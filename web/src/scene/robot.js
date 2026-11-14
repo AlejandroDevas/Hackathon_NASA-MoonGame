@@ -25,12 +25,12 @@ export function createRobot(terrain, x, z, headingDeg) {
  * Advance the robot by `dtSeconds`. Movement is done in sub-steps of at most
  * MAX_SUBSTEP_M so a long frame cannot jump over a steep or missing area; the
  * robot stops at the last valid point when the next one is outside the terrain
- * or steeper than MAX_SLOPE_DEG.
+ * or steeper than `limitDeg` (MAX_SLOPE_DEG unless the site sets its own).
  * @param {RobotState} state
  * @param {{forward: number, turn: number, boost: boolean}} input
  * @returns {RobotState}
  */
-export function stepRobot(state, input, terrain, dtSeconds) {
+export function stepRobot(state, input, terrain, dtSeconds, limitDeg = MAX_SLOPE_DEG) {
   const headingDeg = wrap360(state.headingDeg + input.turn * TURN_RATE_DEG_S * dtSeconds);
   const speed = ROBOT_SPEED * (input.boost ? BOOST_FACTOR : 1);
   const distance = input.forward * speed * dtSeconds;
@@ -44,7 +44,7 @@ export function stepRobot(state, input, terrain, dtSeconds) {
     const step = distance / steps;
     const nextX = x + dx * step;
     const nextZ = z + dz * step;
-    if (!contains(terrain, nextX, nextZ) || !(slopeDegAt(terrain, nextX, nextZ) <= MAX_SLOPE_DEG)) {
+    if (!contains(terrain, nextX, nextZ) || !(slopeDegAt(terrain, nextX, nextZ) <= limitDeg)) {
       blocked = true;
       break;
     }

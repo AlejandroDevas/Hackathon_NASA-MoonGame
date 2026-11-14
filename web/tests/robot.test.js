@@ -109,3 +109,19 @@ describe('nextSignOpen', () => {
     expect(nextSignOpen(false, 30)).toBe(false);
   });
 });
+
+describe('stepRobot with a custom slope limit', () => {
+  const twentyDegrees = makeTerrain({ rows: 101, cols: 101, observerRc: [50, 50], height: (r, c) => 1.82 * c });
+
+  test('a 15 degree limit stops the robot on a 20 degree slope', () => {
+    const r = stepRobot(createRobot(twentyDegrees, 0, 0, 90), go, twentyDegrees, 1, 15);
+    expect(r.blocked).toBe(true);
+    expect(r.x).toBeCloseTo(0, 6);
+  });
+
+  test('the default limit (25) lets it climb the same slope', () => {
+    const r = stepRobot(createRobot(twentyDegrees, 0, 0, 90), go, twentyDegrees, 1);
+    expect(r.blocked).toBe(false);
+    expect(r.x).toBeCloseTo(4, 6);
+  });
+});
