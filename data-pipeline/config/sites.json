@@ -31,5 +31,67 @@
       "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "https://doi.org/10.1016/j.pss.2020.105119"
     ]
+  },
+  {
+    "id": "site04-shackleton-rim",
+    "name": "Shackleton Rim (Site 04)",
+    "lat_deg": -89.7668115,
+    "lon_deg": -171.8698976,
+    "observer_height_m": 2.0,
+    "coordinates_source": "Centro geométrico de la extensión del DEM Site04_final_adj_5mpp_surf.tif de PGDA (x -9000..7000 m, y -15000..1000 m, estereográfica polar MOON_ME), convertido de XY a lat/lon. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+    "sign": {
+      "es": {
+        "title": "Borde de Shackleton (Sitio 04)",
+        "body": "Esta región del polo sur lunar está representada por topografía LOLA de alta resolución. El relieve local controla cuándo el Sol asoma sobre el horizonte y cuándo la Tierra queda visible desde el terreno.",
+        "facts": [
+          "El producto de PGDA identifica el Sitio 04 como el borde de Shackleton y ofrece un DEM de elevación a 5 m por píxel.",
+          "Los DEM polares de esta familia tienen cerca del 90 % de sus píxeles interpolados; la incertidumbre típica de altura citada por Barker et al. es de 0,30–0,50 m."
+        ]
+      },
+      "en": {
+        "title": "Shackleton Rim (Site 04)",
+        "body": "This lunar south pole region is represented by high-resolution LOLA topography. Local relief controls when the Sun rises above the horizon and when Earth is visible from the terrain.",
+        "facts": [
+          "PGDA identifies Site 04 as Shackleton rim and provides a 5 m per pixel elevation DEM.",
+          "About 90% of pixels in this family of polar DEMs are interpolated; Barker et al. report typical height uncertainty of 0.30–0.50 m."
+        ]
+      }
+    },
+    "sources": [
+      "https://pgda.gsfc.nasa.gov/products/78",
+      "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "https://doi.org/10.1016/j.pss.2020.105119"
+    ]
+  },
+  {
+    "id": "site06-nobile-rim-1",
+    "name": "Nobile Rim 1 (Site 06)",
+    "lat_deg": -85.4381005,
+    "lon_deg": 37.3666694,
+    "observer_height_m": 2.0,
+    "coordinates_source": "Centro geométrico de la extensión del DEM Site06_final_adj_5mpp_surf.tif de PGDA (x 74000..94000 m, y 100000..120000 m, estereográfica polar MOON_ME), convertido de XY a lat/lon. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+    "sign": {
+      "es": {
+        "title": "Borde de Nobile 1 (Sitio 06)",
+        "body": "Nobile Rim 1 es una región candidata del polo sur lunar. Su relieve y orientación hacen que las ventanas de luz y la visibilidad de la Tierra dependan del punto exacto del terreno.",
+        "facts": [
+          "El producto de PGDA identifica el Sitio 06 como Nobile rim 1 y ofrece un DEM de elevación LOLA a 5 m por píxel.",
+          "La cuadrícula está en el marco lunar MOON_ME de DE421 y usa estereográfica polar con coordenadas en metros."
+        ]
+      },
+      "en": {
+        "title": "Nobile Rim 1 (Site 06)",
+        "body": "Nobile Rim 1 is a candidate lunar south pole region. Its relief and orientation mean that lighting windows and Earth visibility depend on the exact point on the terrain.",
+        "facts": [
+          "PGDA identifies Site 06 as Nobile rim 1 and provides a 5 m per pixel LOLA elevation DEM.",
+          "The grid uses the lunar MOON_ME frame of DE421 and polar stereographic coordinates in metres."
+        ]
+      }
+    },
+    "sources": [
+      "https://pgda.gsfc.nasa.gov/products/78",
+      "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "https://doi.org/10.1016/j.pss.2020.105119"
+    ]
   }
 ]
