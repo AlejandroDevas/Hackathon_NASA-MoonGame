@@ -54,6 +54,22 @@ describe('renderScenarioCard', () => {
     expect(text(render(m, viability(m), night.info), 'sun-countdown')).toBe(es['card.noChange']);
   });
 
+  test('in permanent darkness the countdown is labelled as a sunrise, not a sunset', () => {
+    const night = makeSite({ sunEl: new Array(48).fill(-1) });
+    night.info.sign = site.info.sign;
+    const m = evaluateScenario(night, T0 + 5 * HOUR, 24 * HOUR);
+    const label = render(m, viability(m), night.info).querySelector('.stat.sun .stat-label').textContent;
+    expect(label).toBe(es['card.sunRises']);
+  });
+
+  test('in permanent daylight the countdown is labelled as a sunset', () => {
+    const day = makeSite({ sunEl: new Array(48).fill(1) });
+    day.info.sign = site.info.sign;
+    const m = evaluateScenario(day, T0 + 5 * HOUR, 24 * HOUR);
+    const label = render(m, viability(m), day.info).querySelector('.stat.sun .stat-label').textContent;
+    expect(label).toBe(es['card.sunSets']);
+  });
+
   test('uses the active locale for the sign text', () => {
     setLocale('en');
     expect(render().textContent).toContain('Synthetic site');

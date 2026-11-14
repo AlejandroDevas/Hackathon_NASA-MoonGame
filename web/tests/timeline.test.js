@@ -68,15 +68,24 @@ describe('createPlayer', () => {
     player.start();
     expect(store.get().playing).toBe(true);
     frames.step(0);
-    frames.step(1000);
-    expect(store.get().scenarios.A.timeMs).toBe(T0 + HOUR);
+    frames.step(100);
+    expect(store.get().scenarios.A.timeMs).toBeCloseTo(T0 + 0.1 * HOUR, 3);
+  });
+
+  test('a long gap between frames (hidden tab) advances at most 100 ms worth of time', () => {
+    const { store, frames, player } = setup();
+    player.start();
+    frames.step(0);
+    frames.step(600_000); // ten real minutes later
+    expect(store.get().scenarios.A.timeMs).toBeCloseTo(T0 + 0.1 * HOUR, 3);
+    expect(store.get().playing).toBe(true);
   });
 
   test('stops by itself at the end of the data', () => {
     const { store, frames, player } = setup();
     player.start();
     frames.step(0);
-    frames.step(100_000);
+    for (let ts = 100; ts <= 60_000 && store.get().playing; ts += 100) frames.step(ts);
     expect(store.get().scenarios.A.timeMs).toBe(T0 + 47 * HOUR);
     expect(store.get().playing).toBe(false);
   });
@@ -97,8 +106,8 @@ describe('createPlayer', () => {
     });
     player.start();
     frames.step(0);
-    frames.step(2000);
-    expect(store.get().scenarios.A.timeMs).toBe(T0 + 2 * HOUR);
-    expect(store.get().scenarios.B.timeMs).toBe(T0 + 12 * HOUR);
+    frames.step(100);
+    expect(store.get().scenarios.A.timeMs).toBeCloseTo(T0 + 0.1 * HOUR, 3);
+    expect(store.get().scenarios.B.timeMs).toBeCloseTo(T0 + 10.1 * HOUR, 3);
   });
 });

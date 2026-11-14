@@ -49,8 +49,10 @@ export function renderScenarioCard(container, metrics, verdict, info) {
   }
 
   const countdowns = el('div', 'countdowns');
-  const sunLabel = metrics.nextSun?.kind === 'rise' ? 'card.sunRises' : 'card.sunSets';
-  const earthLabel = metrics.nextEarth?.kind === 'rise' ? 'card.earthRises' : 'card.earthSets';
+  // With no transition in the data, the label follows the current state (hidden -> it would rise).
+  const rises = (next, visible) => (next ? next.kind === 'rise' : !visible);
+  const sunLabel = rises(metrics.nextSun, metrics.sunVisible) ? 'card.sunRises' : 'card.sunSets';
+  const earthLabel = rises(metrics.nextEarth, metrics.earthVisible) ? 'card.earthRises' : 'card.earthSets';
   countdowns.append(
     stat(t(sunLabel), 'sun-countdown', countdown('sun', metrics.nextSun, metrics.timeMs), 'big sun'),
     stat(t(earthLabel), 'earth-countdown', countdown('earth', metrics.nextEarth, metrics.timeMs), 'big earth'),

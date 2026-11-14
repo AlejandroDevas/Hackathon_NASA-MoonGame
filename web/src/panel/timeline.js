@@ -1,6 +1,7 @@
 import uPlot from 'uplot';
 import 'uplot/dist/uPlot.min.css';
 import { timelineData } from './timelineData.js';
+import { utcTzDate } from './utcAxis.js';
 import { t } from '../i18n.js';
 
 const SUN = '#ffc857';
@@ -19,7 +20,8 @@ export function renderTimeline(el, site, fromMs, toMs, cursorMs) {
       height: 220,
       legend: { show: true },
       scales: { x: { time: true } },
-      axes: [axis, { ...axis, label: '°' }],
+      tzDate: utcTzDate,
+      axes: [{ ...axis, label: 'UTC' }, { ...axis, label: '°' }],
       series: [
         {},
         { label: t('card.sunEl'), stroke: SUN, width: 2 },

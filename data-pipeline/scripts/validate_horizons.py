@@ -18,17 +18,17 @@ sys.path.insert(0, str(ROOT))
 from lunarnav.ephemeris import compute_ephemeris  # noqa: E402
 
 API = "https://ssd.jpl.nasa.gov/api/horizons.api"
-START = datetime(2026, 1, 1, tzinfo=timezone.utc)
+STARTS = [datetime(2026, 1, 1, tzinfo=timezone.utc), datetime(2030, 12, 24, tzinfo=timezone.utc)]
 HOURS = 168
-POINTS = [  # (label, lat, lon, compare azimuth too?)
-    ("Site 01 centre", -89.4632, -137.4896, False),  # azimuth is ill-conditioned near the pole
-    ("Sub-Earth region (0, 0)", 0.0, 0.0, True),
+POINTS = [  # (label, lat, lon)
+    ("Site 01 centre", -89.4632, -137.4896),
+    ("Sub-Earth region (0, 0)", 0.0, 0.0),
 ]
 LIMITS = {"el": 0.1, "az": 0.2}  # degrees
 
 
-def horizons(body_id: str, lat: float, lon: float):
-    stop = START + timedelta(hours=HOURS - 1)
+def horizons(body_id: str, lat: float, lon: float, start: datetime):
+    stop = start + timedelta(hours=HOURS - 1)
     params = {
         "format": "text",
         "COMMAND": f"'{body_id}'",
@@ -38,7 +38,7 @@ def horizons(body_id: str, lat: float, lon: float):
         "CENTER": "'coord@301'",
         "COORD_TYPE": "'GEODETIC'",
         "SITE_COORD": f"'{lon},{lat},0'",
-        "START_TIME": f"'{START:%Y-%m-%d %H:%M}'",
+        "START_TIME": f"'{start:%Y-%m-%d %H:%M}'",
         "STOP_TIME": f"'{stop:%Y-%m-%d %H:%M}'",
         "STEP_SIZE": "'1 h'",
         "QUANTITIES": "'4'",
@@ -61,20 +61,20 @@ def circular_diff(a: np.ndarray, b: np.ndarray) -> np.ndarray:
 
 def main() -> int:
     failed = False
-    print("| Point | Body | Max elevation diff (deg) | Max azimuth diff (deg) |")
-    print("|---|---|---|---|")
-    for label, lat, lon, with_az in POINTS:
-        ours = compute_ephemeris(lat, lon, START, HOURS, cache_dir=ROOT / "cache")
-        for body, body_id, our_el, our_az in (
-            ("Sun", "10", ours.sun_el, ours.sun_az),
-            ("Earth", "399", ours.earth_el, ours.earth_az),
-        ):
-            ref_az, ref_el = horizons(body_id, lat, lon)
-            d_el = float(np.abs(our_el - ref_el).max())
-            d_az = float(circular_diff(our_az, ref_az).max()) if with_az else None
-            failed |= d_el > LIMITS["el"] or (d_az is not None and d_az > LIMITS["az"])
-            az_text = f"{d_az:.4f}" if d_az is not None else "n/a (near pole)"
-            print(f"| {label} | {body} | {d_el:.4f} | {az_text} |")
+    print("| Week from (UTC) | Point | Body | Max elevation diff (deg) | Max azimuth diff (deg) |")
+    print("|---|---|---|---|---|")
+    for start in STARTS:
+        for label, lat, lon in POINTS:
+            ours = compute_ephemeris(lat, lon, start, HOURS, cache_dir=ROOT / "cache")
+            for body, body_id, our_el, our_az in (
+                ("Sun", "10", ours.sun_el, ours.sun_az),
+                ("Earth", "399", ours.earth_el, ours.earth_az),
+            ):
+                ref_az, ref_el = horizons(body_id, lat, lon, start)
+                d_el = float(np.abs(our_el - ref_el).max())
+                d_az = float(circular_diff(our_az, ref_az).max())
+                failed |= d_el > LIMITS["el"] or d_az > LIMITS["az"]
+                print(f"| {start:%Y-%m-%d} | {label} | {body} | {d_el:.4f} | {d_az:.4f} |")
     return 1 if failed else 0
 
 

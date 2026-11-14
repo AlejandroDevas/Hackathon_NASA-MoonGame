@@ -1,3 +1,6 @@
+/** Longest real gap one frame may simulate; a hidden tab pauses rAF and must not make time jump. */
+const MAX_FRAME_MS = 100;
+
 /**
  * Advance a simulated time, stopping at the end of the data.
  * @returns {{timeMs: number, ended: boolean}}
@@ -38,7 +41,7 @@ export function createPlayer(store, sites, speedMsPerSec, { raf, caf } = {}) {
   function frame(timestamp) {
     handle = null;
     if (last === null) last = timestamp;
-    const dtSimMs = ((timestamp - last) / 1000) * speedMsPerSec;
+    const dtSimMs = (Math.min(timestamp - last, MAX_FRAME_MS) / 1000) * speedMsPerSec;
     last = timestamp;
 
     const { scenarios } = store.get();

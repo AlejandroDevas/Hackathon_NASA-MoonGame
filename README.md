@@ -37,7 +37,7 @@ Los kernels SPICE (`de421.bsp`, `moon_pa_de421_1900-2050.bpc`, `moon_080317.tf`,
 ## Fuentes
 
 - Topografía: LRO/LOLA, DEM de 5 m/píxel de [PGDA](https://pgda.gsfc.nasa.gov/products/78). Citar: Barker, M. K. et al. (2021), *Improved LOLA Elevation Maps for South Pole Landing Sites: Error Estimates and Their Impact on Illumination Conditions*, Planetary and Space Science 203, 105119, [doi:10.1016/j.pss.2020.105119](https://doi.org/10.1016/j.pss.2020.105119).
-- Efemérides: [Skyfield](https://rhodesmill.org/skyfield/planetary.html) con kernels SPICE de NAIF/JPL. Validadas contra [JPL Horizons](https://ssd-api.jpl.nasa.gov/doc/horizons.html): ver `data-pipeline/VALIDATION.md`.
+- Efemérides: [Skyfield](https://rhodesmill.org/skyfield/planetary.html) con kernels SPICE de NAIF/JPL. Validadas contra [JPL Horizons](https://ssd-api.jpl.nasa.gov/doc/horizons.html) (elevación y acimut, dos semanas de 2026 y 2030, en el sitio real y en (0, 0)): ver `data-pipeline/VALIDATION.md`.
 
 ## Límites conocidos (léelos antes de usar los números)
 
