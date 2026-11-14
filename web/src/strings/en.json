@@ -40,5 +40,10 @@
   "speed.1d": "1 d/s",
   "scenario.A": "Scenario A",
   "scenario.B": "Scenario B",
-  "diff.title": "Difference vs A"
+  "diff.title": "Difference vs A",
+  "scene.noWebgl": "Your browser cannot show 3D graphics (WebGL). The planning panel still works.",
+  "scene.noTerrain": "This site has no 3D terrain yet.",
+  "scene.blocked": "Slope above 25°: the rover cannot climb it.",
+  "scene.help": "W/↑ forward · S/↓ back · A/D or ←/→ turn · Shift boost",
+  "scene.signClose": "Move away to close the sign."
 }

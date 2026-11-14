@@ -40,5 +40,10 @@
   "speed.1d": "1 d/s",
   "scenario.A": "Escenario A",
   "scenario.B": "Escenario B",
-  "diff.title": "Diferencia respecto a A"
+  "diff.title": "Diferencia respecto a A",
+  "scene.noWebgl": "Tu navegador no puede mostrar gráficos 3D (WebGL). El panel de planificación sigue funcionando.",
+  "scene.noTerrain": "Este sitio no tiene terreno 3D todavía.",
+  "scene.blocked": "Pendiente de más de 25°: el robot no puede subir.",
+  "scene.help": "W/↑ avanzar · S/↓ retroceder · A/D o ←/→ girar · Shift turbo",
+  "scene.signClose": "Aléjate para cerrar el cartel."
 }
