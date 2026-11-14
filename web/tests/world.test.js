@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from 'vitest';
 import { directionFromAzEl } from '../src/scene/sky.js';
 import { gridToScene } from '../src/scene/terrainData.js';
 import { buildTerrainGeometry } from '../src/scene/terrainMesh.js';
-import { createWorld, horizonRingProfile } from '../src/scene/world.js';
+import { createWorld, horizonRingProfile, shadowFrustumHalfSize } from '../src/scene/world.js';
 import { loadTinySite, loadTinyTerrain, makeTerrain } from './helpers.js';
 
 const tiny = loadTinyTerrain();
@@ -95,5 +95,27 @@ describe('world.dispose', () => {
     world.dispose();
     expect(geometry).toHaveBeenCalled();
     expect(material).toHaveBeenCalled();
+  });
+});
+
+describe('shadowFrustumHalfSize', () => {
+  test('covers the corners of the terrain, plus 100 m, rounded up to 100 m', () => {
+    expect(shadowFrustumHalfSize(tiny)).toBe(500); // corners at ~353.6 m
+  });
+
+  test('a rotated terrain (bearing 222.5) is covered out to its corners, not just half its side', () => {
+    const t = makeTerrain({ rows: 1001, cols: 1001, observerRc: [500, 500], northBearingDeg: 222.5, height: () => 0 });
+    expect(shadowFrustumHalfSize(t)).toBe(3700); // corners at ~3535.5 m
+  });
+
+  test('an off-centre observer is covered out to the far corner', () => {
+    const t = makeTerrain({ rows: 1001, cols: 1001, observerRc: [100, 100], height: () => 0 });
+    expect(shadowFrustumHalfSize(t)).toBeGreaterThanOrEqual(Math.hypot(4500, 4500));
+  });
+
+  test('createWorld uses it for the shadow camera', () => {
+    const world = createWorld(loadTinySite());
+    const camera = world.sun.shadow.camera;
+    expect([camera.left, camera.right, camera.top, camera.bottom]).toEqual([-500, 500, 500, -500]);
   });
 });

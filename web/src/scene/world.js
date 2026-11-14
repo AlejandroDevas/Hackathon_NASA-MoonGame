@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { directionFromAzEl } from './sky.js';
-import { heightAt } from './terrainData.js';
+import { gridToScene, heightAt } from './terrainData.js';
 import { buildTerrainGeometry } from './terrainMesh.js';
 
 const RAD = Math.PI / 180;
@@ -11,6 +11,20 @@ const RING_RADIUS_M = 6_000;
 const SUN_RADIUS_DEG = 0.2666;
 const EARTH_RADIUS_DEG = 0.95;
 const STAR_COUNT = 1500;
+
+/**
+ * Half-size (m) of the square shadow camera so it covers the whole terrain: the
+ * farthest corner from the scene origin, plus 100 m, rounded up to a multiple of 100.
+ * (A rotated or off-centre terrain reaches further than half its side.)
+ */
+export function shadowFrustumHalfSize(terrain) {
+  let farthest = 0;
+  for (const [r, c] of [[0, 0], [0, terrain.cols - 1], [terrain.rows - 1, 0], [terrain.rows - 1, terrain.cols - 1]]) {
+    const { x, z } = gridToScene(terrain, r, c);
+    farthest = Math.max(farthest, Math.hypot(x, z));
+  }
+  return Math.ceil((farthest + 100) / 100) * 100;
+}
 
 /** Elevation offset (metres) of the horizon silhouette at `radiusM`, for each of 360 azimuths. */
 export function horizonRingProfile(horizon, radiusM) {
@@ -72,6 +86,7 @@ function buildStars() {
  * @param {{terrain: import('./terrainData.js').Terrain, horizon: Float32Array}} site
  */
 export function createWorld(site) {
+  let lightDistance = SUN_LIGHT_DISTANCE_M;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000000);
 
@@ -92,8 +107,16 @@ export function createWorld(site) {
   const sun = new THREE.DirectionalLight(0xffffff, 3);
   sun.castShadow = true;
   sun.shadow.mapSize.set(4096, 4096);
-  const frustum = 2_600;
-  Object.assign(sun.shadow.camera, { left: -frustum, right: frustum, top: frustum, bottom: -frustum, near: 100, far: 12_000 });
+  const frustum = shadowFrustumHalfSize(site.terrain);
+  lightDistance = Math.max(SUN_LIGHT_DISTANCE_M, frustum + 500);
+  Object.assign(sun.shadow.camera, {
+    left: -frustum,
+    right: frustum,
+    top: frustum,
+    bottom: -frustum,
+    near: 100,
+    far: lightDistance + frustum + 500,
+  });
   sun.shadow.bias = -0.0005;
   sun.shadow.normalBias = 0.5;
   scene.add(sun, sun.target);
@@ -116,7 +139,7 @@ export function createWorld(site) {
 
   function updateSky(sky) {
     const s = directionFromAzEl(sky.sun.azDeg, sky.sun.elDeg);
-    sun.position.set(s.x, s.y, s.z).multiplyScalar(SUN_LIGHT_DISTANCE_M);
+    sun.position.set(s.x, s.y, s.z).multiplyScalar(lightDistance);
     sunDisc.position.set(s.x, s.y, s.z).multiplyScalar(BODY_DISTANCE_M);
     const e = directionFromAzEl(sky.earth.azDeg, sky.earth.elDeg);
     earth.position.set(e.x, e.y, e.z).multiplyScalar(BODY_DISTANCE_M);
