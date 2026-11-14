@@ -38,6 +38,8 @@ describe('loadSite', () => {
     expect(site.horizon).toBeInstanceOf(Float32Array);
     expect(site.horizon.length).toBe(360);
     expect(site.horizon[90]).toBe(2);
+    expect(site.terrain.rows).toBe(101);
+    expect(site.terrain.cols).toBe(101);
   });
 
   test('a missing site throws an error naming the URL', async () => {

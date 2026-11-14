@@ -1,3 +1,5 @@
+import { parseTerrain } from '../scene/terrainData.js';
+
 const BYTES_PER_SAMPLE = 16; // 4 float32 values
 
 /**
@@ -43,9 +45,13 @@ export async function loadSite(baseUrl, id) {
   const info = await (await fetchOk(`${dir}/info.json`)).json();
   const horizonJson = await (await fetchOk(`${dir}/horizon.json`)).json();
   const buffer = await (await fetchOk(`${dir}/${info.ephemeris.file}`)).arrayBuffer();
+  const terrain = info.terrain
+    ? parseTerrain(await (await fetchOk(`${dir}/${info.terrain.file}`)).arrayBuffer(), info.terrain)
+    : null;
   return {
     info,
     horizon: Float32Array.from(horizonJson.elevation_deg),
     eph: parseEphemeris(buffer, info.ephemeris),
+    terrain,
   };
 }
