@@ -1,0 +1,7 @@
+.venv/
+node_modules/
+data-pipeline/cache/
+dist/
+__pycache__/
+.pytest_cache/
+.superpowers/
