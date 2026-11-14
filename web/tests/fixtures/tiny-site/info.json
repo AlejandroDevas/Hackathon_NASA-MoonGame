@@ -1,0 +1,37 @@
+{
+  "id": "tiny-site",
+  "name": "Tiny synthetic site",
+  "lat_deg": -89.0,
+  "lon_deg": 0.0,
+  "observer_height_m": 2.0,
+  "coordinates_source": "synthetic test fixture",
+  "sign": {
+    "es": {
+      "title": "Sitio sintético",
+      "body": "Datos de prueba.",
+      "facts": [
+        "a",
+        "b"
+      ]
+    },
+    "en": {
+      "title": "Synthetic site",
+      "body": "Test data.",
+      "facts": [
+        "a",
+        "b"
+      ]
+    }
+  },
+  "sources": [],
+  "ephemeris": {
+    "start_utc": "2026-01-01T00:00:00Z",
+    "step_s": 3600,
+    "count": 48,
+    "file": "ephemeris.bin"
+  },
+  "bodies": {
+    "sun_radius_deg": 0.2666,
+    "earth_radius_deg": 0
+  }
+}
