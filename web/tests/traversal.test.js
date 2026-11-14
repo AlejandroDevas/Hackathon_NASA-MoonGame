@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vitest';
-import { findStart, planStart } from '../src/scene/traversal.js';
+import { ROUTE_MARGIN_DEG, SLOPE_LADDER_DEG, findStart, planStart } from '../src/scene/traversal.js';
 import { parseTerrain } from '../src/scene/terrainData.js';
 import { loadTinyTerrain, makeTerrain } from './helpers.js';
 
@@ -33,17 +33,48 @@ describe('findStart (tiny terrain)', () => {
   });
 });
 
-describe('planStart', () => {
-  test('on walkable terrain it is findStart plus reachable: true', () => {
+describe('findStart limit and margin', () => {
+  const fourteen = makeTerrain({ rows: 101, cols: 101, observerRc: [50, 50], height: (r, c) => 1.25 * c }); // ~14 degrees
+
+  test('limitDeg 15 admits a 14 degree slope; a 2 degree route margin does not', () => {
+    expect(findStart(fourteen, { x: 0, z: 0 }, 150, { limitDeg: 15 })).not.toBeNull();
+    expect(findStart(fourteen, { x: 0, z: 0 }, 150, { limitDeg: 15, marginDeg: 2 })).toBeNull();
+  });
+
+  test('the route goes from the start point to the goal area', () => {
+    const start = findStart(tiny, { x: 0, z: 0 }, 200);
+    expect(start.route.length).toBeGreaterThan(5);
+    expect(start.route[0]).toEqual({ x: start.x, z: start.z });
+    const last = start.route[start.route.length - 1];
+    expect(Math.hypot(last.x, last.z)).toBeLessThanOrEqual(20);
+  });
+});
+
+describe('planStart (per-site slope limit)', () => {
+  const ramp = (perPixel) => makeTerrain({ rows: 101, cols: 101, observerRc: [50, 50], height: (r, c) => perPixel * c });
+
+  test('gentle terrain gets the lowest limit of the ladder (15) and a route', () => {
     const plan = planStart(tiny, { x: 0, z: 0 }, 200);
     expect(plan.reachable).toBe(true);
+    expect(plan.limitDeg).toBe(15);
+    expect(plan.route[0]).toEqual({ x: plan.x, z: plan.z });
     expect(Math.abs(plan.distanceM - 200)).toBeLessThanOrEqual(15);
   });
 
-  test('on terrain steeper than the limit everywhere it reports no route instead of failing silently', () => {
-    const steep = makeTerrain({ rows: 101, cols: 101, observerRc: [50, 50], height: (r, c) => 4.2 * c }); // ~40 degrees
-    expect(findStart(steep, { x: 0, z: 0 }, 200)).toBeNull();
-    expect(planStart(steep, { x: 0, z: 0 }, 200)).toEqual({ x: 0, z: 0, headingDeg: 0, distanceM: 0, reachable: false });
+  test('terrain of about 32 degrees everywhere needs a 35 degree limit', () => {
+    const plan = planStart(ramp(3.1), { x: 0, z: 0 }, 200);
+    expect(plan.reachable).toBe(true);
+    expect(plan.limitDeg).toBe(35);
+  });
+
+  test('terrain steeper than the whole ladder reports no route instead of failing silently', () => {
+    const plan = planStart(ramp(6), { x: 0, z: 0 }, 200); // ~50 degrees
+    expect(plan).toEqual({ x: 0, z: 0, headingDeg: 0, distanceM: 0, route: [], limitDeg: 45, reachable: false });
+  });
+
+  test('the ladder constants match the design', () => {
+    expect(SLOPE_LADDER_DEG).toEqual([15, 20, 25, 30, 35, 40, 45]);
+    expect(ROUTE_MARGIN_DEG).toBe(2);
   });
 });
 
