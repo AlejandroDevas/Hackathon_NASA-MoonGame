@@ -5,6 +5,7 @@ import { createInput } from '../src/scene/input.js';
 import { createRobotMesh } from '../src/scene/robotMesh.js';
 import { mountScene } from '../src/scene/view3d.js';
 import { createStore } from '../src/state.js';
+import en from '../src/strings/en.json';
 import es from '../src/strings/es.json';
 import { HOUR, T0, loadTinySite } from './helpers.js';
 
@@ -91,6 +92,16 @@ describe('createInput', () => {
     input.dispose();
     press(window, 'keydown', 'KeyW');
     expect(input.read().forward).toBe(0);
+  });
+});
+
+describe('scene strings', () => {
+  test('the slope warnings take the per-site limit as a parameter', () => {
+    for (const table of [es, en]) {
+      expect(table['scene.blocked']).toContain('{limit}');
+      expect(table['scene.slopeLimit']).toContain('{limit}');
+      expect(table['scene.noRoute']).not.toContain('25');
+    }
   });
 });
 

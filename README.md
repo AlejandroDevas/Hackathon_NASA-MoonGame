@@ -18,7 +18,7 @@ No hay servidor: todo es estático.
 Encima del panel hay una vista 3D del sitio seleccionado en el escenario A: el terreno real del recorte LOLA (5 km), un Sol con sombras y una Tierra puestos según la fecha del panel (la animación del panel los mueve), estrellas y la silueta del horizonte lejano. Un robot de seis ruedas parte a ~400 m del punto del sitio y el objetivo es llegar hasta él: a menos de 25 m se abre el cartel con la explicación del lugar.
 
 - **Controles:** W/↑ avanzar, S/↓ retroceder, A/D o ←/→ girar, Shift turbo. Las teclas se ignoran mientras escribes en un campo del panel.
-- **Límite de pendiente:** el robot no entra en terreno de más de 25° (se detiene y avisa). El punto de salida se calcula para que la meta sea alcanzable con ese límite.
+- **Límite de pendiente por sitio:** cada sitio tiene su propio límite, el más bajo de 15°, 20°… 45° con el que la meta sigue siendo alcanzable desde ~400 m: hoy 15° en el Site 01, Haworth y Malapert, 20° en Nobile Rim 1 y 35° en el borde de Shackleton (una pared de cráter). El robot no entra en terreno más empinado (se detiene y avisa) y la ayuda de la escena muestra el límite.
 - Sin WebGL, el panel sigue funcionando y la escena muestra un aviso.
 
 ## Uso
@@ -62,5 +62,5 @@ Los kernels SPICE (`de421.bsp`, `moon_pa_de421_1900-2050.bpc`, `moon_080317.tf`,
 - Hay cinco sitios con datos reales: Connecting Ridge (Site 01), Shackleton Rim (Site 04), Nobile Rim 1 (Site 06), Haworth y Malapert Massif (Site 23). Los puntos de observación son centros de regiones DEM, no coordenadas de aterrizaje.
 - **Escena 3D:** las sombras solo cubren el recorte de 2,5 km; más allá hay una silueta oscura sin iluminar calculada con el horizonte del observador en el centro del sitio, así que desde otro punto es solo aproximada. La Tierra es una esfera sin textura y el robot no tiene físicas (sigue la altura del mapa). La escena muestra solo el escenario A.
 - **Horizonte del robot frente al del panel:** las métricas del panel son para el centro del sitio; desde otro punto del terreno el Sol puede quedar tapado aunque el panel diga que es visible.
-- **Límite de 25°:** con la pendiente medida a 10 m, solo ~0,6 % del terreno de este sitio supera 25° (≈10 % supera 20°), así que casi nunca estorba; el DEM está interpolado en un ~90 %.
+- **Límite de pendiente:** se calcula al cargar cada sitio (~1 s la primera vez) con una búsqueda de ruta que exige 2° menos que el límite del robot y comprueba la pendiente cada 2,5 m a lo largo de cada tramo; si ni 45° sirve, la escena lo avisa y muestra el cartel desde el punto central. Que exista ruta no garantiza que sea fácil, y el DEM está interpolado en un ~90 %.
 - **Rendimiento:** el 3D usa mapa de sombras de 4096 px; con renderizado por software (sin GPU) puede ir a pocos fotogramas por segundo, y el movimiento del robot se ralentiza en vez de saltar.

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { getLocale, t } from '../i18n.js';
 import { createInput } from './input.js';
 import { createRobotMesh } from './robotMesh.js';
-import { createRobot, followCamera, nextSignOpen, stepRobot } from './robot.js';
+import { MAX_SLOPE_DEG, createRobot, followCamera, nextSignOpen, stepRobot } from './robot.js';
 import { skyAt } from './sky.js';
 import { contains, heightAt, normalAt } from './terrainData.js';
 import { planStart } from './traversal.js';
@@ -85,6 +85,8 @@ export function mountScene(container, store, sites, audioCue = null) {
   const input = createInput(window);
   const robotMesh = createRobotMesh();
 
+  const plans = new Map(); // site id -> planStart result, computed once per site (takes ~1 s)
+  let slopeLimitDeg = MAX_SLOPE_DEG;
   let siteId = null;
   let site = null;
   let world = null;
@@ -108,12 +110,14 @@ export function mountScene(container, store, sites, audioCue = null) {
     site = sites.get(id);
     world = createWorld(site);
     world.scene.add(robotMesh);
-    const plan = planStart(site.terrain, { x: 0, z: 0 }, START_DISTANCE_M);
+    if (!plans.has(id)) plans.set(id, planStart(site.terrain, { x: 0, z: 0 }, START_DISTANCE_M));
+    const plan = plans.get(id);
+    slopeLimitDeg = plan.limitDeg;
     setRobot(plan.x, plan.z, plan.headingDeg);
     routeEl.hidden = plan.reachable;
     signOpen = false;
     camera.position.set(robot.x, robot.y + 6, robot.z + 12);
-    renderSign(signEl, site.info);
+    applyTexts();
     applySky();
   }
 
@@ -123,8 +127,8 @@ export function mountScene(container, store, sites, audioCue = null) {
   }
 
   function applyTexts() {
-    help.textContent = t('scene.help');
-    blockedEl.textContent = t('scene.blocked');
+    help.textContent = `${t('scene.help')} · ${t('scene.slopeLimit', { limit: slopeLimitDeg })}`;
+    blockedEl.textContent = t('scene.blocked', { limit: slopeLimitDeg });
     routeEl.textContent = t('scene.noRoute');
     renderSign(signEl, site.info);
   }
@@ -150,7 +154,7 @@ export function mountScene(container, store, sites, audioCue = null) {
     const dt = lastTime === null ? 0 : Math.min((timestamp - lastTime) / 1000, MAX_FRAME_S);
     lastTime = timestamp;
 
-    robot = stepRobot(robot, input.read(), site.terrain, dt);
+    robot = stepRobot(robot, input.read(), site.terrain, dt, slopeLimitDeg);
     placeRobotMesh();
 
     const pose = followCamera(robot);

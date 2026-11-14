@@ -50,7 +50,36 @@ describe('findStart limit and margin', () => {
   });
 });
 
+describe('findStart route edges', () => {
+  // flat except a 30 m wall exactly on row 72 (z = 110 m): the nodes at z = 100 and z = 120 (stride 20 m)
+  // are not affected by it, only the points between them are
+  const wall = makeTerrain({
+    rows: 101,
+    cols: 101,
+    observerRc: [50, 50],
+    height: (r) => (r === 72 ? 30 : 0),
+  });
+
+  test('a steep strip between two walkable nodes cuts the route (edges are sampled, not just nodes)', () => {
+    const start = findStart(wall, { x: 0, z: 0 }, 200, { limitDeg: 15, marginDeg: 2, strideM: 20 });
+    expect(start).not.toBeNull();
+    for (const node of start.route) expect(node.z).toBeLessThan(110); // nothing beyond the wall is reachable
+    expect(start.z).toBeLessThan(110);
+  });
+});
+
 describe('planStart (per-site slope limit)', () => {
+  test('a start that is nowhere near the target distance does not count as winnable', () => {
+    // flat terrain boxed in by a 40 degree ring 60 m from the goal: only a 60 m pocket is reachable
+    const pocket = makeTerrain({
+      rows: 201,
+      cols: 201,
+      observerRc: [100, 100],
+      height: (r, c) => (Math.hypot(r - 100, c - 100) * 5 > 60 ? 8 * Math.hypot(r - 100, c - 100) : 0),
+    });
+    expect(planStart(pocket, { x: 0, z: 0 }, 400).reachable).toBe(false);
+  });
+
   const ramp = (perPixel) => makeTerrain({ rows: 101, cols: 101, observerRc: [50, 50], height: (r, c) => perPixel * c });
 
   test('gentle terrain gets the lowest limit of the ladder (15) and a route', () => {
