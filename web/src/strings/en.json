@@ -1,0 +1,4 @@
+{
+  "app.title": "Lunar Landing Site Navigator",
+  "range.warning": "That date is outside the data; adjusted to {limit}."
+}
