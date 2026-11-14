@@ -34,6 +34,16 @@ def test_json_files_are_utf8_with_accents(tmp_path):
     assert info["sign"]["es"]["title"] == "Cresta de conexión"
 
 
+def test_terrain_block_is_included_only_when_given(tmp_path):
+    block = {"file": "terrain.bin", "rows": 3, "cols": 4}
+    write_site(tmp_path / "with", SITE, np.zeros(360), make_ephemeris(4), terrain=block)
+    write_site(tmp_path / "without", SITE, np.zeros(360), make_ephemeris(4))
+    with_info = json.loads((tmp_path / "with" / "info.json").read_text(encoding="utf-8"))
+    without_info = json.loads((tmp_path / "without" / "info.json").read_text(encoding="utf-8"))
+    assert with_info["terrain"] == block
+    assert "terrain" not in without_info
+
+
 def test_roundtrip(tmp_path):
     eph = make_ephemeris(48)
     horizon = np.linspace(-0.1, 2.0, 360)

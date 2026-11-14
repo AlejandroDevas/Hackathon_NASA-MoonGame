@@ -5,8 +5,10 @@ from pathlib import Path
 
 import numpy as np
 
+from lunarnav.dem import DemCrop
 from lunarnav.ephemeris import Ephemeris
 from lunarnav.export import write_site
+from lunarnav.terrain import write_terrain
 
 COUNT = 48
 
@@ -37,6 +39,15 @@ def build_tiny_site(out_root: Path) -> Path:
         },
         "sources": [],
     }
+    # 101x101 px at 5 m: a 2.29 deg ramp rising to the east plus a 30 m cliff from row 90 (south).
+    rows, cols = np.mgrid[0:101, 0:101]
+    terrain = DemCrop(
+        heights=0.2 * cols + 30.0 * (rows >= 90),
+        pixel_m=5.0,
+        observer_rc=(50.0, 50.0),
+        north_bearing_deg=0.0,
+    )
     out_dir = Path(out_root) / site["id"]
-    write_site(out_dir, site, horizon, eph)
+    terrain_block = write_terrain(out_dir, terrain)
+    write_site(out_dir, site, horizon, eph, terrain=terrain_block)
     return out_dir

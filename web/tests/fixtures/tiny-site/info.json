@@ -33,5 +33,18 @@
   "bodies": {
     "sun_radius_deg": 0.2666,
     "earth_radius_deg": 0
+  },
+  "terrain": {
+    "file": "terrain.bin",
+    "rows": 101,
+    "cols": 101,
+    "pixel_m": 5.0,
+    "min_m": 0.0,
+    "max_m": 50.0,
+    "observer_rc": [
+      50.0,
+      50.0
+    ],
+    "north_bearing_deg": 0.0
   }
 }

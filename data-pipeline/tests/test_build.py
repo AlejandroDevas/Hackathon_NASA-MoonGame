@@ -39,11 +39,16 @@ def test_build_site_end_to_end(tmp_path, kernels_ready):
     dem = tmp_path / "flat.tif"
     write_flat_dem(dem)
     site = {**SITE, "lat_deg": -89.95, "lon_deg": 0.0}
-    out = build_site(site, str(dem), tmp_path / "sites", radius_m=500.0, cache_dir=kernels_ready)
+    out = build_site(
+        site, str(dem), tmp_path / "sites", radius_m=500.0, cache_dir=kernels_ready, terrain_radius_m=300.0
+    )
 
     assert out == tmp_path / "sites" / "demo"
     assert (out / "ephemeris.bin").stat().st_size == 43_824 * 16
     horizon = json.loads((out / "horizon.json").read_text())["elevation_deg"]
     assert len(horizon) == 360 and np.isfinite(horizon).all()
+    info = json.loads((out / "info.json").read_text(encoding="utf-8"))
+    assert info["terrain"]["rows"] == info["terrain"]["cols"] == 31
+    assert (out / "terrain.bin").stat().st_size == 31 * 31 * 2
     index = json.loads((tmp_path / "sites" / "index.json").read_text())
     assert index == [{"id": "demo", "name": "Demo site"}]

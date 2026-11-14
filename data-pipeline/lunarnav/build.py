@@ -7,6 +7,7 @@ from lunarnav.dem import load_dem_crop
 from lunarnav.ephemeris import compute_ephemeris
 from lunarnav.export import write_site
 from lunarnav.horizon import compute_horizon
+from lunarnav.terrain import write_terrain
 
 
 def update_index(out_root: Path, site: dict) -> None:
@@ -29,6 +30,7 @@ def build_site(
     out_root: Path,
     radius_m: float = 10_000.0,
     cache_dir: Path = Path("cache"),
+    terrain_radius_m: float = 2_500.0,
 ) -> Path:
     out_root = Path(out_root)
     crop = load_dem_crop(dem_path, site["lat_deg"], site["lon_deg"], radius_m)
@@ -41,6 +43,8 @@ def build_site(
     )
     eph = compute_ephemeris(site["lat_deg"], site["lon_deg"], cache_dir=cache_dir)
     out_dir = out_root / site["id"]
-    write_site(out_dir, site, horizon, eph)
+    terrain_crop = load_dem_crop(dem_path, site["lat_deg"], site["lon_deg"], terrain_radius_m)
+    terrain_block = write_terrain(out_dir, terrain_crop)
+    write_site(out_dir, site, horizon, eph, terrain=terrain_block)
     update_index(out_root, site)
     return out_dir
