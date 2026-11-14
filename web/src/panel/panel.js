@@ -173,6 +173,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
       structureKey = key;
       rebuild(state);
     }
+    document.documentElement.lang = state.locale;
     playButton.textContent = state.playing ? t('app.pause') : t('app.play');
     playButton.setAttribute('aria-pressed', String(state.playing));
     soundButton.textContent = state.soundEnabled ? t('app.soundOff') : t('app.soundOn');

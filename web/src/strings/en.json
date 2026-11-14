@@ -54,5 +54,6 @@
   "scene.help": "W/↑ forward · S/↓ back · A/D or ←/→ turn · Shift boost",
   "scene.signClose": "Move away to close the sign.",
   "scene.noRoute": "The terrain at this site is too steep for the rover to reach the sign (even at 45°); it is shown from the centre point.",
-  "scene.slopeLimit": "Slope limit at this site: {limit}°"
+  "scene.slopeLimit": "Slope limit at this site: {limit}°",
+  "scene.label": "3D view of the site with the rover"
 }

@@ -72,12 +72,15 @@
   background: rgba(20, 24, 33, 0.92);
   opacity: 0;
   transform: translateY(-8px);
-  transition: opacity 0.25s, transform 0.25s;
+  visibility: hidden; /* closed: not focusable and not read by screen readers */
+  transition: opacity 0.25s, transform 0.25s, visibility 0s 0.25s;
 }
 
 .scene-sign.open {
   opacity: 1;
   transform: none;
+  visibility: visible;
+  transition-delay: 0s;
 }
 
 .scene-sign h3 {

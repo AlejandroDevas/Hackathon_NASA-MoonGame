@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { getLocale, t } from '../i18n.js';
 import { createInput } from './input.js';
 import { createRobotMesh } from './robotMesh.js';
+import { createSignPanel } from './signPanel.js';
 import { MAX_SLOPE_DEG, createRobot, followCamera, nextSignOpen, stepRobot } from './robot.js';
 import { skyAt } from './sky.js';
 import { contains, heightAt, normalAt } from './terrainData.js';
@@ -35,14 +36,6 @@ function el(tag, className, text) {
   return node;
 }
 
-function renderSign(signEl, info) {
-  const sign = info.sign[getLocale()] ?? info.sign.es;
-  signEl.replaceChildren(el('h3', '', sign.title), el('p', '', sign.body));
-  const facts = el('ul');
-  for (const fact of sign.facts) facts.append(el('li', '', fact));
-  signEl.append(facts, el('p', 'scene-sign-hint', t('scene.signClose')));
-}
-
 /**
  * Mount the 3D view of the site selected in scenario A. Sun and Earth follow the
  * scenario's date; the robot is driven with the keyboard. Without WebGL or terrain
@@ -70,15 +63,16 @@ export function mountScene(container, store, sites, audioCue = null) {
 
   container.replaceChildren();
   container.classList.add('scene-root');
+  renderer.domElement.setAttribute('role', 'img');
   container.append(renderer.domElement);
   const hud = el('div', 'scene-hud');
   const help = el('div', 'scene-help');
   const blockedEl = el('div', 'scene-blocked');
   blockedEl.hidden = true;
-  const signEl = el('aside', 'scene-sign');
+  const sign = createSignPanel();
   const routeEl = el('div', 'scene-route');
   routeEl.hidden = true;
-  hud.append(help, blockedEl, routeEl, signEl);
+  hud.append(help, blockedEl, routeEl, sign.el);
   container.append(hud);
 
   const camera = new THREE.PerspectiveCamera(60, 1, 0.5, 200_000);
@@ -127,10 +121,11 @@ export function mountScene(container, store, sites, audioCue = null) {
   }
 
   function applyTexts() {
+    renderer.domElement.setAttribute('aria-label', t('scene.label'));
     help.textContent = `${t('scene.help')} · ${t('scene.slopeLimit', { limit: slopeLimitDeg })}`;
     blockedEl.textContent = t('scene.blocked', { limit: slopeLimitDeg });
     routeEl.textContent = t('scene.noRoute');
-    renderSign(signEl, site.info);
+    sign.setInfo(site.info, getLocale());
   }
 
   function resize() {
@@ -168,7 +163,7 @@ export function mountScene(container, store, sites, audioCue = null) {
     const wasOpen = signOpen;
     signOpen = nextSignOpen(signOpen, Math.hypot(robot.x, robot.z));
     if (signOpen && !wasOpen) audioCue?.play();
-    signEl.classList.toggle('open', signOpen);
+    sign.setOpen(signOpen);
     blockedEl.hidden = !robot.blocked;
     renderer.render(world.scene, camera);
   }

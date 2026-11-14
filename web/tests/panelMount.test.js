@@ -87,6 +87,18 @@ describe('mountPanel', () => {
     expect(root.textContent).toContain('Synthetic site');
   });
 
+  test('the page language follows the interface language', () => {
+    const { root } = setup();
+    expect(document.documentElement.lang).toBe('es');
+    const select = q(root, 'locale');
+    select.value = 'en';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(document.documentElement.lang).toBe('en');
+    q(root, 'locale').value = 'es';
+    q(root, 'locale').dispatchEvent(new Event('change', { bubbles: true }));
+    expect(document.documentElement.lang).toBe('es');
+  });
+
   test('the date input follows the store while the animation moves time', () => {
     const { root, store } = setup();
     store.set({ scenarios: { A: { siteId: 'tiny-site', timeMs: T0 + 8 * HOUR }, B: null } });
