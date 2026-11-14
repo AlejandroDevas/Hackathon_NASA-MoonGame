@@ -12,13 +12,16 @@ const RAD = Math.PI / 180;
 const wrap360 = (deg) => ((deg % 360) + 360) % 360;
 
 /**
- * @typedef {{x: number, z: number, y: number, headingDeg: number, blocked: boolean}} RobotState
+ * @typedef {{x: number, z: number, y: number, headingDeg: number, blocked: boolean,
+ *   blockedBy: 'slope' | 'edge' | null}} RobotState
+ * `blockedBy` says why the last step stopped: 'slope' (steeper than the limit) or
+ * 'edge' (outside the terrain, or no finite slope there: boundary or missing heights).
  * Heading is an azimuth: 0 faces north (-z), 90 faces east (+x).
  */
 
 /** @returns {RobotState} */
 export function createRobot(terrain, x, z, headingDeg) {
-  return { x, z, y: heightAt(terrain, x, z), headingDeg: wrap360(headingDeg), blocked: false };
+  return { x, z, y: heightAt(terrain, x, z), headingDeg: wrap360(headingDeg), blocked: false, blockedBy: null };
 }
 
 /**
@@ -39,19 +42,28 @@ export function stepRobot(state, input, terrain, dtSeconds, limitDeg = MAX_SLOPE
   const dz = -Math.cos(headingDeg * RAD);
 
   let { x, z } = state;
-  let blocked = false;
+  let blockedBy = null;
   for (let i = 0; i < steps; i++) {
     const step = distance / steps;
     const nextX = x + dx * step;
     const nextZ = z + dz * step;
-    if (!contains(terrain, nextX, nextZ) || !(slopeDegAt(terrain, nextX, nextZ) <= limitDeg)) {
-      blocked = true;
+    if (!contains(terrain, nextX, nextZ)) {
+      blockedBy = 'edge';
+      break;
+    }
+    const slope = slopeDegAt(terrain, nextX, nextZ);
+    if (!Number.isFinite(slope)) {
+      blockedBy = 'edge';
+      break;
+    }
+    if (slope > limitDeg) {
+      blockedBy = 'slope';
       break;
     }
     x = nextX;
     z = nextZ;
   }
-  return { x, z, y: heightAt(terrain, x, z), headingDeg, blocked };
+  return { x, z, y: heightAt(terrain, x, z), headingDeg, blocked: blockedBy !== null, blockedBy };
 }
 
 /** Third-person camera: 12 m behind, 6 m above, looking 1.5 m above the robot. */

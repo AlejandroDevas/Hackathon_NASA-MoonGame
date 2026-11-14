@@ -55,5 +55,6 @@
   "scene.signClose": "Aléjate para cerrar el cartel.",
   "scene.noRoute": "En este sitio el terreno es demasiado empinado para que el robot llegue hasta el cartel (ni siquiera con 45°); se muestra desde el punto central.",
   "scene.slopeLimit": "Límite de pendiente de este sitio: {limit}°",
-  "scene.label": "Vista 3D del sitio con el robot"
+  "scene.label": "Vista 3D del sitio con el robot",
+  "scene.blockedEdge": "Límite del terreno cartografiado: el robot no puede seguir."
 }

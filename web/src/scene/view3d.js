@@ -86,6 +86,7 @@ export function mountScene(container, store, sites, audioCue = null) {
   let world = null;
   let robot = null;
   let signOpen = false;
+  let shownBlockReason = null;
   let lastSky = null;
   let frameHandle = null;
   let lastTime = null;
@@ -123,7 +124,7 @@ export function mountScene(container, store, sites, audioCue = null) {
   function applyTexts() {
     renderer.domElement.setAttribute('aria-label', t('scene.label'));
     help.textContent = `${t('scene.help')} · ${t('scene.slopeLimit', { limit: slopeLimitDeg })}`;
-    blockedEl.textContent = t('scene.blocked', { limit: slopeLimitDeg });
+    shownBlockReason = null; // the warning text is rebuilt on the next frame in the new language
     routeEl.textContent = t('scene.noRoute');
     sign.setInfo(site.info, getLocale());
   }
@@ -164,6 +165,13 @@ export function mountScene(container, store, sites, audioCue = null) {
     signOpen = nextSignOpen(signOpen, Math.hypot(robot.x, robot.z));
     if (signOpen && !wasOpen) audioCue?.play();
     sign.setOpen(signOpen);
+    if (robot.blockedBy !== shownBlockReason) {
+      shownBlockReason = robot.blockedBy;
+      if (shownBlockReason) {
+        blockedEl.textContent =
+          shownBlockReason === 'edge' ? t('scene.blockedEdge') : t('scene.blocked', { limit: slopeLimitDeg });
+      }
+    }
     blockedEl.hidden = !robot.blocked;
     renderer.render(world.scene, camera);
   }

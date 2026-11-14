@@ -26,6 +26,8 @@ describe('stepRobot', () => {
     expect(r.x).toBeCloseTo(4, 6);
     expect(r.z).toBeCloseTo(0, 6);
     expect(r.blocked).toBe(false);
+    expect(r.blockedBy).toBeNull();
+    expect(createRobot(tiny, 0, 0, 90).blockedBy).toBeNull();
     expect(r.y).toBeCloseTo(heightAt(tiny, r.x, r.z), 9);
   });
 
@@ -54,6 +56,7 @@ describe('stepRobot', () => {
   test('is stopped by the cliff and reports it', () => {
     const r = stepRobot(createRobot(tiny, 0, 190, 180), go, tiny, 1);
     expect(r.blocked).toBe(true);
+    expect(r.blockedBy).toBe('slope');
     expect(r.z).toBeGreaterThanOrEqual(190);
     expect(r.z).toBeLessThan(198);
   });
@@ -67,6 +70,7 @@ describe('stepRobot', () => {
   test('never leaves the terrain edge and stays finite', () => {
     const r = stepRobot(createRobot(tiny, 249, 0, 90), go, tiny, 5);
     expect(r.blocked).toBe(true);
+    expect(r.blockedBy).toBe('edge');
     expect(r.x).toBeLessThanOrEqual(250);
     expect([r.x, r.z, r.y, r.headingDeg].every(Number.isFinite)).toBe(true);
   });
@@ -80,6 +84,7 @@ describe('stepRobot', () => {
     });
     const r = stepRobot(createRobot(t, 0, 0, 90), go, t, 30);
     expect(r.blocked).toBe(true);
+    expect(r.blockedBy).toBe('edge');
     expect(r.x).toBeLessThan(50);
     expect([r.x, r.z, r.y].every(Number.isFinite)).toBe(true);
   });
