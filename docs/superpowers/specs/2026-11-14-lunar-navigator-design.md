@@ -89,7 +89,7 @@ Three.js + Vite. Terreno desde `terrain.bin`, luz direccional orientada por el S
 - **M0 — Datos:** pipeline para **un** sitio, con validación contra Horizons.
 - **M1 — Panel con datos reales** (sin 3D): métricas, línea de tiempo, comparar dos escenarios.
 - **M2 — Escena 3D:** terreno, luz solar, Tierra, robot y cartel.
-- **M3 — Escalar** a 5–8 sitios curados (Artemis III, CLPS, Apolo/Chandrayaan-3 como contraste).
+- **M3 — Escalar** a 5–8 sitios curados y añadir el horizonte de terreno lejano. Priorizar regiones de Artemis III vigentes y conservar misiones históricas como contraste.
 - **M4 — Pulir:** animación, sonido, textos, README con fuentes y límites.
 
 ## 7. Decisiones mías (revisables)
@@ -98,7 +98,8 @@ Three.js + Vite. Terreno desde `terrain.bin`, luz direccional orientada por el S
 - Borde superior del Sol para decidir visibilidad.
 - Semáforo de viabilidad con umbrales editables.
 - Coordenadas personalizadas **fuera de v1**. Extra posible más adelante: cuadrícula precalculada de métricas con horizonte plano (sin terreno), indicando claramente esa limitación.
-- Sitios de la lista curada: los 9 de Artemis III más IM-1, IM-2, Chandrayaan-3, Apolo 11 y 17; v1 puede empezar con 3.
+- La lista de Artemis III se revisó después del borrador de este diseño: NASA anunció nueve regiones candidatas actualizadas en 2024 ([lista vigente](https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/)). El producto LOLA de 5 m también cubre regiones anteriores como Connecting Ridge y Shackleton Rim, que se conservan como contraste histórico; la disponibilidad de un DEM no implica que una región siga en la lista vigente.
+- M3 actual: cinco regiones con DEM local disponibles — Connecting Ridge (Site 01), Shackleton Rim (Site 04), Nobile Rim 1 (Site 06), Haworth y Malapert Massif (Site 23). Tres aparecen en la lista actualizada de Artemis III; Site 01 y Site 04 son comparaciones históricas.
 
 ## 8. Pendiente del equipo / abierto
 

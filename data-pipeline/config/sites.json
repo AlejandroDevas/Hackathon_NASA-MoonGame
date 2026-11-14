@@ -93,5 +93,69 @@
       "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "https://doi.org/10.1016/j.pss.2020.105119"
     ]
+  },
+  {
+    "id": "haworth",
+    "name": "Haworth",
+    "lat_deg": -86.7639420,
+    "lon_deg": -22.7770238,
+    "observer_height_m": 2.0,
+    "coordinates_source": "Centro geométrico de la extensión del DEM Haworth_final_adj_5mpp_surf.tif de PGDA (x -52900..-23100 m, y 75600..105400 m, estereográfica polar MOON_ME), convertido a lat/lon con pyproj. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+    "sign": {
+      "es": {
+        "title": "Haworth",
+        "body": "Haworth es una de las regiones candidatas de Artemis III cerca del polo sur. En estas latitudes, el Sol recorre el cielo muy cerca del horizonte y pequeñas diferencias del relieve cambian las ventanas de iluminación.",
+        "facts": [
+          "NASA incluyó Haworth entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
+          "PGDA ofrece un DEM LOLA específico de Haworth a 5 m por píxel, en referencia lunar MOON_ME de DE421."
+        ]
+      },
+      "en": {
+        "title": "Haworth",
+        "body": "Haworth is one of the Artemis III candidate regions near the lunar south pole. At these latitudes, the Sun travels close to the horizon, and small terrain differences change the available lighting windows.",
+        "facts": [
+          "NASA included Haworth among the nine revised Artemis III candidate regions in 2024.",
+          "PGDA provides a dedicated 5 m per pixel LOLA DEM for Haworth, referenced to the lunar MOON_ME frame of DE421."
+        ]
+      }
+    },
+    "sources": [
+      "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
+      "https://pgda.gsfc.nasa.gov/products/78",
+      "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "https://doi.org/10.1016/j.pss.2020.105119"
+    ]
+  },
+  {
+    "id": "site23-malapert-massif",
+    "name": "Malapert Massif (Site 23)",
+    "lat_deg": -85.9947847,
+    "lon_deg": -0.2357838,
+    "observer_height_m": 2.0,
+    "coordinates_source": "Centro geométrico de la extensión del DEM Site23_final_adj_5mpp_surf.tif de PGDA (x -11000..10000 m, y 111000..132000 m, estereográfica polar MOON_ME), convertido a lat/lon con pyproj. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+    "sign": {
+      "es": {
+        "title": "Macizo Malapert (Sitio 23)",
+        "body": "El macizo Malapert es una región candidata de Artemis III en el polo sur lunar. El terreno elevado puede favorecer comunicaciones y luz, mientras que la topografía cercana determina las condiciones en cada punto.",
+        "facts": [
+          "NASA incluyó Malapert Massif entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
+          "PGDA identifica el Sitio 23 como Malapert massif y publica su topografía LOLA a 5 m por píxel."
+        ]
+      },
+      "en": {
+        "title": "Malapert Massif (Site 23)",
+        "body": "Malapert Massif is an Artemis III candidate region at the lunar south pole. Elevated terrain may favor communications and lighting, while nearby topography determines conditions at each point.",
+        "facts": [
+          "NASA included Malapert Massif among the nine revised Artemis III candidate regions in 2024.",
+          "PGDA identifies Site 23 as Malapert massif and publishes its LOLA topography at 5 m per pixel."
+        ]
+      }
+    },
+    "sources": [
+      "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
+      "https://pgda.gsfc.nasa.gov/products/78",
+      "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "https://doi.org/10.1016/j.pss.2020.105119"
+    ]
   }
 ]

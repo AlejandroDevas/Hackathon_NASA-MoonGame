@@ -2,7 +2,7 @@
 
 Herramienta web para evaluar rápido un sitio y una fecha de aterrizaje en el polo sur lunar: posición del Sol y de la Tierra respecto al **horizonte real del terreno**, tiempo hasta el ocaso solar y terrestre, % de luz, ventanas de visibilidad de la Tierra y un semáforo de viabilidad con umbrales editables. Permite comparar dos escenarios (sitio + fecha) lado a lado y animar el paso del tiempo.
 
-Proyecto para el NASA Space Apps Challenge 2026 (reto "CLPS Lunar Mission Browser"). Este repositorio contiene los hitos M0 (datos), M1 (panel) y M2 (escena 3D con el robot); los sitios adicionales y el pulido vienen después (ver `docs/superpowers/specs/`).
+Proyecto para el NASA Space Apps Challenge 2026 (reto "CLPS Lunar Mission Browser"). Incluye M0 (pipeline de datos), M1 (panel), M2 (escena 3D con el robot) y el alcance mínimo de M3: cinco regiones con datos y horizonte lejano — Connecting Ridge (Site 01), Shackleton Rim (Site 04), Nobile Rim 1 (Site 06), Haworth y Malapert Massif (Site 23).
 
 ## Cómo funciona
 
@@ -38,6 +38,8 @@ data-pipeline/.venv/Scripts/python -m pip install -r data-pipeline/requirements.
 data-pipeline/.venv/Scripts/python -m pytest data-pipeline/tests
 # con el DEM del sitio descargado en data-pipeline/cache/ (ver config/sites.json):
 data-pipeline/.venv/Scripts/python data-pipeline/scripts/build_site.py site01-connecting-ridge --dem data-pipeline/cache/Site01_final_adj_5mpp_surf.tif --radius-m 8000
+# Opcional para sumar el horizonte distante de un DEM regional de menor resolución:
+data-pipeline/.venv/Scripts/python data-pipeline/scripts/build_site.py site01-connecting-ridge --dem data-pipeline/cache/Site01_final_adj_5mpp_surf.tif --far-dem data-pipeline/cache/LDEM_80S_80MPP_ADJ.TIF
 ```
 
 Los kernels SPICE (`de421.bsp`, `moon_pa_de421_1900-2050.bpc`, `moon_080317.tf`, `pck00008.tpc`) se descargan a `data-pipeline/cache/` con Skyfield. La carpeta `cache/` no se versiona.
@@ -45,18 +47,19 @@ Los kernels SPICE (`de421.bsp`, `moon_pa_de421_1900-2050.bpc`, `moon_080317.tf`,
 ## Fuentes
 
 - Topografía: LRO/LOLA, DEM de 5 m/píxel de [PGDA](https://pgda.gsfc.nasa.gov/products/78). Citar: Barker, M. K. et al. (2021), *Improved LOLA Elevation Maps for South Pole Landing Sites: Error Estimates and Their Impact on Illumination Conditions*, Planetary and Space Science 203, 105119, [doi:10.1016/j.pss.2020.105119](https://doi.org/10.1016/j.pss.2020.105119).
+- Contexto topográfico lejano: [DEM LOLA regional de 80 m/píxel, 80–90°S (PGDA)](https://pgda.gsfc.nasa.gov/products/90), combinado con cada DEM local de 5 m para calcular el horizonte.
 - Efemérides: [Skyfield](https://rhodesmill.org/skyfield/planetary.html) con kernels SPICE de NAIF/JPL. Validadas contra [JPL Horizons](https://ssd-api.jpl.nasa.gov/doc/horizons.html) (elevación y acimut, dos semanas de 2026 y 2030, en el sitio real y en (0, 0)): ver `data-pipeline/VALIDATION.md`.
 
 ## Límites conocidos (léelos antes de usar los números)
 
-- **El punto de observación es el centro del DEM del sitio, no una posición de aterrizaje concreta.** Las coordenadas salen de la extensión del GeoTIFF (ver `coordinates_source` en `data-pipeline/config/sites.json`).
-- **El horizonte usa solo el terreno del recorte del DEM** (8 km de radio en el Site 01). Las cumbres más lejanas no cuentan; el anillo de baja resolución queda para el hito M3.
+- **El punto de observación es el centro del DEM de cada región, no una posición de aterrizaje concreta.** Las coordenadas salen de la extensión del GeoTIFF (ver `coordinates_source` en `data-pipeline/config/sites.json`).
+- **El horizonte combina el DEM local de 5 m con el DEM regional de 80 m.** El regional empieza a contribuir al 75 % del radio local por defecto, con solapamiento para evitar huecos. Solo cuenta el terreno contenido en los DEM disponibles.
 - **Alrededor del 90 % de los píxeles de 5 m están interpolados**; el error típico es 0,30–0,50 m en altura y 1,5–2,5° en pendiente (Barker et al. 2021).
 - **La validación con Horizons cubre las efemérides (Sol y Tierra), no el horizonte del terreno.** La orientación de la cuadrícula del DEM (norte verdadero frente a norte de la cuadrícula) está comprobada con un raster sintético, no contra una fuente externa.
 - El Sol se considera visible cuando su **borde superior** supera el horizonte; la Tierra se considera por su **centro**.
 - El semáforo compara la elevación del Sol con el horizonte *geométrico* (0° por defecto), así que un Sol visible sobre terreno bajo puede marcarse "por debajo del mínimo".
 - Datos de 2026-01-01 a 2030-12-31, paso de 1 hora. Fuera de ese rango la fecha se ajusta al límite y se avisa.
-- Hay un solo sitio real por ahora (M3 añadirá más).
+- Hay cinco sitios con datos reales: Connecting Ridge (Site 01), Shackleton Rim (Site 04), Nobile Rim 1 (Site 06), Haworth y Malapert Massif (Site 23). Los puntos de observación son centros de regiones DEM, no coordenadas de aterrizaje.
 - **Escena 3D:** las sombras solo cubren el recorte de 2,5 km; más allá hay una silueta oscura sin iluminar calculada con el horizonte del observador en el centro del sitio, así que desde otro punto es solo aproximada. La Tierra es una esfera sin textura y el robot no tiene físicas (sigue la altura del mapa). La escena muestra solo el escenario A.
 - **Horizonte del robot frente al del panel:** las métricas del panel son para el centro del sitio; desde otro punto del terreno el Sol puede quedar tapado aunque el panel diga que es visible.
 - **Límite de 25°:** con la pendiente medida a 10 m, solo ~0,6 % del terreno de este sitio supera 25° (≈10 % supera 20°), así que casi nunca estorba; el DEM está interpolado en un ~90 %.

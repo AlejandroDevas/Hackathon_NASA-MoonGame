@@ -34,12 +34,20 @@ def _observer_ground(dem: np.ndarray, r0: float, c0: float) -> float:
     return float(np.nanmedian(window)) if np.isfinite(window).any() else 0.0
 
 
+def ground_height_at(dem: np.ndarray, observer_rc: tuple[float, float]) -> float:
+    """Return the DEM ground height at the observer, with a local NaN fallback."""
+    return _observer_ground(dem, *observer_rc)
+
+
 def compute_horizon(
     dem: np.ndarray,
     pixel_m: float,
     observer_rc: tuple[float, float],
     north_bearing_deg: float,
     observer_height_m: float = 2.0,
+    *,
+    min_distance_m: float = 0.0,
+    observer_ground_m: float | None = None,
 ) -> np.ndarray:
     """Maximum elevation angle of the terrain for each of 360 azimuths (degrees).
 
@@ -48,13 +56,22 @@ def compute_horizon(
     bearing of true north, clockwise from grid "up".
     """
     radius = MOON_RADIUS_M
+    if pixel_m <= 0:
+        raise ValueError("pixel_m must be positive")
+    if min_distance_m < 0:
+        raise ValueError("min_distance_m must be non-negative")
     rows, cols = dem.shape
     r0, c0 = observer_rc
-    h0 = _observer_ground(dem, r0, c0) + observer_height_m
+    ground_m = _observer_ground(dem, r0, c0) if observer_ground_m is None else observer_ground_m
+    h0 = ground_m + observer_height_m
     dip = -float(np.degrees(np.arccos(radius / (radius + observer_height_m))))
 
     max_dist = float(np.hypot(rows, cols)) * pixel_m
-    dist = pixel_m * np.arange(1, int(max_dist / pixel_m) + 1)
+    first_sample = max(1, int(np.ceil(min_distance_m / pixel_m)))
+    last_sample = int(max_dist / pixel_m)
+    if last_sample < first_sample:
+        return np.full(360, dip, dtype=np.float64)
+    dist = pixel_m * np.arange(first_sample, last_sample + 1)
     grid_bearing = np.radians(np.arange(360) + north_bearing_deg)
     r = r0 - np.cos(grid_bearing)[:, None] * dist[None, :] / pixel_m
     c = c0 + np.sin(grid_bearing)[:, None] * dist[None, :] / pixel_m

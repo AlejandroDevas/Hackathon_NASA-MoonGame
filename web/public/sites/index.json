@@ -2,5 +2,21 @@
   {
     "id": "site01-connecting-ridge",
     "name": "Connecting Ridge (Site 01)"
+  },
+  {
+    "id": "site04-shackleton-rim",
+    "name": "Shackleton Rim (Site 04)"
+  },
+  {
+    "id": "site06-nobile-rim-1",
+    "name": "Nobile Rim 1 (Site 06)"
+  },
+  {
+    "id": "haworth",
+    "name": "Haworth"
+  },
+  {
+    "id": "site23-malapert-massif",
+    "name": "Malapert Massif (Site 23)"
   }
 ]

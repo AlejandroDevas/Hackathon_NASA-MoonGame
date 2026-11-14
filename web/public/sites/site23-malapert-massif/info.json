@@ -1,0 +1,75 @@
+{
+  "id": "site23-malapert-massif",
+  "name": "Malapert Massif (Site 23)",
+  "lat_deg": -85.9947847,
+  "lon_deg": -0.2357838,
+  "observer_height_m": 2.0,
+  "coordinates_source": "Centro geométrico de la extensión del DEM Site23_final_adj_5mpp_surf.tif de PGDA (x -11000..10000 m, y 111000..132000 m, estereográfica polar MOON_ME), convertido a lat/lon con pyproj. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+  "sign": {
+    "es": {
+      "title": "Macizo Malapert (Sitio 23)",
+      "body": "El macizo Malapert es una región candidata de Artemis III en el polo sur lunar. El terreno elevado puede favorecer comunicaciones y luz, mientras que la topografía cercana determina las condiciones en cada punto.",
+      "facts": [
+        "NASA incluyó Malapert Massif entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
+        "PGDA identifica el Sitio 23 como Malapert massif y publica su topografía LOLA a 5 m por píxel."
+      ]
+    },
+    "en": {
+      "title": "Malapert Massif (Site 23)",
+      "body": "Malapert Massif is an Artemis III candidate region at the lunar south pole. Elevated terrain may favor communications and lighting, while nearby topography determines conditions at each point.",
+      "facts": [
+        "NASA included Malapert Massif among the nine revised Artemis III candidate regions in 2024.",
+        "PGDA identifies Site 23 as Malapert massif and publishes its LOLA topography at 5 m per pixel."
+      ]
+    }
+  },
+  "sources": [
+    "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
+    "https://pgda.gsfc.nasa.gov/products/78",
+    "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+    "https://doi.org/10.1016/j.pss.2020.105119"
+  ],
+  "ephemeris": {
+    "start_utc": "2026-01-01T00:00:00Z",
+    "step_s": 3600,
+    "count": 43824,
+    "file": "ephemeris.bin"
+  },
+  "bodies": {
+    "sun_radius_deg": 0.2666,
+    "earth_radius_deg": 0
+  },
+  "terrain": {
+    "file": "terrain.bin",
+    "rows": 1001,
+    "cols": 1001,
+    "pixel_m": 5.0,
+    "min_m": 4069.996337890625,
+    "max_m": 4927.72265625,
+    "observer_rc": [
+      499.50009987226804,
+      500.49998763499934
+    ],
+    "north_bearing_deg": 359.7642162
+  },
+  "horizon": {
+    "sources": [
+      {
+        "file": "Site23_final_adj_5mpp_surf.tif",
+        "pixel_m": 5.0,
+        "requested_range_m": [
+          0,
+          10000.0
+        ]
+      },
+      {
+        "file": "LDEM_80S_80MPP_ADJ.TIF",
+        "pixel_m": 80.0,
+        "requested_range_m": [
+          7500.0,
+          300000.0
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "id": "site06-nobile-rim-1",
+  "name": "Nobile Rim 1 (Site 06)",
+  "lat_deg": -85.4381005,
+  "lon_deg": 37.3666694,
+  "observer_height_m": 2.0,
+  "coordinates_source": "Centro geométrico de la extensión del DEM Site06_final_adj_5mpp_surf.tif de PGDA (x 74000..94000 m, y 100000..120000 m, estereográfica polar MOON_ME), convertido de XY a lat/lon. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+  "sign": {
+    "es": {
+      "title": "Borde de Nobile 1 (Sitio 06)",
+      "body": "Nobile Rim 1 es una región candidata del polo sur lunar. Su relieve y orientación hacen que las ventanas de luz y la visibilidad de la Tierra dependan del punto exacto del terreno.",
+      "facts": [
+        "El producto de PGDA identifica el Sitio 06 como Nobile rim 1 y ofrece un DEM de elevación LOLA a 5 m por píxel.",
+        "La cuadrícula está en el marco lunar MOON_ME de DE421 y usa estereográfica polar con coordenadas en metros."
+      ]
+    },
+    "en": {
+      "title": "Nobile Rim 1 (Site 06)",
+      "body": "Nobile Rim 1 is a candidate lunar south pole region. Its relief and orientation mean that lighting windows and Earth visibility depend on the exact point on the terrain.",
+      "facts": [
+        "PGDA identifies Site 06 as Nobile rim 1 and provides a 5 m per pixel LOLA elevation DEM.",
+        "The grid uses the lunar MOON_ME frame of DE421 and polar stereographic coordinates in metres."
+      ]
+    }
+  },
+  "sources": [
+    "https://pgda.gsfc.nasa.gov/products/78",
+    "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+    "https://doi.org/10.1016/j.pss.2020.105119"
+  ],
+  "ephemeris": {
+    "start_utc": "2026-01-01T00:00:00Z",
+    "step_s": 3600,
+    "count": 43824,
+    "file": "ephemeris.bin"
+  },
+  "bodies": {
+    "sun_radius_deg": 0.2666,
+    "earth_radius_deg": 0
+  },
+  "terrain": {
+    "file": "terrain.bin",
+    "rows": 1001,
+    "cols": 1001,
+    "pixel_m": 5.0,
+    "min_m": 4909.8271484375,
+    "max_m": 6435.630859375,
+    "observer_rc": [
+      499.50007955230467,
+      500.49993148909925
+    ],
+    "north_bearing_deg": 37.36666939997971
+  },
+  "horizon": {
+    "sources": [
+      {
+        "file": "Site06_final_adj_5mpp_surf.tif",
+        "pixel_m": 5.0,
+        "requested_range_m": [
+          0,
+          10000.0
+        ]
+      },
+      {
+        "file": "LDEM_80S_80MPP_ADJ.TIF",
+        "pixel_m": 80.0,
+        "requested_range_m": [
+          7500.0,
+          300000.0
+        ]
+      }
+    ]
+  }
+}

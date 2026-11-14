@@ -52,5 +52,25 @@
       499.6542830663916
     ],
     "north_bearing_deg": 222.51039999999668
+  },
+  "horizon": {
+    "sources": [
+      {
+        "file": "Site01_final_adj_5mpp_surf.tif",
+        "pixel_m": 5.0,
+        "requested_range_m": [
+          0,
+          8000.0
+        ]
+      },
+      {
+        "file": "LDEM_80S_80MPP_ADJ.TIF",
+        "pixel_m": 80.0,
+        "requested_range_m": [
+          6000.0,
+          300000.0
+        ]
+      }
+    ]
   }
 }

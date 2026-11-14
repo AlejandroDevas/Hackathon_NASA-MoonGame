@@ -1,0 +1,74 @@
+{
+  "id": "site04-shackleton-rim",
+  "name": "Shackleton Rim (Site 04)",
+  "lat_deg": -89.7668115,
+  "lon_deg": -171.8698976,
+  "observer_height_m": 2.0,
+  "coordinates_source": "Centro geométrico de la extensión del DEM Site04_final_adj_5mpp_surf.tif de PGDA (x -9000..7000 m, y -15000..1000 m, estereográfica polar MOON_ME), convertido de XY a lat/lon. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+  "sign": {
+    "es": {
+      "title": "Borde de Shackleton (Sitio 04)",
+      "body": "Esta región del polo sur lunar está representada por topografía LOLA de alta resolución. El relieve local controla cuándo el Sol asoma sobre el horizonte y cuándo la Tierra queda visible desde el terreno.",
+      "facts": [
+        "El producto de PGDA identifica el Sitio 04 como el borde de Shackleton y ofrece un DEM de elevación a 5 m por píxel.",
+        "Los DEM polares de esta familia tienen cerca del 90 % de sus píxeles interpolados; la incertidumbre típica de altura citada por Barker et al. es de 0,30–0,50 m."
+      ]
+    },
+    "en": {
+      "title": "Shackleton Rim (Site 04)",
+      "body": "This lunar south pole region is represented by high-resolution LOLA topography. Local relief controls when the Sun rises above the horizon and when Earth is visible from the terrain.",
+      "facts": [
+        "PGDA identifies Site 04 as Shackleton rim and provides a 5 m per pixel elevation DEM.",
+        "About 90% of pixels in this family of polar DEMs are interpolated; Barker et al. report typical height uncertainty of 0.30–0.50 m."
+      ]
+    }
+  },
+  "sources": [
+    "https://pgda.gsfc.nasa.gov/products/78",
+    "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+    "https://doi.org/10.1016/j.pss.2020.105119"
+  ],
+  "ephemeris": {
+    "start_utc": "2026-01-01T00:00:00Z",
+    "step_s": 3600,
+    "count": 43824,
+    "file": "ephemeris.bin"
+  },
+  "bodies": {
+    "sun_radius_deg": 0.2666,
+    "earth_radius_deg": 0
+  },
+  "terrain": {
+    "file": "terrain.bin",
+    "rows": 1001,
+    "cols": 1001,
+    "pixel_m": 5.0,
+    "min_m": -836.4898681640625,
+    "max_m": 1739.121826171875,
+    "observer_rc": [
+      500.4997125630248,
+      499.50003991938365
+    ],
+    "north_bearing_deg": 188.13010240000034
+  },
+  "horizon": {
+    "sources": [
+      {
+        "file": "Site04_final_adj_5mpp_surf.tif",
+        "pixel_m": 5.0,
+        "requested_range_m": [
+          0,
+          10000.0
+        ]
+      },
+      {
+        "file": "LDEM_80S_80MPP_ADJ.TIF",
+        "pixel_m": 80.0,
+        "requested_range_m": [
+          7500.0,
+          300000.0
+        ]
+      }
+    ]
+  }
+}

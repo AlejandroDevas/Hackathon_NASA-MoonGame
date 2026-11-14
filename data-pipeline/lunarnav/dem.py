@@ -11,14 +11,19 @@ from rasterio.windows import Window
 
 @dataclass
 class DemCrop:
-    heights: np.ndarray  # float64 metres, NaN where there is no data
+    heights: np.ndarray  # floating-point metres, NaN where there is no data
     pixel_m: float
     observer_rc: tuple[float, float]  # fractional (row, col) of the site in `heights`
     north_bearing_deg: float  # true north, clockwise from grid "up"
 
 
 def load_dem_crop(
-    path: str, lat_deg: float, lon_deg: float, radius_m: float = 10_000.0
+    path: str,
+    lat_deg: float,
+    lon_deg: float,
+    radius_m: float = 10_000.0,
+    *,
+    dtype: str = "float64",
 ) -> DemCrop:
     with rasterio.open(path) as src:
         crs = CRS.from_wkt(src.crs.to_wkt())
@@ -40,7 +45,9 @@ def load_dem_crop(
         row1 = min(round(row) + half + 1, src.height)
         col1 = min(round(col) + half + 1, src.width)
         window = Window(col0, row0, col1 - col0, row1 - row0)
-        heights = src.read(1, window=window, masked=True).astype("float64").filled(np.nan)
+        heights = src.read(
+            1, window=window, masked=True, out_dtype=dtype
+        ).filled(np.nan)
 
     return DemCrop(
         heights=heights,

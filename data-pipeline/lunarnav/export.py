@@ -12,7 +12,12 @@ EARTH_RADIUS_DEG = 0
 
 
 def write_site(
-    out_dir: Path, site: dict, horizon: np.ndarray, eph: Ephemeris, terrain: dict | None = None
+    out_dir: Path,
+    site: dict,
+    horizon: np.ndarray,
+    eph: Ephemeris,
+    terrain: dict | None = None,
+    horizon_info: dict | None = None,
 ) -> None:
     """Write ``ephemeris.bin`` (float32 LE, per sample [sun_el, sun_az, earth_el,
     earth_az]), ``horizon.json`` and ``info.json`` into ``out_dir``."""
@@ -40,4 +45,6 @@ def write_site(
     }
     if terrain is not None:
         info["terrain"] = terrain
+    if horizon_info is not None:
+        info["horizon"] = horizon_info
     (out_dir / "info.json").write_text(json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")

@@ -1,0 +1,75 @@
+{
+  "id": "haworth",
+  "name": "Haworth",
+  "lat_deg": -86.763942,
+  "lon_deg": -22.7770238,
+  "observer_height_m": 2.0,
+  "coordinates_source": "Centro geométrico de la extensión del DEM Haworth_final_adj_5mpp_surf.tif de PGDA (x -52900..-23100 m, y 75600..105400 m, estereográfica polar MOON_ME), convertido a lat/lon con pyproj. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+  "sign": {
+    "es": {
+      "title": "Haworth",
+      "body": "Haworth es una de las regiones candidatas de Artemis III cerca del polo sur. En estas latitudes, el Sol recorre el cielo muy cerca del horizonte y pequeñas diferencias del relieve cambian las ventanas de iluminación.",
+      "facts": [
+        "NASA incluyó Haworth entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
+        "PGDA ofrece un DEM LOLA específico de Haworth a 5 m por píxel, en referencia lunar MOON_ME de DE421."
+      ]
+    },
+    "en": {
+      "title": "Haworth",
+      "body": "Haworth is one of the Artemis III candidate regions near the lunar south pole. At these latitudes, the Sun travels close to the horizon, and small terrain differences change the available lighting windows.",
+      "facts": [
+        "NASA included Haworth among the nine revised Artemis III candidate regions in 2024.",
+        "PGDA provides a dedicated 5 m per pixel LOLA DEM for Haworth, referenced to the lunar MOON_ME frame of DE421."
+      ]
+    }
+  },
+  "sources": [
+    "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
+    "https://pgda.gsfc.nasa.gov/products/78",
+    "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+    "https://doi.org/10.1016/j.pss.2020.105119"
+  ],
+  "ephemeris": {
+    "start_utc": "2026-01-01T00:00:00Z",
+    "step_s": 3600,
+    "count": 43824,
+    "file": "ephemeris.bin"
+  },
+  "bodies": {
+    "sun_radius_deg": 0.2666,
+    "earth_radius_deg": 0
+  },
+  "terrain": {
+    "file": "terrain.bin",
+    "rows": 1001,
+    "cols": 1001,
+    "pixel_m": 5.0,
+    "min_m": 1408.6746826171875,
+    "max_m": 1822.6756591796875,
+    "observer_rc": [
+      499.5001482921107,
+      499.50007108208047
+    ],
+    "north_bearing_deg": 337.2229761999994
+  },
+  "horizon": {
+    "sources": [
+      {
+        "file": "Haworth_final_adj_5mpp_surf.tif",
+        "pixel_m": 5.0,
+        "requested_range_m": [
+          0,
+          10000.0
+        ]
+      },
+      {
+        "file": "LDEM_80S_80MPP_ADJ.TIF",
+        "pixel_m": 80.0,
+        "requested_range_m": [
+          7500.0,
+          300000.0
+        ]
+      }
+    ]
+  }
+}
