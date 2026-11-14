@@ -2,7 +2,7 @@
 
 Herramienta web para evaluar rápido un sitio y una fecha de aterrizaje en el polo sur lunar: posición del Sol y de la Tierra respecto al **horizonte real del terreno**, tiempo hasta el ocaso solar y terrestre, % de luz, ventanas de visibilidad de la Tierra y un semáforo de viabilidad con umbrales editables. Permite comparar dos escenarios (sitio + fecha) lado a lado y animar el paso del tiempo.
 
-Proyecto para el NASA Space Apps Challenge 2026 (reto "CLPS Lunar Mission Browser"). Este repositorio contiene los hitos M0 (datos) y M1 (panel); la escena 3D con el robot viene después (ver `docs/superpowers/specs/`).
+Proyecto para el NASA Space Apps Challenge 2026 (reto "CLPS Lunar Mission Browser"). Este repositorio contiene los hitos M0 (datos), M1 (panel) y M2 (escena 3D con el robot); los sitios adicionales y el pulido vienen después (ver `docs/superpowers/specs/`).
 
 ## Cómo funciona
 
@@ -12,6 +12,14 @@ data-pipeline/ (Python, se ejecuta una vez)  ->  web/public/sites/<id>/  ->  web
 ```
 
 No hay servidor: todo es estático.
+
+## Escena 3D
+
+Encima del panel hay una vista 3D del sitio seleccionado en el escenario A: el terreno real del recorte LOLA (5 km), un Sol con sombras y una Tierra puestos según la fecha del panel (la animación del panel los mueve), estrellas y la silueta del horizonte lejano. Un robot de seis ruedas parte a ~400 m del punto del sitio y el objetivo es llegar hasta él: a menos de 25 m se abre el cartel con la explicación del lugar.
+
+- **Controles:** W/↑ avanzar, S/↓ retroceder, A/D o ←/→ girar, Shift turbo. Las teclas se ignoran mientras escribes en un campo del panel.
+- **Límite de pendiente:** el robot no entra en terreno de más de 25° (se detiene y avisa). El punto de salida se calcula para que la meta sea alcanzable con ese límite.
+- Sin WebGL, el panel sigue funcionando y la escena muestra un aviso.
 
 ## Uso
 
@@ -49,3 +57,7 @@ Los kernels SPICE (`de421.bsp`, `moon_pa_de421_1900-2050.bpc`, `moon_080317.tf`,
 - El semáforo compara la elevación del Sol con el horizonte *geométrico* (0° por defecto), así que un Sol visible sobre terreno bajo puede marcarse "por debajo del mínimo".
 - Datos de 2026-01-01 a 2030-12-31, paso de 1 hora. Fuera de ese rango la fecha se ajusta al límite y se avisa.
 - Hay un solo sitio real por ahora (M3 añadirá más).
+- **Escena 3D:** las sombras solo cubren el recorte de 2,5 km; más allá hay una silueta oscura sin iluminar calculada con el horizonte del observador en el centro del sitio, así que desde otro punto es solo aproximada. La Tierra es una esfera sin textura y el robot no tiene físicas (sigue la altura del mapa). La escena muestra solo el escenario A.
+- **Horizonte del robot frente al del panel:** las métricas del panel son para el centro del sitio; desde otro punto del terreno el Sol puede quedar tapado aunque el panel diga que es visible.
+- **Límite de 25°:** con la pendiente medida a 10 m, solo ~0,6 % del terreno de este sitio supera 25° (≈10 % supera 20°), así que casi nunca estorba; el DEM está interpolado en un ~90 %.
+- **Rendimiento:** el 3D usa mapa de sombras de 4096 px; con renderizado por software (sin GPU) puede ir a pocos fotogramas por segundo, y el movimiento del robot se ralentiza en vez de saltar.
