@@ -16,12 +16,13 @@ const siteList = [
   { id: 'other', name: 'Other' },
 ];
 
-function setup() {
+function setup(audioCue) {
   const store = createStore({
     scenarios: { A: { siteId: 'tiny-site', timeMs: T0 + 5 * HOUR }, B: null },
     windowMs: 24 * HOUR,
     thresholds: { ...DEFAULT_THRESHOLDS },
     playing: false,
+    soundEnabled: false,
     locale: 'es',
   });
   const timelines = { created: 0, destroyed: 0, cursors: [] };
@@ -34,7 +35,7 @@ function setup() {
   };
   const root = document.createElement('div');
   document.body.append(root);
-  mountPanel(root, store, siteList, sites, { renderTimeline });
+  mountPanel(root, store, siteList, sites, { renderTimeline, audioCue });
   return { store, root, timelines };
 }
 
@@ -116,3 +117,22 @@ describe('mountPanel', () => {
     expect(store.get().playing).toBe(false);
   });
 });
+
+describe('sound toggle', () => {
+  test('stays off when the audio cue cannot start (no Web Audio)', () => {
+    const { root, store } = setup({ setEnabled: () => false });
+    q(root, 'sound-toggle').click();
+    expect(store.get().soundEnabled).toBe(false);
+    expect(q(root, 'sound-toggle').getAttribute('aria-pressed')).toBe('false');
+  });
+
+  test('turns on and off following what the audio cue reports', () => {
+    const { root, store } = setup({ setEnabled: (next) => next });
+    q(root, 'sound-toggle').click();
+    expect(store.get().soundEnabled).toBe(true);
+    expect(q(root, 'sound-toggle').getAttribute('aria-pressed')).toBe('true');
+    q(root, 'sound-toggle').click();
+    expect(store.get().soundEnabled).toBe(false);
+  });
+});
+

@@ -1,5 +1,9 @@
-/** Small optional Web Audio cue, created only after an explicit user action. */
-export function createAudioCue() {
+/**
+ * Small optional Web Audio cue. The AudioContext is created only after an explicit
+ * user action (browsers block audio before that), and never if Web Audio is missing.
+ * @param {{ AudioContextClass?: typeof AudioContext | null }} [options] injectable for tests
+ */
+export function createAudioCue({ AudioContextClass } = {}) {
   let context = null;
   let enabled = false;
 
@@ -8,12 +12,18 @@ export function createAudioCue() {
       enabled = Boolean(next);
       if (!enabled) return false;
 
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) {
+      const ContextClass =
+        AudioContextClass === undefined ? window.AudioContext || window.webkitAudioContext : AudioContextClass;
+      if (!ContextClass) {
         enabled = false;
         return false;
       }
-      context ??= new AudioContextClass();
+      try {
+        context ??= new ContextClass();
+      } catch {
+        enabled = false; // e.g. the browser refuses to create a context: stay silent instead of breaking the page
+        return false;
+      }
       if (context.state === 'suspended') context.resume().catch(() => {});
       return enabled;
     },
