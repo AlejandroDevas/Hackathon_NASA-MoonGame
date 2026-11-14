@@ -99,6 +99,19 @@ describe('renderControls', () => {
     expect(warning.textContent).toContain('2026-01-02');
   });
 
+  test('while the date field has focus the typed text is kept; on blur it shows the clamped value', () => {
+    const { store, el } = setup();
+    document.body.append(el);
+    const input = el.querySelector('[data-testid="time-A"]');
+    input.focus();
+    change(el, 'time-A', '2031-01-01T00:00');
+    expect(store.get().scenarios.A.timeMs).toBe(T0 + 47 * HOUR);
+    expect(input.value).toBe('2031-01-01T00:00');
+    input.blur();
+    expect(input.value).toBe('2026-01-02T23:00');
+    el.remove();
+  });
+
   test('a valid date updates the store and keeps the warning hidden', () => {
     const { store, el } = setup();
     change(el, 'time-A', '2026-01-01T10:00');

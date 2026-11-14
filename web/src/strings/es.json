@@ -28,5 +28,17 @@
   "ctl.thresholds": "Umbrales de viabilidad",
   "ctl.minSunEl": "Elevación solar mínima (°)",
   "ctl.maxDark": "Oscuridad máxima (h)",
-  "ctl.maxEarthGap": "Hueco máximo sin Tierra (h)"
+  "ctl.maxEarthGap": "Hueco máximo sin Tierra (h)",
+  "app.play": "Reproducir",
+  "app.pause": "Pausar",
+  "app.compare": "Comparar",
+  "app.compareOff": "Quitar comparación",
+  "app.attribution": "Datos: NASA LRO/LOLA (PGDA) y efemérides SPICE vía Skyfield. Barker et al. 2021. Horizonte calculado solo con el terreno del recorte del DEM.",
+  "app.loadError": "No se pudieron cargar los datos: {message}",
+  "speed.1h": "1 h/s",
+  "speed.6h": "6 h/s",
+  "speed.1d": "1 d/s",
+  "scenario.A": "Escenario A",
+  "scenario.B": "Escenario B",
+  "diff.title": "Diferencia respecto a A"
 }

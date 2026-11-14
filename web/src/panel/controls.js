@@ -76,10 +76,15 @@ export function renderControls(container, store, siteList, sites, slot) {
     if (Number.isNaN(parsed)) return;
     const eph = sites.get(store.get().scenarios[slot].siteId).eph;
     const { timeMs, clamped } = clampTime(eph, parsed);
-    time.value = toInputValue(timeMs);
+    // Browsers fire `change` while a year is still being typed: never overwrite
+    // the field under the user's cursor; it is corrected on blur instead.
+    if (document.activeElement !== time) time.value = toInputValue(timeMs);
     warning.hidden = !clamped;
     warning.textContent = clamped ? t('range.warning', { limit: toDisplay(timeMs) }) : '';
     update({ timeMs });
+  });
+  time.addEventListener('blur', () => {
+    time.value = toInputValue(store.get().scenarios[slot].timeMs);
   });
 
   container.append(field(t('ctl.site'), select), field(t('ctl.time'), time), warning);
