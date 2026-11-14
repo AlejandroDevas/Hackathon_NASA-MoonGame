@@ -51,7 +51,7 @@ function renderSign(signEl, info) {
  * @param {{get(): object, subscribe(fn: Function): () => void}} store
  * @param {Map<string, object>} sites
  */
-export function mountScene(container, store, sites) {
+export function mountScene(container, store, sites, audioCue = null) {
   const first = sites.get(store.get().scenarios.A.siteId);
   if (!first?.terrain) {
     showNotice(container, t('scene.noTerrain'));
@@ -154,7 +154,9 @@ export function mountScene(container, store, sites) {
     }
     camera.lookAt(pose.target.x, pose.target.y, pose.target.z);
 
+    const wasOpen = signOpen;
     signOpen = nextSignOpen(signOpen, Math.hypot(robot.x, robot.z));
+    if (signOpen && !wasOpen) audioCue?.play();
     signEl.classList.toggle('open', signOpen);
     blockedEl.hidden = !robot.blocked;
     renderer.render(world.scene, camera);
@@ -184,6 +186,7 @@ export function mountScene(container, store, sites) {
       unsubscribe();
       observer.disconnect();
       input.dispose();
+      audioCue?.dispose();
       renderer.dispose();
       container.replaceChildren();
     },

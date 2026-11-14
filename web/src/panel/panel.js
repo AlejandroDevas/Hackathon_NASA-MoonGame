@@ -27,12 +27,13 @@ function el(tag, className, text) {
  * @param {Map<string, object>} sites loaded sites by id
  * @param {{renderTimeline: Function}} deps chart renderer, injected so the panel does not depend on uPlot
  */
-export function mountPanel(root, store, siteList, sites, { renderTimeline }) {
+export function mountPanel(root, store, siteList, sites, { renderTimeline, audioCue }) {
   let player = null;
   let speedMs = SPEEDS[1].ms;
   let structureKey = null;
   let views = {};
   let playButton = null;
+  let soundButton = null;
 
   function createView(slot, section) {
     const controlsEl = el('div');
@@ -99,6 +100,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline }) {
 
     const locale = el('select');
     locale.dataset.testid = 'locale';
+    locale.setAttribute('aria-label', t('ctl.language'));
     for (const code of ['es', 'en']) locale.add(new Option(code.toUpperCase(), code, false, code === store.get().locale));
     locale.addEventListener('change', () => {
       setLocale(locale.value);
@@ -107,6 +109,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline }) {
 
     const speed = el('select');
     speed.dataset.testid = 'speed';
+    speed.setAttribute('aria-label', t('ctl.speed'));
     for (const s of SPEEDS) speed.add(new Option(t(s.key), String(s.ms), false, s.ms === speedMs));
     speed.addEventListener('change', () => {
       speedMs = Number(speed.value);
@@ -128,6 +131,14 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline }) {
       }
     });
 
+    soundButton = el('button');
+    soundButton.dataset.testid = 'sound-toggle';
+    soundButton.addEventListener('click', () => {
+      const enabled = !store.get().soundEnabled;
+      const active = audioCue ? audioCue.setEnabled(enabled) : enabled;
+      store.set({ soundEnabled: active });
+    });
+
     const compare = el('button', '', store.get().scenarios.B ? t('app.compareOff') : t('app.compare'));
     compare.dataset.testid = 'compare-toggle';
     compare.addEventListener('click', () => {
@@ -135,7 +146,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline }) {
       store.set({ scenarios: { A: scenarios.A, B: scenarios.B ? null : { ...scenarios.A } } });
     });
 
-    tools.append(locale, speed, playButton, compare);
+    tools.append(locale, speed, playButton, soundButton, compare);
     header.append(tools);
     return header;
   }
@@ -163,6 +174,10 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline }) {
       rebuild(state);
     }
     playButton.textContent = state.playing ? t('app.pause') : t('app.play');
+    playButton.setAttribute('aria-pressed', String(state.playing));
+    soundButton.textContent = state.soundEnabled ? t('app.soundOff') : t('app.soundOn');
+    soundButton.setAttribute('aria-pressed', String(state.soundEnabled));
+    soundButton.setAttribute('aria-label', state.soundEnabled ? t('app.soundOff') : t('app.soundOn'));
     const metricsA = views.A.update(state);
     if (views.B && metricsA) views.B.update(state, metricsA);
   }

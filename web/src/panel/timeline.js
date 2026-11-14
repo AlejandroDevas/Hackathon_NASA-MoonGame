@@ -16,18 +16,18 @@ export function renderTimeline(el, site, fromMs, toMs, cursorMs) {
   const axis = { stroke: '#98a2b8', grid: { stroke: '#2a3242', width: 1 }, ticks: { stroke: '#2a3242' } };
   const plot = new uPlot(
     {
-      width: Math.max(el.clientWidth, 320),
+      width: Math.max(el.clientWidth, 240),
       height: 220,
       legend: { show: true },
       scales: { x: { time: true } },
       tzDate: utcTzDate,
-      axes: [{ ...axis, label: 'UTC' }, { ...axis, label: '°' }],
+      axes: [{ ...axis, label: t('chart.utc') }, { ...axis, label: t('chart.elevation') }],
       series: [
         {},
         { label: t('card.sunEl'), stroke: SUN, width: 2 },
-        { label: `${t('card.sunEl')} · horizon`, stroke: SUN, width: 1, dash: [5, 4] },
+        { label: `${t('card.sunEl')} · ${t('chart.horizon')}`, stroke: SUN, width: 1, dash: [5, 4] },
         { label: t('card.earthEl'), stroke: EARTH, width: 2 },
-        { label: `${t('card.earthEl')} · horizon`, stroke: EARTH, width: 1, dash: [5, 4] },
+        { label: `${t('card.earthEl')} · ${t('chart.horizon')}`, stroke: EARTH, width: 1, dash: [5, 4] },
       ],
       hooks: {
         draw: [
@@ -49,8 +49,21 @@ export function renderTimeline(el, site, fromMs, toMs, cursorMs) {
     timelineData(site, fromMs, toMs),
     el,
   );
+  let lastWidth = el.clientWidth;
+  const observer = typeof ResizeObserver === 'function'
+    ? new ResizeObserver(([entry]) => {
+      const width = Math.max(Math.floor(entry.contentRect.width), 240);
+      if (width === lastWidth) return;
+      lastWidth = width;
+      plot.setSize({ width, height: 220 });
+    })
+    : null;
+  observer?.observe(el);
   return {
-    destroy: () => plot.destroy(),
+    destroy() {
+      observer?.disconnect();
+      plot.destroy();
+    },
     setCursor(ms) {
       cursor = ms;
       plot.redraw(false);

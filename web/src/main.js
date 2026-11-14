@@ -6,6 +6,7 @@ import { mountPanel } from './panel/panel.js';
 import './panel/panel.css';
 import { renderTimeline } from './panel/timeline.js';
 import { mountScene } from './scene/view3d.js';
+import { createAudioCue } from './scene/audioCue.js';
 import './scene/scene.css';
 import { createStore } from './state.js';
 
@@ -28,11 +29,13 @@ async function main() {
       windowMs: 7 * DAY_MS,
       thresholds: { ...DEFAULT_THRESHOLDS },
       playing: false,
+      soundEnabled: false,
       locale: 'es',
     });
-    const scene = mountScene(document.getElementById('scene'), store, sites);
+    const audioCue = createAudioCue();
+    const scene = mountScene(document.getElementById('scene'), store, sites, audioCue);
     if (import.meta.env.DEV) window.__navigator = scene.debug;
-    mountPanel(root, store, siteList, sites, { renderTimeline });
+    mountPanel(root, store, siteList, sites, { renderTimeline, audioCue });
   } catch (error) {
     root.textContent = t('app.loadError', { message: error.message });
   }
