@@ -64,6 +64,7 @@ export function renderScenarioCard(container, metrics, verdict, info) {
     stat(t('card.sunEl'), 'sun-el', degrees(metrics.sunElDeg)),
     stat(t('card.earthEl'), 'earth-el', degrees(metrics.earthElDeg)),
     stat(t('card.sunFraction'), 'sun-fraction', percent(metrics.sunFraction)),
+    stat(t('card.longestSun'), 'sun-longest', formatDuration(metrics.longestSunMs)),
     stat(t('card.earthFraction'), 'earth-fraction', percent(metrics.earthFraction)),
     stat(t('card.longestDark'), 'sun-dark', formatDuration(metrics.longestDarkMs)),
     stat(t('card.longestEarthGap'), 'earth-gap', formatDuration(metrics.longestEarthGapMs)),

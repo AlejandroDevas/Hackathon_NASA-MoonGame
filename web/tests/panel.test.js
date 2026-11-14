@@ -38,6 +38,7 @@ describe('renderScenarioCard', () => {
     expect(text(el, 'sun-countdown')).toBe('4 h 37 min');
     expect(text(el, 'earth-countdown')).toBe('6 h 51 min');
     expect(text(el, 'earth-gap')).toBe('7 h 18 min');
+    expect(text(el, 'sun-longest')).toBe('4 h 37 min');
     expect(el.querySelector('[data-testid="verdict"]').classList.contains('verdict-green')).toBe(true);
   });
 

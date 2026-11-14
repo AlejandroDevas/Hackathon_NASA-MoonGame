@@ -16,6 +16,11 @@ function visibleMs(windows) {
   return windows.reduce((sum, w) => sum + (w.endMs - w.startMs), 0);
 }
 
+/** Longest single window among `windows`. */
+function longestWindowMs(windows) {
+  return windows.reduce((longest, w) => Math.max(longest, w.endMs - w.startMs), 0);
+}
+
 /** Longest stretch of [fromMs, toMs] not covered by `windows` (ends included). */
 function longestGapMs(windows, fromMs, toMs) {
   let longest = 0;
@@ -59,6 +64,7 @@ export function evaluateScenario(site, timeMs, windowMs) {
     nextEarth: nextTransition(site, 'earth', timeMs),
     sunFraction: fraction(sunWindows, sunVisible),
     earthFraction: fraction(earthWindows, earthVisible),
+    longestSunMs: longestWindowMs(sunWindows),
     longestDarkMs: longestGapMs(sunWindows, timeMs, windowEndMs),
     longestEarthGapMs: longestGapMs(earthWindows, timeMs, windowEndMs),
     earthWindows,

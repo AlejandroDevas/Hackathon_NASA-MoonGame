@@ -21,6 +21,7 @@ describe('evaluateScenario (tiny site, t = 5 h, 24 h window)', () => {
     expect(m.sunFraction).toBeCloseTo(0.30203, 3);
     expect(m.earthFraction).toBeCloseTo(0.69583, 3);
     expect(hours(m.longestDarkMs)).toBeCloseTo(16.75132, 3);
+    expect(hours(m.longestSunMs)).toBeCloseTo(4.62434, 3);
     expect(hours(m.longestEarthGapMs)).toBeCloseTo(7.3, 3);
     expect(m.earthWindows).toHaveLength(2);
     expect(m.truncated).toBe(false);
@@ -67,8 +68,19 @@ describe('polar day and night windows', () => {
     const night = makeSite({ sunEl: new Array(48).fill(-1) });
     const m = evaluateScenario(night, T0 + 5 * HOUR, 24 * HOUR);
     expect(m.sunFraction).toBe(0);
+    expect(m.longestSunMs).toBe(0);
     expect(m.sunVisible).toBe(false);
     expect(m.nextSun).toBeNull();
     expect(hours(m.longestDarkMs)).toBeCloseTo(24, 6);
   });
 });
+
+describe('longest continuous sunlight in permanent daylight', () => {
+  test('is the whole window', async () => {
+    const { makeSite } = await import('./helpers.js');
+    const day = makeSite({ sunEl: new Array(48).fill(1) });
+    const m = evaluateScenario(day, T0 + 5 * HOUR, 24 * HOUR);
+    expect(hours(m.longestSunMs)).toBeCloseTo(24, 6);
+  });
+});
+
