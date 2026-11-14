@@ -5,7 +5,7 @@ import { createRobotMesh } from './robotMesh.js';
 import { createRobot, followCamera, nextSignOpen, stepRobot } from './robot.js';
 import { skyAt } from './sky.js';
 import { contains, heightAt, normalAt } from './terrainData.js';
-import { findStart } from './traversal.js';
+import { planStart } from './traversal.js';
 import { createWorld } from './world.js';
 
 const MAX_FRAME_S = 0.1;
@@ -76,7 +76,9 @@ export function mountScene(container, store, sites, audioCue = null) {
   const blockedEl = el('div', 'scene-blocked');
   blockedEl.hidden = true;
   const signEl = el('aside', 'scene-sign');
-  hud.append(help, blockedEl, signEl);
+  const routeEl = el('div', 'scene-route');
+  routeEl.hidden = true;
+  hud.append(help, blockedEl, routeEl, signEl);
   container.append(hud);
 
   const camera = new THREE.PerspectiveCamera(60, 1, 0.5, 200_000);
@@ -98,13 +100,17 @@ export function mountScene(container, store, sites, audioCue = null) {
   }
 
   function loadSiteScene(id) {
-    if (world) world.scene.remove(robotMesh);
+    if (world) {
+      world.scene.remove(robotMesh);
+      world.dispose();
+    }
     siteId = id;
     site = sites.get(id);
     world = createWorld(site);
     world.scene.add(robotMesh);
-    const start = findStart(site.terrain, { x: 0, z: 0 }, START_DISTANCE_M);
-    setRobot(start?.x ?? 0, start?.z ?? 0, start?.headingDeg ?? 0);
+    const plan = planStart(site.terrain, { x: 0, z: 0 }, START_DISTANCE_M);
+    setRobot(plan.x, plan.z, plan.headingDeg);
+    routeEl.hidden = plan.reachable;
     signOpen = false;
     camera.position.set(robot.x, robot.y + 6, robot.z + 12);
     renderSign(signEl, site.info);
@@ -119,6 +125,7 @@ export function mountScene(container, store, sites, audioCue = null) {
   function applyTexts() {
     help.textContent = t('scene.help');
     blockedEl.textContent = t('scene.blocked');
+    routeEl.textContent = t('scene.noRoute');
     renderSign(signEl, site.info);
   }
 
@@ -187,6 +194,11 @@ export function mountScene(container, store, sites, audioCue = null) {
       observer.disconnect();
       input.dispose();
       audioCue?.dispose();
+      world.dispose();
+      robotMesh.traverse((object) => {
+        object.geometry?.dispose();
+        object.material?.dispose();
+      });
       renderer.dispose();
       container.replaceChildren();
     },

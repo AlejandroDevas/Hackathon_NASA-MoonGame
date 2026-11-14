@@ -122,5 +122,15 @@ export function createWorld(site) {
     earth.position.set(e.x, e.y, e.z).multiplyScalar(BODY_DISTANCE_M);
   }
 
-  return { scene, sun, sunDisc, earth, terrainMesh, updateSky, eyeY };
+  /** Free the GPU resources of this world (call when switching to another site). */
+  function dispose() {
+    scene.traverse((object) => {
+      object.geometry?.dispose();
+      const materials = Array.isArray(object.material) ? object.material : [object.material];
+      for (const material of materials) material?.dispose();
+    });
+    sun.shadow.map?.dispose();
+  }
+
+  return { scene, sun, sunDisc, earth, terrainMesh, updateSky, eyeY, dispose };
 }

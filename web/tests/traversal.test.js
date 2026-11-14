@@ -2,9 +2,9 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, test } from 'vitest';
-import { findStart } from '../src/scene/traversal.js';
+import { findStart, planStart } from '../src/scene/traversal.js';
 import { parseTerrain } from '../src/scene/terrainData.js';
-import { loadTinyTerrain } from './helpers.js';
+import { loadTinyTerrain, makeTerrain } from './helpers.js';
 
 const tiny = loadTinyTerrain();
 const here = dirname(fileURLToPath(import.meta.url));
@@ -30,6 +30,20 @@ describe('findStart (tiny terrain)', () => {
 
   test('a goal outside the terrain has no start', () => {
     expect(findStart(tiny, { x: 1000, z: 0 }, 200)).toBeNull();
+  });
+});
+
+describe('planStart', () => {
+  test('on walkable terrain it is findStart plus reachable: true', () => {
+    const plan = planStart(tiny, { x: 0, z: 0 }, 200);
+    expect(plan.reachable).toBe(true);
+    expect(Math.abs(plan.distanceM - 200)).toBeLessThanOrEqual(15);
+  });
+
+  test('on terrain steeper than the limit everywhere it reports no route instead of failing silently', () => {
+    const steep = makeTerrain({ rows: 101, cols: 101, observerRc: [50, 50], height: (r, c) => 4.2 * c }); // ~40 degrees
+    expect(findStart(steep, { x: 0, z: 0 }, 200)).toBeNull();
+    expect(planStart(steep, { x: 0, z: 0 }, 200)).toEqual({ x: 0, z: 0, headingDeg: 0, distanceM: 0, reachable: false });
   });
 });
 

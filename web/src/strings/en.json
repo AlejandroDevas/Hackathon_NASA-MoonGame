@@ -52,5 +52,6 @@
   "scene.noTerrain": "This site has no 3D terrain yet.",
   "scene.blocked": "Slope above 25°: the rover cannot climb it.",
   "scene.help": "W/↑ forward · S/↓ back · A/D or ←/→ turn · Shift boost",
-  "scene.signClose": "Move away to close the sign."
+  "scene.signClose": "Move away to close the sign.",
+  "scene.noRoute": "The terrain at this site is too steep (over 25°) for the rover to reach the sign; it is shown from the centre point."
 }

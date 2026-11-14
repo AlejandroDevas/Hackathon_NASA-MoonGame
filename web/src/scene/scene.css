@@ -100,3 +100,20 @@
   color: var(--muted);
   font-size: 12px !important;
 }
+
+.scene-route {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  max-width: min(360px, calc(100% - 24px));
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(245, 165, 36, 0.92);
+  color: #1a1200;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.scene-route[hidden] {
+  display: none;
+}

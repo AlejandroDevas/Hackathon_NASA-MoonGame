@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { directionFromAzEl } from '../src/scene/sky.js';
 import { gridToScene } from '../src/scene/terrainData.js';
 import { buildTerrainGeometry } from '../src/scene/terrainMesh.js';
@@ -84,5 +84,16 @@ describe('createWorld', () => {
     const names = world.scene.children.map((c) => c.name);
     expect(names).toEqual(expect.arrayContaining(['terrain', 'horizon-ring', 'stars']));
     expect(world.eyeY).toBeCloseTo(tiny.heights[50 * 101 + 50] + 2, 3);
+  });
+});
+
+describe('world.dispose', () => {
+  test('frees the geometries and materials so switching sites does not leak GPU memory', () => {
+    const world = createWorld(loadTinySite());
+    const geometry = vi.spyOn(world.terrainMesh.geometry, 'dispose');
+    const material = vi.spyOn(world.terrainMesh.material, 'dispose');
+    world.dispose();
+    expect(geometry).toHaveBeenCalled();
+    expect(material).toHaveBeenCalled();
   });
 });

@@ -52,5 +52,6 @@
   "scene.noTerrain": "Este sitio no tiene terreno 3D todavía.",
   "scene.blocked": "Pendiente de más de 25°: el robot no puede subir.",
   "scene.help": "W/↑ avanzar · S/↓ retroceder · A/D o ←/→ girar · Shift turbo",
-  "scene.signClose": "Aléjate para cerrar el cartel."
+  "scene.signClose": "Aléjate para cerrar el cartel.",
+  "scene.noRoute": "En este sitio el terreno es demasiado empinado (más de 25°) para llegar hasta el cartel con el robot; se muestra desde el punto central."
 }

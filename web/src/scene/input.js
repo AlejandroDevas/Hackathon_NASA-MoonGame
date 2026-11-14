@@ -17,6 +17,8 @@ export function createInput(target) {
   const down = new Set();
   const onKeyDown = (event) => {
     if (isFormField(event.target)) return;
+    // Ctrl/Meta/Alt + key is a browser shortcut (Ctrl+S, Ctrl+A, Ctrl+D...), not driving
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
     down.add(event.code);
     if (CONTROL_KEYS.has(event.code)) event.preventDefault(); // arrows must not scroll the page
   };

@@ -75,6 +75,17 @@ describe('createInput', () => {
     input.dispose();
   });
 
+  test('browser shortcuts with Ctrl/Meta/Alt (Ctrl+S, Ctrl+A, Ctrl+D) are not hijacked', () => {
+    const input = createInput(window);
+    for (const modifier of ['ctrlKey', 'metaKey', 'altKey']) {
+      const event = new KeyboardEvent('keydown', { code: 'KeyA', bubbles: true, cancelable: true, [modifier]: true });
+      window.dispatchEvent(event);
+      expect(event.defaultPrevented).toBe(false);
+    }
+    expect(input.read()).toEqual({ forward: 0, turn: 0, boost: false });
+    input.dispose();
+  });
+
   test('dispose removes the listeners', () => {
     const input = createInput(window);
     input.dispose();

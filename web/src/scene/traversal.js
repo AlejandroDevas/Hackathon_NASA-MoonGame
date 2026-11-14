@@ -70,3 +70,15 @@ export function findStart(terrain, goal, targetDistM, { strideM = 10 } = {}) {
   const headingDeg = (((Math.atan2(east, north) / RAD) % 360) + 360) % 360;
   return { ...best, headingDeg };
 }
+
+/**
+ * Like findStart, but never null: when the goal cannot be reached under the slope
+ * limit (e.g. a crater wall) it returns the goal itself with `reachable: false`, so
+ * the caller can tell the player instead of leaving the robot stuck without a word.
+ * @returns {{x: number, z: number, headingDeg: number, distanceM: number, reachable: boolean}}
+ */
+export function planStart(terrain, goal, targetDistM, opts) {
+  const start = findStart(terrain, goal, targetDistM, opts);
+  if (start) return { ...start, reachable: true };
+  return { x: goal.x, z: goal.z, headingDeg: 0, distanceM: 0, reachable: false };
+}
