@@ -27,6 +27,13 @@ def make_ephemeris(count):
     return Ephemeris(datetime(2026, 1, 1, tzinfo=timezone.utc), 3600, *arrays)
 
 
+def test_json_files_are_utf8_with_accents(tmp_path):
+    site = {**SITE, "sign": {**SITE["sign"], "es": {"title": "Cresta de conexión", "body": "b", "facts": ["a", "b"]}}}
+    write_site(tmp_path, site, np.zeros(360), make_ephemeris(4))
+    info = json.loads((tmp_path / "info.json").read_bytes().decode("utf-8"))
+    assert info["sign"]["es"]["title"] == "Cresta de conexión"
+
+
 def test_roundtrip(tmp_path):
     eph = make_ephemeris(48)
     horizon = np.linspace(-0.1, 2.0, 360)

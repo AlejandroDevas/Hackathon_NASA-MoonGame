@@ -4,15 +4,15 @@
   "lat_deg": -89.4632,
   "lon_deg": -137.4896,
   "observer_height_m": 2.0,
-  "coordinates_source": "Centro de la extensiÛn del DEM Site01_final_adj_5mpp_surf.tif de PGDA (x -19000..-3000 m, y -20000..-4000 m, polar estereogr·fica MOON_ME), convertido a lat/lon con pyproj. Es el centro de la zona, no una posiciÛn de aterrizaje concreta.",
+  "coordinates_source": "Centro de la extensi√≥n del DEM Site01_final_adj_5mpp_surf.tif de PGDA (x -19000..-3000 m, y -20000..-4000 m, polar estereogr√°fica MOON_ME), convertido a lat/lon con pyproj. Es el centro de la zona, no una posici√≥n de aterrizaje concreta.",
   "sign": {
     "es": {
-      "title": "Cresta de conexiÛn (Sitio 01)",
-      "body": "Una de las zonas del polo sur lunar estudiadas con topografÌa l·ser LOLA de 5 m por pÌxel. AquÌ el Sol nunca se aleja mucho del horizonte, asÌ que el relieve decide quÈ puntos reciben luz casi continua y cu·les se quedan en sombra.",
+      "title": "Cresta de conexi√≥n (Sitio 01)",
+      "body": "Una de las zonas del polo sur lunar estudiadas con topograf√≠a l√°ser LOLA de 5 m por p√≠xel. Aqu√≠ el Sol nunca se aleja mucho del horizonte, as√≠ que el relieve decide qu√© puntos reciben luz casi continua y cu√°les se quedan en sombra.",
       "facts": [
-        "Entre el 1 de enero de 2024 y el 1 de enero de 2026, el Sitio 1 fue el de mayor superficie con iluminaciÛn media superior al 70 % a 1 m sobre el suelo (Barker et al. 2021).",
-        "A 5 m sobre el suelo, el Sitio 1 tiene periodos de iluminaciÛn continua m·s largos que los dem·s sitios estudiados.",
-        "Cerca del 90 % de los pÌxeles del mapa est·n interpolados; el error de altura tÌpico es de 0,30 a 0,50 m (RMS)."
+        "Entre el 1 de enero de 2024 y el 1 de enero de 2026, el Sitio 1 fue el de mayor superficie con iluminaci√≥n media superior al 70 % a 1 m sobre el suelo (Barker et al. 2021).",
+        "A 5 m sobre el suelo, el Sitio 1 tiene periodos de iluminaci√≥n continua m√°s largos que los dem√°s sitios estudiados.",
+        "Cerca del 90 % de los p√≠xeles del mapa est√°n interpolados; el error de altura t√≠pico es de 0,30 a 0,50 m (RMS)."
       ]
     },
     "en": {

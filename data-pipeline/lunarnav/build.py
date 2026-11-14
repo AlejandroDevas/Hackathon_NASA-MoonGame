@@ -12,7 +12,7 @@ from lunarnav.horizon import compute_horizon
 def update_index(out_root: Path, site: dict) -> None:
     """Insert or replace ``{id, name}`` for ``site`` in ``out_root/index.json``."""
     path = Path(out_root) / "index.json"
-    index = json.loads(path.read_text()) if path.exists() else []
+    index = json.loads(path.read_text(encoding="utf-8")) if path.exists() else []
     entry = {"id": site["id"], "name": site["name"]}
     for i, existing in enumerate(index):
         if existing["id"] == entry["id"]:
@@ -20,7 +20,7 @@ def update_index(out_root: Path, site: dict) -> None:
             break
     else:
         index.append(entry)
-    path.write_text(json.dumps(index, ensure_ascii=False, indent=2))
+    path.write_text(json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
 def build_site(

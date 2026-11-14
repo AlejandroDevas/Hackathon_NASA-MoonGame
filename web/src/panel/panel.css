@@ -1,0 +1,188 @@
+:root {
+  --bg: #0b0d12;
+  --surface: #141821;
+  --surface-2: #1b212d;
+  --border: #2a3242;
+  --text: #e8ebf2;
+  --muted: #98a2b8;
+  --sun: #ffc857;
+  --earth: #5aa9ff;
+  --green: #3ecf8e;
+  --amber: #f5a524;
+  --red: #f4585d;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.45 system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.scenarios {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.scenario {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.controls {
+  display: grid;
+  gap: 10px;
+}
+
+.field {
+  display: grid;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.field select,
+.field input {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font: inherit;
+}
+
+.range-warning {
+  background: rgba(245, 165, 36, 0.12);
+  border: 1px solid var(--amber);
+  border-radius: 8px;
+  color: var(--amber);
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+details > summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 18px;
+}
+
+.verdict {
+  display: inline-block;
+  align-self: flex-start;
+  border-radius: 999px;
+  padding: 2px 12px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.verdict-green {
+  background: rgba(62, 207, 142, 0.15);
+  color: var(--green);
+}
+
+.verdict-amber {
+  background: rgba(245, 165, 36, 0.15);
+  color: var(--amber);
+}
+
+.verdict-red {
+  background: rgba(244, 88, 93, 0.15);
+  color: var(--red);
+}
+
+.verdict-reasons {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: -8px;
+}
+
+.countdowns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.stat {
+  background: var(--surface-2);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.stat-label {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.stat-value {
+  font-variant-numeric: tabular-nums;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.stat.big .stat-value {
+  font-size: 24px;
+}
+
+.stat.sun .stat-value {
+  color: var(--sun);
+}
+
+.stat.earth .stat-value {
+  color: var(--earth);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.note {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0;
+}
+
+@media (max-width: 520px) {
+  .countdowns,
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}

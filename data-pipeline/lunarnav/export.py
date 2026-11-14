@@ -24,7 +24,7 @@ def write_site(out_dir: Path, site: dict, horizon: np.ndarray, eph: Ephemeris) -
         "azimuth_step_deg": 1,
         "elevation_deg": [float(v) for v in horizon],
     }
-    (out_dir / "horizon.json").write_text(json.dumps(horizon_json))
+    (out_dir / "horizon.json").write_text(json.dumps(horizon_json), encoding="utf-8")
 
     info = {
         **site,
@@ -36,4 +36,4 @@ def write_site(out_dir: Path, site: dict, horizon: np.ndarray, eph: Ephemeris) -
         },
         "bodies": {"sun_radius_deg": SUN_RADIUS_DEG, "earth_radius_deg": EARTH_RADIUS_DEG},
     }
-    (out_dir / "info.json").write_text(json.dumps(info, ensure_ascii=False, indent=2))
+    (out_dir / "info.json").write_text(json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")
