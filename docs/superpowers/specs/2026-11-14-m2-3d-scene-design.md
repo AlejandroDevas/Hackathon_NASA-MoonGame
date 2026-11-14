@@ -30,3 +30,14 @@ Hacer visible lo que el panel calcula: terreno real del sitio, Sol rasante con s
 - **Cartel:** panel HTML sobre el canvas, abre/cierra por distancia al punto central.
 - **Pruebas:** módulos puros con tests (lectura de `terrain.bin`, muestreo de altura, vector del Sol, cinemática del robot con límite de pendiente, estado del cartel). El dibujo WebGL se verifica en el navegador (el motor de pruebas no tiene WebGL).
 - **Three.js** 0.187 vía npm, sin plugins.
+
+## Adenda — límite de pendiente por sitio (aprobada 2026-11-14)
+
+El límite fijo de 25° casi no estorbaba en 4 de los 5 sitios (0–0,6 % del terreno lo superaba) y hacía imposible el Site 04 (pared de cráter, pendiente de 32,7° en la meta). Se sustituye por un límite **por sitio, calculado al cargarlo**:
+
+- Escalera de límites `15, 20, 25, 30, 35, 40, 45°`. Se usa el **más bajo** con el que la meta es alcanzable desde ~400 m (suelo en 15°, elegido por el equipo). Resultado esperado con los datos actuales: 15° en los sitios 01, 06, 23 y Haworth; 35° en el Site 04.
+- La búsqueda de ruta exige `límite − 2°` (margen) para que un pasillo de un nodo siga siendo transitable por el robot continuo, que usa el límite completo.
+- El robot recibe el límite del sitio; la ayuda de la escena lo muestra ("Límite de pendiente de este sitio: N°") y el aviso de bloqueo usa ese valor.
+- Si ni 45° sirve, se mantiene el aviso "sin ruta" y el robot arranca en el cartel.
+- `findStart` devuelve también la ruta (nodos de la salida a la meta) para poder probar con un piloto automático.
+- Prueba de aceptación: un piloto automático que sigue la ruta con las reglas reales del robot llega al cartel en los 5 sitios.
