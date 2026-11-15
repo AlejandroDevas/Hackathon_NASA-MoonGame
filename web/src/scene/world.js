@@ -12,7 +12,7 @@ const SUN_RADIUS_DEG = 0.2666;
 const EARTH_RADIUS_DEG = 0.95;
 const STAR_COUNT = 4500;
 /** The shadow-lift aid multiplies the (almost black) ambient light by this much; a visual aid only. */
-const SHADOW_LIFT_FACTOR = 80;
+const SHADOW_LIFT_FACTOR = 40;
 
 /**
  * Half-size (m) of the square shadow camera so it covers the whole terrain: the

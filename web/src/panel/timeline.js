@@ -16,6 +16,9 @@ const EARTH = '#5aa9ff';
  */
 export function renderTimeline(el, site, fromMs, toMs, cursorMs, { onScrub, getTime } = {}) {
   let cursor = cursorMs;
+  const data = timelineData(site, fromMs, toMs);
+  const firstMs = data[0][0] * 1000;
+  const lastMs = data[0][data[0].length - 1] * 1000;
   const axis = { stroke: '#98a2b8', grid: { stroke: '#2a3242', width: 1 }, ticks: { stroke: '#2a3242' } };
   const plot = new uPlot(
     {
@@ -50,10 +53,14 @@ export function renderTimeline(el, site, fromMs, toMs, cursorMs, { onScrub, getT
         ],
       },
     },
-    timelineData(site, fromMs, toMs),
+    data,
     el,
   );
-  const rangeMs = () => ({ fromMs: plot.scales.x.min * 1000, toMs: plot.scales.x.max * 1000 });
+  // uPlot has no scale yet while the chart is being built, so fall back to the data range
+  const rangeMs = () => ({
+    fromMs: plot.scales.x.min != null ? plot.scales.x.min * 1000 : firstMs,
+    toMs: plot.scales.x.max != null ? plot.scales.x.max * 1000 : lastMs,
+  });
   const describeTime = (ms) => {
     plot.over.setAttribute('aria-valuenow', String(Math.round(ms / 1000)));
     plot.over.setAttribute('aria-valuetext', `${new Date(ms).toISOString().slice(0, 16).replace('T', ' ')} UTC`);

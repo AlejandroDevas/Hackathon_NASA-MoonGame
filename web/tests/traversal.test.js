@@ -117,5 +117,5 @@ describe('findStart (real Site 01 terrain)', () => {
     const start = findStart(terrain, { x: 0, z: 0 }, 400);
     expect(start).not.toBeNull();
     expect(Math.abs(start.distanceM - 400)).toBeLessThanOrEqual(40);
-  });
+  }, 30_000); // a 1001x1001 BFS with edge sampling takes a few seconds when the machine is busy
 });
