@@ -1,4 +1,8 @@
-# NASA rover model
+# NASA 3D models
+
+Both models are NASA assets with their credit below; neither is a CLPS or Artemis vehicle.
+
+## Rover
 
 - Asset: Mars 2020 Perseverance Rover GLB (4.76 MB).
 - Source: NASA/JPL-Caltech, [NASA Science 3D Resources](https://science.nasa.gov/3d-resources/mars-2020-perseverance-rover/).
@@ -6,7 +10,7 @@
 - NASA's 3D Resources says assets are free to download and use. Keep NASA/JPL-Caltech attribution and follow [NASA's media usage guidance](https://www.nasa.gov/general/nasa-brand-center/images-and-media/). NASA is not endorsing this project.
 - The GLB is Draco-compressed. The decoder (`draco_wasm_wrapper.js` and `draco_decoder.wasm`, from the three.js distribution, MIT licence) is served locally from `public/draco/`, so the page still makes no third-party requests.
 
-# NASA lunar module model
+## Lunar module
 
 - Asset: Apollo Lunar Module GLB (`apollo-lunar-module.glb`, 716,840 bytes; Draco-compressed, WebP textures).
 - Source: NASA 3D Resources, [NASA-3D-Resources on GitHub](https://github.com/nasa/NASA-3D-Resources) (`3D Models/Apollo Lunar Module/Apollo Lunar Module.glb`); the catalogue entry is on [data.nasa.gov](https://data.nasa.gov/dataset/nasa-3d-models-apollo-lunar-module).

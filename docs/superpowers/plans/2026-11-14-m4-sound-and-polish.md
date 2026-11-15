@@ -1,5 +1,7 @@
 # M4 — Sonido y pulido Implementation Plan
 
+> **Plan histórico.** Ya se ejecutó; el estado actual del proyecto está en el [README](../../../README.md) y en los diseños de `docs/superpowers/specs/`. Se conserva como registro de cómo se construyó.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Dejar el sonido actual probado y robusto y cerrar el pulido pendiente de M4 (accesibilidad, avisos, sombras, pista de luz continua, README).

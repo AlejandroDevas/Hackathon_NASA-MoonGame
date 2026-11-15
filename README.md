@@ -1,35 +1,70 @@
 # Lunar Landing Site Navigator
 
-Herramienta web para evaluar rápido un sitio y una fecha de aterrizaje en el polo sur lunar: posición del Sol y de la Tierra respecto al **horizonte real del terreno**, tiempo hasta el ocaso solar y terrestre, % de luz, la racha de luz continua más larga, ventanas de visibilidad de la Tierra y un semáforo de viabilidad con umbrales editables. Permite comparar dos escenarios (sitio + fecha) lado a lado y animar el paso del tiempo.
+Herramienta web para evaluar un sitio y una fecha de aterrizaje en el polo sur lunar, y un pequeño juego 3D para recorrer esos sitios. Proyecto para el NASA Space Apps Challenge 2026 (reto "CLPS Lunar Mission Browser").
 
-Proyecto para el NASA Space Apps Challenge 2026 (reto "CLPS Lunar Mission Browser"). Incluye M0 (pipeline de datos), M1 (panel), M2 (escena 3D con el robot) y el alcance mínimo de M3: cinco regiones con datos y horizonte lejano — Connecting Ridge (Site 01), Shackleton Rim (Site 04), Nobile Rim 1 (Site 06), Haworth y Malapert Massif (Site 23).
+Responde a la pregunta de planificación —¿qué sitio y qué fecha dan mejor luz y mejor visibilidad de la Tierra?— con la posición del Sol y de la Tierra respecto al **horizonte real del terreno**, y deja explorar el lugar en 3D con un rover.
+
+## Qué incluye
+
+- **Panel de planificación:** elevación del Sol y de la Tierra, tiempo hasta el ocaso solar y terrestre (con la fecha cuando falta un mes o más), % de luz, racha de luz continua más larga, noche más larga, mayor hueco sin Tierra, y un semáforo de viabilidad con umbrales editables. Gráfica de elevación contra el horizonte con cursor arrastrable, animación del paso del tiempo y modo **Comparar** (dos escenarios lado a lado).
+- **Ventana de Análisis:** mejores ventanas de aterrizaje de 2026 a 2030, calendario de luz, gráfico polar del cielo y comparación de los cinco sitios con exportación a CSV.
+- **Escena 3D:** terreno LOLA real de 5 m con sombras reales, un rover NASA que se conduce hasta el módulo de aterrizaje del sitio, señales con datos del lugar, una Tierra con imagen NASA que gira con la hora, polvo con gravedad lunar y, en cuatro sitios, un mapa de tonos de imágenes LROC.
+- **Cinco sitios con datos reales:** Connecting Ridge (Site 01), Shackleton Rim (Site 04), Nobile Rim 1 (Site 06), Haworth y Malapert Massif (Site 23).
+- **Español e inglés**, todo estático y sin servidor, y funciona sin conexión (la página no hace peticiones a terceros; una prueba lo vigila).
+
+## Estado del proyecto
+
+Hitos del [diseño](docs/superpowers/specs/2026-11-14-lunar-navigator-design.md):
+
+| Hito | Contenido | Estado |
+|---|---|---|
+| M0 | Pipeline de datos (horizonte, efemérides, terreno) con validación contra JPL Horizons | Hecho |
+| M1 | Panel con datos reales, línea de tiempo y comparación | Hecho |
+| M2 | Escena 3D con terreno, Sol, Tierra, rover y cartel | Hecho |
+| M3 | Cinco regiones con horizonte lejano | Hecho |
+| M4 | Animación, sonido, textos, accesibilidad, README con fuentes y límites | Hecho |
+| Extras | Ventana de Análisis, señales y datos por sitio, módulo y rocas, Tierra NASA, polvo, mapa de tonos LROC | Hecho |
+
+Pendiente o por decidir: ver [Ideas y pendiente](#ideas-y-pendiente).
 
 ## Cómo funciona
 
 ```
-data-pipeline/ (Python, se ejecuta una vez)  ->  web/public/sites/<id>/  ->  web/ (JS, calcula todo en el navegador)
-  DEM LOLA + Skyfield/SPICE                        ephemeris.bin · horizon.json · info.json
+data-pipeline/ (Python, se ejecuta una vez)       web/public/sites/<id>/                 web/ (JS, calcula en el navegador)
+  DEM LOLA + Skyfield/SPICE            ->           ephemeris.bin · horizon.json    ->     métricas, panel, escena 3D
+  DEM LOLA (recorte de 5 km)           ->           terrain.bin · info.json
+  mosaico LROC NAC (vistas previas)    ->           albedo.bin (cuatro sitios)
 ```
 
-No hay servidor: todo es estático. Al arrancar se descargan solo las efemérides y el horizonte de los cinco sitios (~0,7 MB cada uno); el terreno de 2 MB de cada sitio se pide la primera vez que se elige. Las fuentes (Barlow, Barlow Condensed e IBM Plex Mono, licencia OFL) van incluidas en la aplicación, así que la página no hace peticiones a terceros y funciona sin conexión; una prueba lo vigila.
+- **No hay servidor.** Al arrancar se descargan solo las efemérides y el horizonte de los cinco sitios (~0,7 MB cada uno) y el terreno del primero. El terreno de cada sitio (`terrain.bin`, 2 MB, más `albedo.bin`, 1 MB, si lo tiene) se pide la primera vez que se elige.
+- **Activos locales:** las fuentes (Barlow, Barlow Condensed e IBM Plex Mono, licencia OFL), los modelos 3D (`web/public/models/`), el decodificador Draco (`web/public/draco/`) y la imagen de la Tierra (`web/public/textures/`) van incluidos, así que no hay peticiones a terceros.
+- **Qué se calcula dónde:** Python precalcula posiciones (Skyfield) y horizonte (a partir del DEM); el navegador calcula visibilidad, cuentas atrás, porcentajes, mejores ventanas y veredictos. No se usa ninguna librería de efemérides en el navegador.
+
+## Panel de planificación
+
+- **Escenario:** sitio, fecha y hora (UTC) y ventana de análisis (1 día, 7 días o 1 día lunar de 29,5 días). **Comparar** añade un escenario B con la misma estructura y una tarjeta de diferencias respecto a A.
+- **Veredicto:** *Viable*, *Dudoso* o *No viable* según tres umbrales editables: elevación solar mínima (0° por defecto), oscuridad máxima (120 h) y hueco máximo sin Tierra (48 h). Cada estado conserva su etiqueta de texto.
+- **Cuentas atrás:** ocaso o salida del Sol y de la Tierra. Cuando faltan 30 días o más, bajo la duración aparece la fecha ("≈ 7 may 2029 (UTC)").
+- **Gráfica:** elevación del Sol y de la Tierra contra el horizonte (uPlot). El cursor se arrastra con el ratón o se mueve con las flechas.
+- **Barra de herramientas:** idioma, velocidad de la animación (1 h/s, 6 h/s, 1 d/s), reproducir, sonido, aclarar sombras, imagen LROC, vista libre/seguir al robot, Análisis y Comparar.
 
 ## Escena 3D
 
-Encima del panel hay una vista 3D del sitio seleccionado en el escenario A: el terreno real del recorte LOLA (5 km, malla a 5 m por vértice), un Sol con sombras y una Tierra puestos según la fecha del panel (la animación del panel los mueve), estrellas y la silueta del horizonte lejano. El rover NASA Perseverance (modelo GLB local, escala de escena ajustada) parte a ~400 m del punto del sitio y el objetivo es llegar hasta él: a menos de 25 m se abre el cartel con la explicación del lugar.
+El terreno del sitio seleccionado en el escenario A se ve a la izquierda del panel (arriba en móvil). El Sol y la Tierra se colocan según la fecha del panel y la animación los mueve. El rover parte a ~400 m del módulo de aterrizaje y el objetivo es llegar hasta él: a menos de 25 m se abre el cartel del lugar.
 
-- **Controles:** W/↑ avanzar, S/↓ retroceder, A/D o ←/→ girar, Shift turbo. Las teclas se ignoran mientras escribes en un campo del panel.
-- **Sonido (opcional):** apagado por defecto. El botón "Activar sonido" del panel crea el audio solo cuando lo pulsas (los navegadores no permiten sonar antes) y reproduce un pitido de dos notas cuando se abre el cartel. No hay sonido ambiente ni de motor a propósito: en la Luna no hay atmósfera y el sonido no viaja, así que sería físicamente falso. Si el navegador no soporta Web Audio, el botón queda apagado y no pasa nada más.
-- **Avisos del robot:** distinguen "pendiente de más de N°" de "límite del terreno cartografiado" (borde del mapa o alturas sin datos).
-- **Modelo del rover:** NASA/JPL-Caltech, Perseverance Rover GLB; se usa como modelo visual de rover de seis ruedas, no como vehículo lunar exacto. El GLB va comprimido con Draco, así que el decodificador (de three.js) se sirve en local desde `web/public/draco/`. Fuente, crédito y atribución: `web/public/models/README.md`.
-- **Imagen LROC en el suelo:** cuatro sitios (Connecting Ridge, Shackleton, Haworth y Malapert) tienen un mapa de tonos sacado del mosaico LROC NAC del polo sur (NASA/GSFC/Arizona State University), alineado con la malla del terreno (`albedo.bin`, un byte por celda). Se ve como un moteado y manchas claras y oscuras (cráteres pequeños y eyecta) sobre el suelo; el botón **Imagen LROC** lo apaga para comparar. Nobile Rim 1 queda fuera: el mosaico termina en 85,5° S y solo cubre el 11 % de su terreno. Ver «Imagen LROC: cómo se hace y límites» más abajo.
-- **Módulo y rocas:** en el centro de cada sitio está el módulo lunar Apolo de NASA (NASA 3D Resources; es un modelo histórico usado solo como referencia visual de «un módulo de aterrizaje», no el vehículo de CLPS ni de Artemis; créditos en `web/public/models/README.md`). Mientras carga, o si no carga, se ve un módulo procedural propio con las patas ajustadas al terreno, y unas 2.100 rocas repartidas por el mapa (más densas junto al módulo y al punto de salida del robot) que evitan las pendientes fuertes. Son malla instanciada, tres llamadas de dibujo en total. El Sol tiene un halo suave que el relieve tapa.
-- **La Tierra:** usa la imagen *Blue Marble: Next Generation* de NASA Earth Observatory (enero de 2004, reducida a 2048 × 1024; el océano profundo se recoloreó a azul porque el mapa original lo deja casi negro; detalles y crédito en `web/public/textures/README.md`). Las nubes son procedurales, en una capa aparte. Mientras la imagen carga, o si no carga, se ve una Tierra procedural. Gira con la hora UTC y con la fase de la Luna para que mire hacia el observador el meridiano correcto (precisión de unos pocos grados de longitud; el eje se deja vertical), y la luz del Sol le da la fase.
+- **Controles:** W/↑ avanzar, S/↓ retroceder, A/D o ←/→ girar, Shift turbo. Las teclas se ignoran mientras escribes en un campo del panel. En **vista libre** se arrastra para girar y la rueda acerca.
+- **Terreno:** la malla es la altura LOLA real de un recorte de 5 km de lado (1001 × 1001 muestras de 5 m). El grano fino es un regolito **procedural** que se repite cada 32 m (con cráteres pequeños, usado también como mapa de relieve para que la luz rasante lo marque), con un moteado suave y un tono algo más claro en las pendientes fuertes. Más allá del recorte hay una silueta oscura del horizonte lejano.
+- **Imagen LROC:** cuatro sitios (Connecting Ridge, Shackleton, Haworth y Malapert) tienen un mapa de tonos del mosaico LROC NAC del polo sur (NASA/GSFC/Arizona State University), alineado con la malla (`albedo.bin`, un byte por celda): moteado y manchas claras y oscuras de cráteres pequeños y eyecta. El botón **Imagen LROC** lo apaga para comparar. Nobile Rim 1 queda fuera (el mosaico termina en 85,5° S y solo cubre el 11 % de su terreno). Detalles y límites: [Imagen LROC](#imagen-lroc-cómo-se-hace-y-límites).
+- **Módulo y rocas:** en el centro de cada sitio está el módulo lunar Apolo de NASA (NASA 3D Resources): un modelo histórico usado solo como referencia visual de «un módulo de aterrizaje», **no** el vehículo de CLPS ni de Artemis. Mientras carga, o si no carga, se ve un módulo procedural con las patas ajustadas al terreno. Unas 2.100 rocas repartidas por el mapa (más densas junto al módulo y al punto de salida) evitan las pendientes fuertes; son malla instanciada y **solo visuales** (el rover pasa por encima).
+- **Señales:** tres etiquetas por sitio —la zona de aterrizaje, el punto más alto y el punto más bajo del mapa— con altitud y distancia al robot en vivo; salen de la altura real del terreno. Un panel arriba a la izquierda dice dónde están el Sol y la Tierra (acimut, elevación, horizonte en esa dirección y si quedan sobre o bajo el horizonte).
+- **Cartel del sitio:** texto del lugar, por qué importa, datos calculados con las efemérides de 2026–2030 (% de luz solar, luz continua más larga, noche más larga, % de Tierra visible, mayor hueco sin Tierra) y enlaces a las fuentes.
+- **Sol:** disco con sombras reales y un halo suave que el relieve tapa cuando el Sol queda bajo el horizonte.
+- **Tierra:** imagen *Blue Marble: Next Generation* de NASA Earth Observatory (enero de 2004, reducida a 2048 × 1024; el océano profundo se recoloreó a azul porque el mapa original lo deja casi negro) con nubes procedurales en una capa aparte. Gira con la hora UTC y con la fase media de la Luna para que mire al observador el meridiano que le toca (precisión de unos pocos grados de longitud; el eje se deja vertical), y la luz del Sol le da la fase. Mientras carga la imagen, o si falla, se ve una Tierra procedural.
+- **Rover:** NASA/JPL-Caltech, *Mars 2020 Perseverance Rover* (GLB local); es un modelo visual de rover de seis ruedas, no un vehículo lunar. El GLB va comprimido con Draco y el decodificador se sirve en local. Si no carga, se ve un rover sencillo.
 - **Polvo:** el rover lanza granos desde las ruedas traseras que siguen parábolas con la gravedad lunar (1,62 m/s²) y **sin rozamiento del aire**: suben lento y alto, no forman nubes y vuelven a caer donde salieron. Cada grano aterriza, descansa 0,6 s y desaparece.
-- **Señales en el mapa:** cada sitio tiene tres etiquetas: la zona de aterrizaje (el módulo, en el centro), el punto más alto y el punto más bajo del mapa. Salen de la altura real del recorte LOLA y muestran altitud y distancia al robot en vivo. Un panel arriba a la izquierda dice dónde están el Sol y la Tierra (acimut, elevación, horizonte en esa dirección y si quedan sobre o bajo el horizonte).
-- **Cartel del sitio:** además del texto, explica por qué importa el lugar, muestra datos calculados con los datos de 2026–2030 (% de luz solar, luz continua más larga, noche más larga, % de Tierra visible, mayor hueco sin Tierra) y enlaza las fuentes NASA.
-- **Terreno:** la malla es la altura LOLA real. El color y el grano son **procedurales, no imágenes de satélite**: un regolito sintético que se repite cada 32 m (relieve fino con cráteres pequeños, usado también como mapa de relieve para que la luz rasante lo marque), un moteado suave y un tono algo más claro en las pendientes fuertes.
-- **Accesibilidad:** el cartel cerrado no se expone a lectores de pantalla ni al foco, el lienzo 3D tiene etiqueta, `<html lang>` sigue al idioma de la interfaz y las teclas con Ctrl/Alt/Meta no se capturan.
-- **Límite de pendiente por sitio:** cada sitio tiene su propio límite, el más bajo de 15°, 20°… 45° con el que la meta sigue siendo alcanzable desde ~400 m: hoy 15° en el Site 01, Haworth y Malapert, 20° en Nobile Rim 1 y 35° en el borde de Shackleton (una pared de cráter). El robot no entra en terreno más empinado (se detiene y avisa) y la ayuda de la escena muestra el límite.
+- **Sonido (opcional):** apagado por defecto. El botón "Activar sonido" crea el audio solo cuando lo pulsas (los navegadores no permiten sonar antes) y reproduce un pitido de dos notas al abrirse el cartel. No hay sonido ambiente ni de motor a propósito: en la Luna no hay atmósfera y el sonido no viaja. Si el navegador no soporta Web Audio, el botón queda apagado.
+- **Límite de pendiente por sitio:** cada sitio usa el más bajo de 15°, 20°… 45° con el que la meta sigue siendo alcanzable desde ~400 m: 15° en Connecting Ridge, Haworth y Malapert, 20° en Nobile Rim 1 y 35° en el borde de Shackleton (una pared de cráter). El robot no entra en terreno más empinado (se detiene y avisa; distingue "pendiente de más de N°" de "límite del terreno cartografiado") y la ayuda de la escena muestra el límite.
+- **Accesibilidad:** el cartel cerrado no se expone a lectores de pantalla ni al foco, las etiquetas del mapa tienen una lista equivalente para lectores de pantalla, el lienzo 3D tiene etiqueta, `<html lang>` sigue al idioma de la interfaz y las teclas con Ctrl/Alt/Meta no se capturan.
 - Sin WebGL, el panel sigue funcionando y la escena muestra un aviso.
 
 ## Ventana de Análisis
@@ -48,12 +83,12 @@ python data-pipeline/scripts/make_albedo.py --list       # qué teselas necesita
 python data-pipeline/scripts/make_albedo.py --download   # baja esas vistas previas PNG a data-pipeline/cache/lroc y genera albedo.bin
 ```
 
-Se ejecuta después de `build_site.py`, porque necesita el `terrain.bin` y el `info.json` del sitio. Necesita Pillow además de `requirements.txt`.
+Se ejecuta después de `build_site.py`, porque necesita el `terrain.bin` y el `info.json` del sitio. Necesita Pillow (incluido en `requirements.txt`).
 
-- **Fuente:** mosaico LROC NAC del polo sur sin controlar a 1 m/px (Wagner et al. 2015), 40 teselas polares entre 85,5° S y el polo. Las teselas completas pesan 2–3 GB cada una, así que se usan sus **vistas previas PNG** (unos 0,3–1 MB cada una, **unos 32 m por píxel**). En total se descargan 6 PNG, unos 3,6 MB. La geometría de las teselas (nombre, extensión) está en `data-pipeline/lunarnav/lroc.py` y se comprobó contra las cabeceras de los GeoTIFF originales.
+- **Fuente:** mosaico LROC NAC del polo sur sin controlar a 1 m/px (Wagner et al. 2015), 40 teselas polares entre 85,5° S y el polo. Las teselas completas pesan 2–3 GB cada una, así que se usan sus **vistas previas PNG** (unos 0,3–1 MB cada una, **unos 32 m por píxel**); en total se descargan 6 PNG, unos 3,6 MB. La geometría de las teselas (nombre, extensión) está en `data-pipeline/lunarnav/lroc.py` y se comprobó contra las cabeceras de los GeoTIFF originales.
 - **No es una fotografía del suelo a 5 m:** a 32 m por píxel solo aporta variación de tono a gran escala. La malla del terreno sigue siendo LOLA a 5 m.
 - **Las sombras de la imagen no se usan:** el mosaico se tomó en el solsticio de 2010 con el Sol casi en el horizonte, por lo que casi todo es sombra y el resto lleva la luz de ese día. La app ilumina el terreno por su cuenta en cualquier fecha, así que `relative_tone` solo conserva el contraste local de las zonas iluminadas (cada píxel dividido por el brillo medio de sus 100 m de alrededor) y marca la sombra como «sin información». Por eso el mapa cubre entre el 17 % y el 49 % del terreno según el sitio.
-- **Alineación:** las imágenes se proyectaron sobre el DEM GLD100, no sobre el LOLA de 5 m. Se comprobó correlacionándolas con el relieve sombreado del propio terreno: correlación de 0,76 a 0,93 sin desplazar, y el mejor desplazamiento es de 20 a 40 m, es decir, del orden de un píxel de la vista previa. Es una comprobación de coherencia, no una validación contra una fuente externa.
+- **Alineación:** las imágenes se proyectaron sobre el DEM GLD100, no sobre el LOLA de 5 m. Se comprobó correlacionándolas con el relieve sombreado del propio terreno: correlación de 0,76 a 0,93 sin desplazar y mejor desplazamiento de 20 a 40 m, del orden de un píxel de la vista previa. Es una comprobación de coherencia, no una validación contra una fuente externa.
 - **Exageración:** la variación real de tono es de unos ±20 % a 30 m; con el Sol tan bajo apenas se vería, así que se muestra multiplicada por 1,7 (`ALBEDO_STRENGTH` en `terrainMesh.js`). El botón compara con el terreno sin ella.
 
 ## Uso
@@ -61,7 +96,7 @@ Se ejecuta después de `build_site.py`, porque necesita el `terrain.bin` y el `i
 ```bash
 npm --prefix web install
 npm --prefix web run dev      # http://localhost:5173
-npm --prefix web test         # pruebas del panel y las métricas
+npm --prefix web test         # pruebas (Vitest): métricas, panel, ventana de Análisis, escena y datos
 npm --prefix web run build    # versión estática en web/dist
 ```
 
@@ -77,27 +112,47 @@ data-pipeline/.venv/Scripts/python data-pipeline/scripts/build_site.py site01-co
 data-pipeline/.venv/Scripts/python data-pipeline/scripts/build_site.py site01-connecting-ridge --dem data-pipeline/cache/Site01_final_adj_5mpp_surf.tif --far-dem data-pipeline/cache/LDEM_80S_80MPP_ADJ.TIF
 ```
 
-Los kernels SPICE (`de421.bsp`, `moon_pa_de421_1900-2050.bpc`, `moon_080317.tf`, `pck00008.tpc`) se descargan a `data-pipeline/cache/` con Skyfield. La carpeta `cache/` no se versiona.
+Los kernels SPICE (`de421.bsp`, `moon_pa_de421_1900-2050.bpc`, `moon_080317.tf`, `pck00008.tpc`) se descargan a `data-pipeline/cache/` con Skyfield. La carpeta `cache/` no se versiona. Los textos de cada sitio (cartel, fuentes) viven en `data-pipeline/config/sites.json` y se copian al `info.json` de cada sitio; si se edita uno, hay que mantener el otro igual.
 
-## Fuentes
+## Créditos de modelos, imágenes y datos
 
-- Topografía: LRO/LOLA, DEM de 5 m/píxel de [PGDA](https://pgda.gsfc.nasa.gov/products/78). Citar: Barker, M. K. et al. (2021), *Improved LOLA Elevation Maps for South Pole Landing Sites: Error Estimates and Their Impact on Illumination Conditions*, Planetary and Space Science 203, 105119, [doi:10.1016/j.pss.2020.105119](https://doi.org/10.1016/j.pss.2020.105119).
-- Contexto topográfico lejano: [DEM LOLA regional de 80 m/píxel, 80–90°S (PGDA)](https://pgda.gsfc.nasa.gov/products/90), combinado con cada DEM local de 5 m para calcular el horizonte.
-- Efemérides: [Skyfield](https://rhodesmill.org/skyfield/planetary.html) con kernels SPICE de NAIF/JPL. Validadas contra [JPL Horizons](https://ssd-api.jpl.nasa.gov/doc/horizons.html) (elevación y acimut, dos semanas de 2026 y 2030, en el sitio real y en (0, 0)): ver `data-pipeline/VALIDATION.md`.
+| Qué | Origen | Detalle |
+|---|---|---|
+| Topografía (terreno y horizonte) | NASA LRO/LOLA, [PGDA](https://pgda.gsfc.nasa.gov/products/78) | Barker et al. (2021) |
+| Horizonte lejano | [DEM LOLA regional de 80 m/píxel, 80–90° S (PGDA)](https://pgda.gsfc.nasa.gov/products/90) | Se combina con cada DEM local de 5 m |
+| Efemérides | [Skyfield](https://rhodesmill.org/skyfield/planetary.html) con kernels SPICE de NAIF/JPL | Validadas contra [JPL Horizons](https://ssd-api.jpl.nasa.gov/doc/horizons.html) |
+| Imagen del suelo | LROC NAC, mosaico del polo sur | NASA/GSFC/Arizona State University; `data-pipeline/lunarnav/lroc.py` |
+| Rover | NASA 3D Resources, *Mars 2020 Perseverance Rover* | NASA/JPL-Caltech; `web/public/models/README.md` |
+| Módulo de aterrizaje | NASA 3D Resources, *Apollo Lunar Module* | `web/public/models/README.md` |
+| Tierra | NASA Earth Observatory, *Blue Marble: Next Generation* | Recoloreado el océano; `web/public/textures/README.md` |
+| Fuentes tipográficas | Barlow, Barlow Condensed, IBM Plex Mono | Licencia OFL (paquetes `@fontsource`) |
+
+NASA no respalda este proyecto. Los modelos y las imágenes de NASA se usan según las [guías de uso de medios de NASA](https://www.nasa.gov/nasa-brand-center/images-and-media/).
+
+Citar para la topografía: Barker, M. K. et al. (2021), *Improved LOLA Elevation Maps for South Pole Landing Sites: Error Estimates and Their Impact on Illumination Conditions*, Planetary and Space Science 203, 105119, [doi:10.1016/j.pss.2020.105119](https://doi.org/10.1016/j.pss.2020.105119). Las efemérides están validadas en `data-pipeline/VALIDATION.md` (elevación y acimut, dos semanas de 2026 y 2030, en el sitio real y en (0, 0)).
 
 ## Límites conocidos (léelos antes de usar los números)
 
-- **El punto de observación es el centro del DEM de cada región, no una posición de aterrizaje concreta.** Las coordenadas salen de la extensión del GeoTIFF (ver `coordinates_source` en `data-pipeline/config/sites.json`).
+- **El punto de observación es el centro del DEM de cada región, no una posición de aterrizaje concreta.** Las coordenadas salen de la extensión del GeoTIFF (ver `coordinates_source` en `data-pipeline/config/sites.json`). Un punto concreto del borde puede ver la Tierra o el Sol muy distinto: en Shackleton, por ejemplo, la próxima salida de la Tierra puede estar a más de dos años por la pared del cráter al sur.
 - **El horizonte combina el DEM local de 5 m con el DEM regional de 80 m.** El regional empieza a contribuir al 75 % del radio local por defecto, con solapamiento para evitar huecos. Solo cuenta el terreno contenido en los DEM disponibles.
 - **Alrededor del 90 % de los píxeles de 5 m están interpolados**; el error típico es 0,30–0,50 m en altura y 1,5–2,5° en pendiente (Barker et al. 2021).
 - **La validación con Horizons cubre las efemérides (Sol y Tierra), no el horizonte del terreno.** La orientación de la cuadrícula del DEM (norte verdadero frente a norte de la cuadrícula) está comprobada con un raster sintético, no contra una fuente externa.
 - El Sol se considera visible cuando su **borde superior** supera el horizonte; la Tierra se considera por su **centro**.
 - El semáforo compara la elevación del Sol con el horizonte *geométrico* (0° por defecto), así que un Sol visible sobre terreno bajo puede marcarse "por debajo del mínimo".
 - Datos de 2026-01-01 a 2030-12-31, paso de 1 hora. Fuera de ese rango la fecha se ajusta al límite y se avisa.
-- Hay cinco sitios con datos reales: Connecting Ridge (Site 01), Shackleton Rim (Site 04), Nobile Rim 1 (Site 06), Haworth y Malapert Massif (Site 23). Los puntos de observación son centros de regiones DEM, no coordenadas de aterrizaje.
-- **Escena 3D:** las sombras cubren todo el recorte de 2,5 km (el marco se calcula con sus esquinas); más allá hay una silueta oscura sin iluminar calculada con el horizonte del observador en el centro del sitio, así que desde otro punto es solo aproximada. La Tierra es una esfera sin textura y el rover no tiene físicas (sigue la altura del mapa). La escena muestra solo el escenario A.
+- **Escena 3D:** las sombras cubren todo el recorte (5 km de lado, 2,5 km de radio); más allá hay una silueta oscura sin iluminar calculada con el horizonte del observador en el centro del sitio, así que desde otro punto es solo aproximada. El rover no tiene físicas (sigue la altura del mapa) y las rocas y el polvo son solo visuales. La escena muestra solo el escenario A.
 - **Horizonte del robot frente al del panel:** las métricas del panel son para el centro del sitio; desde otro punto del terreno el Sol puede quedar tapado aunque el panel diga que es visible.
+- **Modelos y texturas:** el rover es el de Marte y el módulo es el histórico de Apolo; son referencias visuales, no los vehículos de CLPS o Artemis. El grano del suelo y las nubes son procedurales, y los continentes de la Tierra de respaldo, dibujados a mano.
+- **La Tierra:** su giro usa la fase media de la Luna y deja el eje vertical; no es una vista astronómica exacta de qué cara mira a la Luna.
 - **Límite de pendiente:** se calcula al cargar cada sitio (~1 s la primera vez) con una búsqueda de ruta que exige 2° menos que el límite del robot y comprueba la pendiente cada 2,5 m a lo largo de cada tramo; si ni 45° sirve, la escena lo avisa y muestra el cartel desde el punto central. Que exista ruta no garantiza que sea fácil, y el DEM está interpolado en un ~90 %.
 - **Textos de los sitios:** las cifras de cada cartel (tamaños de cráteres, iluminación, edades) vienen de páginas de NASA/USGS/LROC y de artículos citados en el propio cartel; algunas (el 90 % de luz de la cresta, el 56 % anual de un punto estudiado) son de puntos y métodos distintos y no son comparables entre sí. El estado de Artemis III cambia: los textos hablan de «las nueve regiones revisadas en 2024» y conviene volver a comprobarlo en NASA antes de presentarlo.
-- **Textura:** el grano fino del suelo es sintético; el tono a gran escala viene de LROC en cuatro sitios (ver arriba) y la Tierra usa una imagen NASA. Usar el mosaico LROC NAC/WAC como albedo requiere descargar y remuestrear datos de varios GB en el pipeline.
-- **Rendimiento:** el 3D usa la malla de terreno a 5 m, mapa de sombras de 4096 px y el modelo NASA GLB; con renderizado por software (sin GPU) puede ir a pocos fotogramas por segundo, y el movimiento del rover se ralentiza en vez de saltar.
+- **Rendimiento:** el 3D usa la malla de terreno a 5 m (un millón de vértices), mapa de sombras de 4096 px, los modelos NASA GLB, rocas instanciadas y polvo; con renderizado por software (sin GPU) puede ir a pocos fotogramas por segundo, y el movimiento del rover se ralentiza en vez de saltar.
+- **Pruebas del pipeline:** necesitan los paquetes de `requirements.txt` (entre ellos Skyfield); sin ellos, algunos archivos de `data-pipeline/tests/` no se pueden ejecutar.
+
+## Ideas y pendiente
+
+- Aplicar el mosaico LROC NAC a 1 m/px (teselas de 2–3 GB; haría falta además quitar las sombras de 2010) o usar un producto con iluminación uniforme; hoy solo se usan sus vistas previas de ~32 m.
+- Un modelo de rover lunar: NASA 3D Resources no ofrece un LRV en GLB, y el rover actual es el de Marte.
+- Inclinar el eje de la Tierra y usar la fase real de la Luna de las efemérides.
+- Coordenadas de aterrizaje concretas en vez del centro del DEM, y más regiones.
+- Partir el JavaScript en bloques (hoy es un solo paquete de unos 730 kB) y precargar los terrenos de los sitios que faltan.

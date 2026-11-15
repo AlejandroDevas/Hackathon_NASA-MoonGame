@@ -38,7 +38,7 @@
   "app.compareOff": "Remove comparison",
   "app.soundOn": "Enable sound",
   "app.soundOff": "Mute sound",
-  "app.attribution": "Data: NASA LRO/LOLA (PGDA) and SPICE ephemerides via Skyfield. Barker et al. 2021. Images: LROC NAC (NASA/GSFC/Arizona State University). The horizon combines the local 5 m DEM with the available regional 80 m DEM.",
+  "app.attribution": "Data: NASA LRO/LOLA (PGDA) and SPICE ephemerides via Skyfield. Barker et al. 2021. Images: LROC NAC (NASA/GSFC/Arizona State University) and Blue Marble (NASA Earth Observatory). 3D models: NASA 3D Resources. The horizon combines the local 5 m DEM with the available regional 80 m DEM.",
   "app.loadError": "Could not load the data: {message}",
   "speed.1h": "1 h/s",
   "speed.6h": "6 h/s",

@@ -1,5 +1,7 @@
 # Límite de pendiente por sitio Implementation Plan
 
+> **Plan histórico.** Ya se ejecutó; el estado actual del proyecto está en el [README](../../../README.md) y en los diseños de `docs/superpowers/specs/`. Se conserva como registro de cómo se construyó.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Cada sitio usa el límite de pendiente más bajo (desde 15°, pasos de 5°) con el que la meta sigue siendo alcanzable.

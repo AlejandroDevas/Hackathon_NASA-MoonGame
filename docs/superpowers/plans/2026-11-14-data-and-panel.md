@@ -1,5 +1,7 @@
 # Datos y Panel (M0 + M1) Implementation Plan
 
+> **Plan histórico.** Ya se ejecutó; el estado actual del proyecto está en el [README](../../../README.md) y en los diseños de `docs/superpowers/specs/`. Se conserva como registro de cómo se construyó.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Un pipeline en Python que genera horizonte + efemérides reales de un sitio, y un panel web (sin 3D) que calcula y compara métricas de luz y visibilidad de la Tierra sobre esos datos.

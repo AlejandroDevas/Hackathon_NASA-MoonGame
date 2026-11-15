@@ -1,6 +1,6 @@
 # Lunar Landing Site Navigator — Diseño
 
-Fecha: 2026-11-14 · Estado: **borrador pendiente de aprobación**
+Fecha: 2026-11-14 · Estado: **implementado (M0–M4 y extras); ver §10 y el [README](../../../README.md)**. Este documento conserva el diseño original; lo que cambió después está en §10.
 Reto: NASA Space Apps 2026, "CLPS Lunar Mission Browser" (enunciado oficial pegado por el equipo).
 
 ## 1. Intención y por qué
@@ -111,3 +111,33 @@ Three.js + Vite. Terreno desde `terrain.bin`, luz direccional orientada por el S
 ## 9. Lo que queda al constructor
 
 Estructura exacta de carpetas, formato binario concreto, tolerancias de validación, librería de gráficas definitiva, estética y UX de detalle.
+
+## 10. Estado actual (2026-11-15)
+
+Resumen de cómo quedó respecto a este diseño. El detalle vigente está en el [README](../../../README.md).
+
+**Cumplido tal como se diseñó**
+- Pipeline de Python con horizonte, efemérides (Skyfield, validadas contra Horizons; ver `data-pipeline/VALIDATION.md`) y terreno; panel con métricas, semáforo editable, gráfica, animación y modo comparar; escena 3D con robot, Sol con sombras y cartel por sitio; todo estático.
+- Cinco sitios (M3): Connecting Ridge, Shackleton Rim, Nobile Rim 1, Haworth y Malapert Massif.
+- Es/en en archivos de traducciones, y sonido opcional (M4).
+
+**Cambió respecto al diseño**
+- **Tierra:** §5.4 decía «esfera con textura»; hoy usa la imagen *Blue Marble: Next Generation* de NASA (con nubes procedurales y giro según la hora y la fase de la Luna).
+- **Modelos 3D:** el rover es el GLB del Perseverance (NASA/JPL) y el módulo de aterrizaje el GLB del Apolo (NASA 3D Resources), cada uno con un modelo procedural de respaldo. Ninguno es el vehículo de CLPS ni de Artemis.
+- **Límite de pendiente:** por sitio y calculado al cargar (15° a 35°), no un 25° fijo (ver el diseño del M2).
+- **Carga:** las efemérides y el horizonte de los cinco sitios se cargan al arrancar; el terreno (y su mapa de tonos) de cada sitio solo al elegirlo.
+- **Navegador:** el 3D usa `WebGLRenderer`; no se usa WebGPU. Las métricas se calculan con código propio sobre los datos precalculados, sin librerías de efemérides en el navegador.
+
+**Añadido después del diseño (extras de §6)**
+- **Ventana de Análisis:** mejores ventanas de aterrizaje, calendario de luz, cielo contra el horizonte, comparación de los cinco sitios y CSV.
+- **Contenido por sitio:** textos reescritos con fuentes NASA/USGS/LROC, datos calculados con las efemérides, etiquetas con los puntos de interés y panel del Sol y la Tierra en la escena, fecha junto a las cuentas atrás largas.
+- **Escena:** rocas, módulo de aterrizaje, polvo con gravedad lunar, halo del Sol y grano de regolito procedural.
+- **Imagen LROC:** mapa de tonos en cuatro sitios a partir de las vistas previas del mosaico NAC polar (la cobertura termina en 85,5° S, así que Nobile Rim 1 queda fuera).
+
+**Preguntas de §8 resueltas**
+- Idioma de la interfaz: es + en. Descargas: se pidió permiso cada vez, con nombre, origen y tamaño (kernels SPICE, DEM de PGDA, modelos y texturas NASA, vistas previas LROC).
+- Siguen abiertas la fecha de entrega y qué debe aprender el jugador en dos minutos.
+
+**Sigue siendo cierto**
+- Los puntos de observación son centros de DEM, no posiciones de aterrizaje (§3, coordenadas sin verificar contra una fuente oficial).
+- Móvil: no se rompe, pero no se optimizó.

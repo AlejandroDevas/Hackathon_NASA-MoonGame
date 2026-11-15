@@ -14,7 +14,7 @@ Hacer visible lo que el panel calcula: terreno real del sitio, Sol rasante con s
 - Integración con el panel: la fecha del escenario A (y la animación) mueven el Sol y la Tierra en el 3D. En modo Comparar el 3D muestra el escenario A.
 
 ## No-objetivos
-- Físicas de choque con Rapier, modelos 3D descargados, texturas descargadas (la Tierra es una esfera con sombreado sencillo; una textura real se pedirá con permiso más adelante).
+- Físicas de choque con Rapier, modelos 3D descargados, texturas descargadas (la Tierra es una esfera con sombreado sencillo; una textura real se pedirá con permiso más adelante). *(Superado: ver las adendas.)*
 - Varios sitios en el 3D (M3), sonido y pulido (M4), móvil táctil.
 - Vista del terreno más allá del recorte (solo la silueta del horizonte).
 
@@ -46,5 +46,14 @@ El límite fijo de 25° casi no estorbaba en 4 de los 5 sitios (0–0,6 % del te
 
 - **Rover:** el no-objetivo "modelos 3D descargados" dejó de aplicar. El equipo añadió el GLB del rover Perseverance (NASA/JPL, 4,76 MB, en `web/public/models/` con su atribución) como modelo visual de seis ruedas. Se escala a 2,8 m y se centra *después* de escalarlo y girarlo; el rover simple sigue como respaldo si el modelo no carga.
 - **Terreno:** la malla usa las 1001×1001 muestras de 5 m del recorte (antes una de cada dos).
-- **Interfaz:** rediseño descrito en `docs/diseno-interfaz.md` (negro y carbón, acento dorado, Barlow e IBM Plex Mono). Siguiendo esa regla, la Tierra del 3D se dibuja gris cálido y no azul.
+- **Interfaz:** rediseño descrito en `docs/diseno-interfaz.md` (negro y carbón, acento dorado, Barlow e IBM Plex Mono). Siguiendo esa regla, la Tierra del 3D se dibujó gris cálido y no azul. *(Revertido: ver la adenda del 2026-11-15.)*
 
+## Adenda — estado posterior (2026-11-15)
+
+Cambios hechos después de la aprobación; el estado vigente está en el [README](../../../README.md).
+
+- **Tierra:** volvió a ser azul (una esfera gris se leía como otra Luna) y ahora usa la imagen *Blue Marble: Next Generation* de NASA Earth Observatory (2048 × 1024, océano recoloreado) con nubes procedurales en una capa aparte. Gira con la hora UTC y la fase media de la Luna; el eje queda vertical. Si la imagen no carga, se ve una Tierra procedural. Esto sustituye al no-objetivo de «textura descargada».
+- **Módulo de aterrizaje:** el punto del sitio se marca con el GLB del módulo lunar Apolo (NASA 3D Resources; 717 KB, Draco), con un módulo procedural de respaldo. El GLB del rover también va comprimido con Draco; el decodificador se sirve en local (antes el rover NASA nunca cargaba por no tenerlo).
+- **Escena:** rocas instanciadas (~2.100 por sitio, solo visuales), polvo con gravedad lunar y sin aire, halo del Sol, grano de regolito procedural y mapa de tonos LROC en cuatro sitios (con botón para apagarlo).
+- **Puntos de interés:** etiquetas de la zona de aterrizaje, el punto más alto y el más bajo, y un panel con el Sol y la Tierra frente al horizonte. El cartel suma «por qué importa», datos calculados y fuentes.
+- **Carga:** `terrain.bin` (y `albedo.bin`) de cada sitio se piden solo al elegirlo.
