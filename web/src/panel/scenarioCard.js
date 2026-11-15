@@ -1,4 +1,4 @@
-import { formatDuration, getLocale, t } from '../i18n.js';
+import { formatDate, formatDuration, getLocale, t } from '../i18n.js';
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -7,14 +7,31 @@ function el(tag, className, text) {
   return node;
 }
 
-/** A label with its value; the value carries `data-testid` so it can be read on its own. */
-function stat(label, testId, valueText, className = '') {
+/**
+ * A label with its value; the value carries `data-testid` so it can be read on its own.
+ * `subText`, when given, goes under the value (a calendar date for a long countdown).
+ */
+function stat(label, testId, valueText, className = '', subText = '') {
   const wrap = el('div', `stat ${className}`.trim());
   wrap.append(el('div', 'stat-label', label));
   const value = el('div', 'stat-value', valueText);
   value.dataset.testid = testId;
   wrap.append(value);
+  if (subText) {
+    const sub = el('div', 'stat-sub', subText);
+    sub.dataset.testid = `${testId}-date`;
+    wrap.append(sub);
+  }
   return wrap;
+}
+
+/** From this far away a duration alone is hard to picture, so the date is shown too. */
+export const LONG_COUNTDOWN_MS = 30 * 24 * 3_600_000;
+
+/** "≈ 7 may 2029 (UTC)" for a transition that is at least LONG_COUNTDOWN_MS away, else ''. */
+function dateNote(transition, timeMs) {
+  if (!transition || transition.atMs - timeMs < LONG_COUNTDOWN_MS) return '';
+  return t('card.onDate', { date: formatDate(transition.atMs) });
 }
 
 const percent = (fraction) => `${Math.round(fraction * 100)} %`;
@@ -54,8 +71,8 @@ export function renderScenarioCard(container, metrics, verdict, info) {
   const sunLabel = rises(metrics.nextSun, metrics.sunVisible) ? 'card.sunRises' : 'card.sunSets';
   const earthLabel = rises(metrics.nextEarth, metrics.earthVisible) ? 'card.earthRises' : 'card.earthSets';
   countdowns.append(
-    stat(t(sunLabel), 'sun-countdown', countdown('sun', metrics.nextSun, metrics.timeMs), 'big sun'),
-    stat(t(earthLabel), 'earth-countdown', countdown('earth', metrics.nextEarth, metrics.timeMs), 'big earth'),
+    stat(t(sunLabel), 'sun-countdown', countdown('sun', metrics.nextSun, metrics.timeMs), 'big sun', dateNote(metrics.nextSun, metrics.timeMs)),
+    stat(t(earthLabel), 'earth-countdown', countdown('earth', metrics.nextEarth, metrics.timeMs), 'big earth', dateNote(metrics.nextEarth, metrics.timeMs)),
   );
   container.append(countdowns);
 

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from 'vitest';
 import { setLocale } from '../src/i18n.js';
-import { renderScenarioCard } from '../src/panel/scenarioCard.js';
+import { LONG_COUNTDOWN_MS, renderScenarioCard } from '../src/panel/scenarioCard.js';
 import { clampTime, renderControls } from '../src/panel/controls.js';
 import { DEFAULT_THRESHOLDS, evaluateScenario, viability } from '../src/metrics/scenario.js';
 import { createStore } from '../src/state.js';
@@ -46,6 +46,38 @@ describe('renderScenarioCard', () => {
     const el = render(metrics, viability(metrics, { ...DEFAULT_THRESHOLDS, maxDarkH: 10 }));
     expect(el.querySelector('[data-testid="verdict"]').classList.contains('verdict-amber')).toBe(true);
     expect(text(el, 'verdict-reasons')).toContain(es['verdict.failed.dark']);
+  });
+
+  test('a short countdown shows no date', () => {
+    const el = render();
+    expect(el.querySelector('[data-testid="sun-countdown-date"]')).toBeNull();
+    expect(el.querySelector('[data-testid="earth-countdown-date"]')).toBeNull();
+  });
+
+  test('a countdown of 30 days or more also shows the calendar date, without touching the duration text', () => {
+    const at = T0 + 5 * HOUR + 857 * 24 * HOUR + 13 * HOUR; // 2028-05-08 19:00 UTC
+    const far = { ...metrics, nextEarth: { kind: 'rise', atMs: at } };
+    const el = render(far);
+    expect(text(el, 'earth-countdown')).toBe('857 d 13 h');
+    expect(text(el, 'earth-countdown-date')).toBe(`≈ ${new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(at)} (UTC)`);
+    expect(text(el, 'earth-countdown-date')).toContain('2028');
+    expect(el.querySelector('[data-testid="sun-countdown-date"]')).toBeNull();
+  });
+
+  test('the date threshold is exactly 30 days', () => {
+    const start = metrics.timeMs;
+    const just = render({ ...metrics, nextSun: { kind: 'rise', atMs: start + LONG_COUNTDOWN_MS - 60_000 } });
+    const over = render({ ...metrics, nextSun: { kind: 'rise', atMs: start + LONG_COUNTDOWN_MS } });
+    expect(just.querySelector('[data-testid="sun-countdown-date"]')).toBeNull();
+    expect(over.querySelector('[data-testid="sun-countdown-date"]')).not.toBeNull();
+  });
+
+  test('the date follows the interface language', () => {
+    setLocale('en');
+    const at = Date.UTC(2029, 4, 7, 12);
+    const el = render({ ...metrics, nextEarth: { kind: 'rise', atMs: at } });
+    expect(text(el, 'earth-countdown-date')).toBe('≈ May 7, 2029 (UTC)');
+    setLocale('es');
   });
 
   test('with no change in the data, the countdown says so instead of a time', () => {

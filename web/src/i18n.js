@@ -31,3 +31,8 @@ export function formatDuration(ms) {
   if (hours >= 1) return minutes ? `${hours} h ${minutes} min` : `${hours} h`;
   return `${minutes} min`;
 }
+
+/** "7 may 2029" / "7 May 2029": the UTC calendar date of `ms`, in the active language. */
+export function formatDate(ms) {
+  return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(ms);
+}

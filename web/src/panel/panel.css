@@ -174,3 +174,4 @@ body.analysis-open { overflow: hidden; }
   .analysis-grid { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
   .analysis-grid > :first-child { grid-column: 1 / -1; }
 }
+.stat-sub { margin-top: 2px; color: var(--muted); font-family: var(--font-mono); font-size: 11px; letter-spacing: .02em; }

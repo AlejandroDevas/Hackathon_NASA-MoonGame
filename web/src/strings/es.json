@@ -128,5 +128,6 @@
   "analysis.compareHelp": "Misma fecha de inicio y misma ventana ({days} días) en todos los sitios; en verde, el mejor porcentaje.",
   "analysis.csv": "Descargar CSV",
   "analysis.dataNote": "Todos los números usan el horizonte del centro de cada región, no el de un punto de aterrizaje, y el Sol cuenta como visible cuando su borde superior supera el horizonte.",
-  "scene.loading": "Cargando el terreno de este sitio…"
+  "scene.loading": "Cargando el terreno de este sitio…",
+  "card.onDate": "≈ {date} (UTC)"
 }

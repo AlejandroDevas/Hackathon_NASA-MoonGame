@@ -128,5 +128,6 @@
   "analysis.compareHelp": "Same start date and the same window ({days} days) at every site; the best percentage is in green.",
   "analysis.csv": "Download CSV",
   "analysis.dataNote": "All numbers use the horizon at each region's centre, not at a specific landing point, and the Sun counts as visible when its upper limb clears the horizon.",
-  "scene.loading": "Loading this site's terrain…"
+  "scene.loading": "Loading this site's terrain…",
+  "card.onDate": "≈ {date} (UTC)"
 }
