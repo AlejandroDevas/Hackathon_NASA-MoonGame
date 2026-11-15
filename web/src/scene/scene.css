@@ -64,3 +64,18 @@
 @media (max-width: 520px) {
   .scene-sky { left: 10px; top: 10px; max-width: calc(100% - 20px); font-size: 10px; }
 }
+
+/* terrain of another site being fetched */
+.scene-loading { position: absolute; left: 50%; top: 50%; display: flex; align-items: center; gap: 10px; padding: 9px 15px; border: 1px solid #d4ad5b55; border-radius: 4px; background: #090909ee; color: var(--text); font-family: var(--font-mono); font-size: 12px; transform: translate(-50%, -50%); }
+.scene-loading[hidden] { display: none; }
+.scene-loading::before { content: ''; width: 14px; height: 14px; border: 2px solid #d4ad5b44; border-top-color: var(--sun); border-radius: 50%; animation: scene-spin .9s linear infinite; }
+@keyframes scene-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 520px) {
+  /* on a phone the Sun/Earth readout keeps position and state; the horizon figure only fits on wider screens */
+  .scene-sky-hz { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene-loading::before { animation-duration: 3s; }
+}

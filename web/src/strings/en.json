@@ -103,7 +103,8 @@
   "compass.NW": "northwest",
   "sky.sun": "Sun",
   "sky.earth": "Earth",
-  "sky.row": "{name} · azimuth {az}° · elevation {el}° · horizon {horizon}° · {state}",
+  "sky.pos": "{name} · azimuth {az}° · elevation {el}°",
+  "sky.hz": "horizon {horizon}°",
   "sky.visible": "above the horizon",
   "sky.hidden": "below the horizon",
   "analysis.open": "Analysis",
@@ -142,6 +143,8 @@
   "analysis.csv": "Download CSV",
   "analysis.dataNote": "All numbers use the horizon at each region's centre, not at a specific landing point, and the Sun counts as visible when its upper limb clears the horizon.",
   "scene.loading": "Loading this site's terrain…",
+  "app.loading": "Loading the lunar data…",
+  "app.loadingTerrain": "Preparing the 3D terrain…",
   "card.onDate": "≈ {date} (UTC)",
   "app.lroc": "LROC image",
   "app.lrocNone": "This site is outside the LROC mosaic (it ends at 85.5° S)."

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { DEFAULT_THRESHOLDS } from '../src/metrics/scenario.js';
-import { bestWindows, lightCalendar, siteOverview } from '../src/metrics/overview.js';
+import { bestWindows, lightCalendar, litStart, siteOverview } from '../src/metrics/overview.js';
 import { HOUR, T0, makeSite } from './helpers.js';
 
 /** 48 hours: the Sun is up (5 deg over a flat 0 deg horizon) for the first 24 and down after. */
@@ -74,5 +74,23 @@ describe('lightCalendar', () => {
     expect(calendar.sun[48]).toBe(2); // day 3 is past the 48 hours of data
     expect(calendar.earth[12]).toBe(1);
     expect(calendar.earth[0]).toBe(0);
+  });
+});
+
+describe('litStart', () => {
+  test('starts at the first hour of the sunniest window, with the Sun and the Earth up', () => {
+    // Sun up for hours 0..23, Earth for 12..35: a 6 h stay is fully lit and in contact from hour 12 on
+    const start = litStart(daySite(), { stayMs: 6 * HOUR });
+    expect(start).toBeGreaterThanOrEqual(T0 + 12 * HOUR);
+    expect(start).toBeLessThanOrEqual(T0 + 18 * HOUR);
+  });
+
+  test('stays inside the requested range', () => {
+    const start = litStart(daySite(), { stayMs: 6 * HOUR, fromMs: T0 + 24 * HOUR });
+    expect(start).toBeGreaterThanOrEqual(T0 + 24 * HOUR);
+  });
+
+  test('returns null when the range is too short for the stay', () => {
+    expect(litStart(daySite(), { stayMs: 100 * HOUR })).toBeNull();
   });
 });

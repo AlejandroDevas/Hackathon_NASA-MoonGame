@@ -18,6 +18,7 @@ import { contains, heightAt, normalAt } from './terrainData.js';
 import { buildRocks, placeRocks } from './rocks.js';
 import { createQualityController } from './quality.js';
 import { startFor } from './startPlan.js';
+import { initialPixelRatio } from './pixelRatio.js';
 import { createWorld } from './world.js';
 
 const MAX_FRAME_S = 0.1;
@@ -68,6 +69,9 @@ export function mountScene(container, store, sites, audioCue = null) {
     showNotice(container, t('scene.noWebgl'));
     return inertHandle();
   }
+  // Sharp on high-density screens; the governor lowers it if the view runs slowly.
+  const devicePixelRatio = initialPixelRatio(window.devicePixelRatio);
+  renderer.setPixelRatio(devicePixelRatio);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
   // The shadow map is only redrawn when the Sun, the robot or the terrain detail changes (see `shadowDirty`).
@@ -90,8 +94,11 @@ export function mountScene(container, store, sites, audioCue = null) {
   const skySun = el('div', 'scene-sky-row scene-sky-sun');
   const skyEarth = el('div', 'scene-sky-row scene-sky-earth');
   skyEl.append(skySun, skyEarth);
-  hud.append(help, blockedEl, routeEl, skyEl, sign.el);
-  const tags = createPoiTags(hud);
+  const tags = createPoiTags(hud); // first, so the HUD panels stay above the floating labels
+  const loadingEl = el('div', 'scene-loading');
+  loadingEl.setAttribute('role', 'status');
+  loadingEl.hidden = true;
+  hud.append(help, blockedEl, routeEl, skyEl, loadingEl, sign.el);
   container.append(hud);
 
   const camera = new THREE.PerspectiveCamera(60, 1, 0.5, 150_000);
@@ -246,13 +253,13 @@ export function mountScene(container, store, sites, audioCue = null) {
       const horizon = horizonAt(site.horizon, body.azDeg);
       const visible = body.elDeg + radiusDeg > horizon;
       node.classList.toggle('hidden-body', !visible);
-      node.textContent = t('sky.row', {
-        name: t(key),
-        az: Math.round(body.azDeg),
-        el: body.elDeg.toFixed(1),
-        horizon: horizon.toFixed(1),
-        state: t(visible ? 'sky.visible' : 'sky.hidden'),
-      });
+      // the horizon part is a span of its own so narrow screens can drop it (see scene.css)
+      const part = (text, className) => el('span', className, text);
+      node.replaceChildren(
+        part(t('sky.pos', { name: t(key), az: Math.round(body.azDeg), el: body.elDeg.toFixed(1) })),
+        part(` · ${t('sky.hz', { horizon: horizon.toFixed(1) })}`, 'scene-sky-hz'),
+        part(` · ${t(visible ? 'sky.visible' : 'sky.hidden')}`),
+      );
     };
     row(skySun, 'sky.sun', lastSky.sun, bodies.sun_radius_deg);
     row(skyEarth, 'sky.earth', lastSky.earth, bodies.earth_radius_deg);
@@ -299,14 +306,18 @@ export function mountScene(container, store, sites, audioCue = null) {
     if (loadingId === id) return;
     loadingId = id;
     help.textContent = t('scene.loading');
+    loadingEl.textContent = t('scene.loading');
+    loadingEl.hidden = false;
     ensureTerrain(target).then(
       () => {
         loadingId = null;
+        loadingEl.hidden = true;
         if (store.get().scenarios.A.siteId === id && id !== siteId) loadSiteScene(id);
         else applyTexts();
       },
       (error) => {
         loadingId = null;
+        loadingEl.hidden = true;
         console.warn(`Terrain of ${id} could not be loaded.`, error);
         applyTexts();
       },
@@ -316,7 +327,7 @@ export function mountScene(container, store, sites, audioCue = null) {
   function resize() {
     const width = Math.max(container.clientWidth, 1);
     const height = Math.max(container.clientHeight, 1);
-    renderer.setPixelRatio(forcedScale ?? quality.scale); // 1 = one drawn pixel per CSS pixel; lower on a machine that cannot keep up
+    renderer.setPixelRatio(forcedScale ?? devicePixelRatio * quality.scale);
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();

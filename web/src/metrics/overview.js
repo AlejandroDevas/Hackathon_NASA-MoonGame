@@ -100,3 +100,22 @@ export function lightCalendar(site, fromMs, days) {
   }
   return { days, sun: sunCells, earth: earthCells };
 }
+
+/**
+ * A good opening date for the scenario: the start of the sunniest window of `stayMs`
+ * (ties broken by Earth visibility) inside [fromMs, toMs], moved forward to the first
+ * hour in which the Sun is up. Null when no window of that length fits.
+ * @returns {number|null} timestamp in ms
+ */
+export function litStart(site, { stayMs, fromMs, toMs } = {}) {
+  const [best] = bestWindows(site, { stayMs, fromMs, toMs, count: 1 });
+  if (!best) return null;
+  const { eph } = site;
+  const sun = marginSeries(site, 'sun');
+  const first = Math.round((best.startMs - eph.startMs) / eph.stepMs);
+  const last = Math.round((best.endMs - eph.startMs) / eph.stepMs);
+  for (let i = first; i < last; i++) {
+    if (sun[i] > 0) return eph.startMs + i * eph.stepMs;
+  }
+  return best.startMs;
+}

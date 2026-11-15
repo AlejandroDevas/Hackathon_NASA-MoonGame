@@ -103,7 +103,8 @@
   "compass.NW": "noroeste",
   "sky.sun": "Sol",
   "sky.earth": "Tierra",
-  "sky.row": "{name} · acimut {az}° · elevación {el}° · horizonte {horizon}° · {state}",
+  "sky.pos": "{name} · acimut {az}° · elevación {el}°",
+  "sky.hz": "horizonte {horizon}°",
   "sky.visible": "sobre el horizonte",
   "sky.hidden": "bajo el horizonte",
   "analysis.open": "Análisis",
@@ -142,6 +143,8 @@
   "analysis.csv": "Descargar CSV",
   "analysis.dataNote": "Todos los números usan el horizonte del centro de cada región, no el de un punto de aterrizaje, y el Sol cuenta como visible cuando su borde superior supera el horizonte.",
   "scene.loading": "Cargando el terreno de este sitio…",
+  "app.loading": "Cargando los datos lunares…",
+  "app.loadingTerrain": "Preparando el terreno 3D…",
   "card.onDate": "≈ {date} (UTC)",
   "app.lroc": "Imagen LROC",
   "app.lrocNone": "Este sitio queda fuera del mosaico LROC (termina en 85,5° S)."

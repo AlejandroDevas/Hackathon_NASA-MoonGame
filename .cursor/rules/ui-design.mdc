@@ -1,0 +1,31 @@
+---
+description: Visual direction for the lunar landing site navigator UI. Apply on any web CSS, layout, or copy change.
+globs: web/**/*.{css,js,html,json}
+alwaysApply: false
+---
+
+# UI: consola de polo sur, no plantilla de IA
+
+This is a **mission instrument**, not a SaaS landing page. The 3D terrain is the product. The panel is a flight console.
+
+## Five decisions (do not drift)
+
+1. **Type:** Barlow Condensed for titles and big numbers. Barlow for UI. IBM Plex Mono for metrics, UTC, and diffs. Never Inter, Roboto, Geist, Space Grotesk, or `system-ui` as the face.
+2. **Colour:** Warm vacuum black and basalt (`--bg`, `--surface`), ink `--text` (#efe6d4). **One accent:** sun gold `--sun`. Earth uses desaturated `--earth`. Accents only on sun values, the Play control, and the verdict when it is the answer. No purple, no indigo, no neon cyan, no gradients behind UI.
+3. **Layout:** Desktop is a split: terrain full-height left, console scroll on the right. Mobile stacks terrain then console. Left-aligned. No centered heroes. No three equal marketing cards.
+4. **Density:** Tight inside a metric (label stuck to its number). More space between scenario blocks than inside them. Hairline 1px borders, radius 2px max on panels, 0 on stats. Cards only wrap one scenario as a unit — never cards inside cards with matching padding.
+5. **Tone:** Short, specific, lunar. “Viable / Dudoso / No viable”, not “supercharge”. Kicker is `CLPS · polo sur lunar`, not a generic eyebrow.
+
+## Forbidden tells
+
+- Inter / system-ui as brand type
+- Purple/indigo/violet anywhere
+- Glassmorphism, blobs, soft multi-stop gradients on chrome
+- 12px+ corner radius, pill buttons on everything, drop shadows
+- Emoji as icons
+- Equal 16px gaps everywhere
+- Marketing section order (hero CTA, logo strip, three features)
+
+## Tokens
+
+Use CSS variables in `web/src/panel/panel.css`. Chart colours in `timeline.js` must match `--sun` and `--earth`.
