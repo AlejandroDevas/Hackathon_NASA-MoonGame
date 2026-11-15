@@ -19,6 +19,12 @@ describe('the page works offline and does not tell third parties who visits', ()
     expect(html).not.toMatch(/(?:src|href)\s*=\s*["']\s*(?:https?:)?\/\//i);
   });
 
+  test('the game page (public/juego) loads nothing from another origin either', () => {
+    const html = readFileSync(join(WEB, 'public', 'juego', 'index.html'), 'utf8');
+    expect(html).not.toMatch(/(?:src|href)\s*=\s*["']\s*(?:https?:)?\/\//i);
+    expect(html).not.toMatch(/cdn\.tailwindcss|fonts\.googleapis|fonts\.gstatic/i);
+  });
+
   test('no stylesheet imports or references a remote URL', () => {
     for (const file of filesUnder(join(WEB, 'src'), '.css')) {
       const css = readFileSync(file, 'utf8');

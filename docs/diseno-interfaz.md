@@ -30,7 +30,7 @@ La interfaz debe ayudar a explorar el terreno lunar y, a la vez, responder rápi
 
 ## Decisiones que cambiaron
 
-- **Botón del juego (2026-11-15).** Un enlace dorado con un mando, a la izquierda del menú, lleva a `juego/index.html`, el juego «Misión Rescate Lunar», que vive aparte de la app. Es un enlace y no un elemento del menú porque es una entrada principal; en móvil queda en la fila de arriba, junto al idioma y el menú. El tutorial gana dos pasos (volumen y juego). El juego tiene dos botones de vuelta a la página principal.
+- **Botón del juego (2026-11-15).** Un enlace dorado con un mando, a la izquierda del menú, lleva a `juego/index.html`, el juego «Misión Rescate Lunar», que vive aparte de la app. Es un enlace y no un elemento del menú porque es una entrada principal; en móvil queda en la fila de arriba, junto al idioma y el menú. El tutorial gana dos pasos (volumen y juego). El juego tiene dos botones de vuelta a la página principal. Más tarde se hizo independiente de internet (CSS y fuentes locales) y bilingüe: abre en el idioma de la página, que se comparte por `localStorage` y `?lang=`.
 
 - **Tutorial interactivo y lenguaje llano (2026-11-15).** La primera visita abre una ventana pequeña que explica cada control, resaltándolo sobre la página oscurecida (Anterior/Siguiente abajo a la izquierda, Saltar abajo a la derecha; también teclado y Esc). Se puede repetir desde el menú. Con el mismo fin, los «Datos de este sitio» del cartel pasaron de etiquetas técnicas a un título corto y una frase por cifra, con duraciones en días y horas completos; y las etiquetas del planificador evitan «elevación», «hueco» u «ocaso» donde basta «altura», «sin ver la Tierra» o «se pone».
 

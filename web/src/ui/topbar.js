@@ -10,6 +10,7 @@ function el(tag, className, text) {
 }
 
 const DEFAULT_VOLUME = 0.6;
+const LANG_KEY = 'inside-moon-153.lang';
 
 /** The mini-game (`web/public/juego/`), served next to the app; relative so it works under any base path. */
 export const GAME_URL = './juego/index.html';
@@ -46,6 +47,11 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
   for (const code of ['es', 'en']) locale.add(new Option(code.toUpperCase(), code, false, code === store.get().locale));
   locale.addEventListener('change', () => {
     setLocale(locale.value);
+    try {
+      window.localStorage.setItem(LANG_KEY, locale.value); // the game reads the same choice
+    } catch {
+      /* no storage: the choice lasts for this visit */
+    }
     store.set({ locale: locale.value });
   });
 
@@ -161,6 +167,7 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
     if (state.volume !== undefined && Number(volume.value) !== state.volume) volume.value = String(state.volume);
 
     gameLabel.textContent = t('app.game');
+    gameLink.href = `${GAME_URL}?lang=${state.locale}`; // the game opens in the same language
     gameLink.setAttribute('aria-label', t('app.gameLabel'));
     gameLink.title = t('app.gameLabel');
 

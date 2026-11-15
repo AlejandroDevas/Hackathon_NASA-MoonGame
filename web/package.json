@@ -7,17 +7,21 @@
     "dev": "vite",
     "build": "vite build",
     "test": "vitest run",
-    "plan-starts": "node scripts/plan-starts.mjs"
+    "plan-starts": "node scripts/plan-starts.mjs",
+    "build-game": "node scripts/build-game-assets.mjs"
   },
   "dependencies": {
     "@fontsource/barlow": "^5.3.0",
     "@fontsource/barlow-condensed": "^5.3.0",
+    "@fontsource/fredoka": "^5.3.0",
     "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/jetbrains-mono": "^5.3.0",
     "three": "^0.187.0",
     "uplot": "^1.6.32"
   },
   "devDependencies": {
     "jsdom": "^31.0.1",
+    "tailwindcss": "^3.4.19",
     "vite": "^8.3.8",
     "vitest": "^5.1.0"
   }

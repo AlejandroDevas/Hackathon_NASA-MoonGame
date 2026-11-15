@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Misión Rescate Lunar: Polo Sur (Roblox NASA Edition)</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Local copies, so the game works without internet (see web/scripts/build-game-assets.mjs) -->
+    <link rel="stylesheet" href="./fonts.css">
+    <link rel="stylesheet" href="./tailwind.css">
     <style>
         * {
             box-sizing: border-box;
@@ -76,7 +77,13 @@
                 <a id="btnBackHomeStory" href="../index.html" class="roblox-btn px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-600 whitespace-nowrap" title="Volver a la página principal de Inside Moon 153">
                     ← Volver a Inside Moon 153
                 </a>
-                <span id="storyStepBadge" class="mono text-xs text-slate-400">1 / 3</span>
+                <div class="flex items-center gap-2">
+                    <select id="gameLang" aria-label="Idioma / Language" class="px-2 py-1 rounded-lg bg-slate-800 border border-slate-600 text-slate-200 text-xs font-bold">
+                        <option value="es">ES</option>
+                        <option value="en">EN</option>
+                    </select>
+                    <span id="storyStepBadge" class="mono text-xs text-slate-400">1 / 3</span>
+                </div>
             </div>
             <div class="mb-3">
                 <span class="px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 text-xs font-bold tracking-wider uppercase border border-sky-500/30">
@@ -333,7 +340,7 @@
             </p>
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-left text-xs text-slate-300 mb-5">
                 <div class="font-bold text-sky-400 mb-1">🛰️ ¿Qué es el programa CLPS de la NASA?</div>
-                <p class="leading-relaxed text-slate-400">
+                <p class="leading-relaxed text-slate-400" data-i18n-html="gameover-clps">
                     <strong class="text-slate-200">CLPS (Commercial Lunar Payload Services)</strong> es la iniciativa oficial de la NASA mediante la cual contrata a empresas estadounidenses para enviar módulos de aterrizaje robóticos e instrumentos científicos a la Luna, preparando el terreno y los recursos para los astronautas de las misiones <strong class="text-amber-300">Artemis</strong>. Gracias a la carga útil del módulo CLPS, una unidad de recuperación automática rescató tu traje.
                 </p>
             </div>
@@ -363,7 +370,7 @@
             <!-- Instrucciones paso a paso de cómo se llega al final -->
             <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 mb-4">
                 <h3 class="text-xs font-bold uppercase text-amber-400 mb-2">📋 Ruta Oficial para Completar el Rescate Lunar:</h3>
-                <ol class="list-decimal list-inside space-y-1 text-xs text-slate-300">
+                <ol class="list-decimal list-inside space-y-1 text-xs text-slate-300" data-i18n-html="victory-route">
                     <li><strong class="text-white">Paso 1 (Comandante Sara):</strong> Sal de la nave <span class="mono text-sky-300">[E]</span>, sigue la luz amarilla al <em>Reflector Pico Norte</em> y obtén la <strong>Pistola Fotónica</strong>.</li>
                     <li><strong class="text-white">Paso 2 (Ingeniero Mateo):</strong> Ve a la <em>Antena Horizonte Sur</em> y ajusta la <strong>Línea de Tiempo Orbital</strong> hasta lograr enlace 🟢 Directo con la Tierra.</li>
                     <li><strong class="text-white">Paso 3 (Dra. Elena):</strong> Explora el <em>Cráter de Hielo PSR-4</em> para analizar el agua congelada protegida por espectros.</li>
@@ -375,10 +382,10 @@
             <!-- Información oficial de la NASA sobre CLPS -->
             <div class="bg-sky-950/40 border border-sky-500/40 rounded-2xl p-4 mb-5">
                 <h3 class="text-xs font-bold uppercase text-sky-300 mb-1.5">🚀 Programa CLPS de la NASA (Commercial Lunar Payload Services)</h3>
-                <p class="text-xs text-slate-300 leading-relaxed mb-2">
+                <p class="text-xs text-slate-300 leading-relaxed mb-2" data-i18n-html="victory-clps-1">
                     Según la <strong>NASA</strong>, <strong>CLPS</strong> permite a la agencia espacial adquirir servicios integrados de transporte comercial desde la Tierra hasta la superficie de la Luna. Empresas aeroespaciales privadas diseñan, construyen, lanzan y operan módulos de aterrizaje robóticos que llevan cargas útiles científicas y tecnológicas de la NASA.
                 </p>
-                <p class="text-xs text-slate-400 leading-relaxed">
+                <p class="text-xs text-slate-400 leading-relaxed" data-i18n-html="victory-clps-2">
                     Sus objetivos principales incluyen estudiar los recursos lunares (como el hielo de agua en el Polo Sur), probar tecnologías de navegación y comunicaciones, y reducir riesgos antes de la llegada de las tripulaciones humanas del programa <strong class="text-amber-300">Artemis</strong>.
                 </p>
             </div>
@@ -447,6 +454,277 @@
     </div>
 
     <script>
+        // =========================================================================
+        // 0. IDIOMA (es / en): el texto original está en español; el inglés sale de un diccionario
+        // =========================================================================
+        const GAME_LANG = (() => {
+            const wanted = new URLSearchParams(location.search).get('lang');
+            try {
+                if (wanted === 'es' || wanted === 'en') {
+                    localStorage.setItem('inside-moon-153.lang', wanted);
+                    return wanted;
+                }
+                const saved = localStorage.getItem('inside-moon-153.lang');
+                if (saved === 'es' || saved === 'en') return saved;
+            } catch (e) { /* sin almacenamiento: se queda en español */ }
+            return wanted === 'en' ? 'en' : 'es';
+        })();
+        const EN = {
+            "← Volver a Inside Moon 153": "← Back to Inside Moon 153",
+            "Volver a la página principal de Inside Moon 153": "Back to the Inside Moon 153 main page",
+            "🚀 NASA Space Apps 2026 • Polo Sur Lunar": "🚀 NASA Space Apps 2026 • Lunar South Pole",
+            "Saltar Intro": "Skip intro",
+            "Siguiente": "Next",
+            "Vidas restantes": "Lives left",
+            "Puntos NASA": "NASA points",
+            "Misiones": "Missions",
+            "Tienda": "Shop",
+            "Sitios NASA": "NASA sites",
+            "Contactar tripulación por Radio NASA [C]": "Contact the crew by NASA radio [C]",
+            "Activar/Silenciar Música y Sonidos": "Turn music and sounds on/off",
+            "☀️ Elevación Solar": "☀️ Sun elevation",
+            "🌍 Enlace Tierra": "🌍 Earth link",
+            "🎯 Objetivo Actual": "🎯 Current objective",
+            "Habla con la Comandante Sara dentro de la Nave CLPS": "Talk to Commander Sara inside the CLPS lander",
+            "⏱️ Línea de Tiempo Orbital": "⏱️ Orbital timeline",
+            "☀️ Sol:": "☀️ Sun:",
+            "🌍 Tierra:": "🌍 Earth:",
+            "Pulso Solar [Espacio]": "Solar pulse [Space]",
+            "Radar Polo Sur": "South Pole radar",
+            "Luz activa • 14h": "Light active • 14h",
+            "0 Pts NASA": "0 NASA points",
+            "Hablar / Usar [E]": "Talk / Use [E]",
+            "Saltar [Shift]": "Jump [Shift]",
+            "Disparar [Espacio]": "Fire [Space]",
+            "📻 Canal Radio NASA • 2287.5 MHz": "📻 NASA radio channel • 2287.5 MHz",
+            "Cortar Transmisión [ESC]": "End transmission [ESC]",
+            "SEÑAL ESTABLE • CLPS-DSN": "STABLE SIGNAL • CLPS-DSN",
+            "Recompensa: +150 Pts": "Reward: +150 pts",
+            "Repetir Mensaje": "Replay message",
+            "Cerrar": "Close",
+            "¡Aceptar Misión!": "Accept mission!",
+            "🔬 Telemetría de Campo NASA": "🔬 NASA field telemetry",
+            "Cráter Shackleton": "Shackleton Crater",
+            "Registrar Datos (+75 Puntos)": "Log data (+75 points)",
+            "Protocolo de Contingencia Lunar": "Lunar contingency protocol",
+            "¡Señal Vital Perdida en la Penumbra!": "Vital signal lost in the penumbra!",
+            "Al quedarte sin energía vital en las sombras heladas del Polo Sur (-230 °C), los Acechadores de la Penumbra neutralizaron tu traje. Sin embargo, antes de perder conexión, tu traje envió su última telemetría a la Red de Espacio Profundo (DSN) de la NASA.": "With no life energy left in the freezing shadows of the South Pole (-230 °C), the Penumbra Stalkers disabled your suit. However, before losing connection, your suit sent its last telemetry to NASA's Deep Space Network (DSN).",
+            "🛰️ ¿Qué es el programa CLPS de la NASA?": "🛰️ What is NASA's CLPS program?",
+            "🔄 Reactivar Misión en el Módulo CLPS (3 Vidas)": "🔄 Restart the mission at the CLPS lander (3 lives)",
+            "🏆 ¡Misión Rescate Lunar Completada!": "🏆 Lunar Rescue Mission complete!",
+            "¡Has Asegurado el Polo Sur Lunar para Artemis!": "You have secured the Lunar South Pole for Artemis!",
+            "Completaste las 5 misiones críticas de la tripulación: alineaste el reflector solar en el borde del Cráter Shackleton, restableciste la ventana de comunicación directa con la Tierra, confirmaste hielo de agua en sombra permanente, recuperaste la caja negra de Surveyor-X y encendiste la Torre Relé Orbital K-1.": "You completed the crew's 5 critical missions: you aligned the solar reflector on the rim of Shackleton Crater, restored the direct communication window with Earth, confirmed water ice in permanent shadow, recovered the Surveyor-X black box and powered up the K-1 Orbital Relay Tower.",
+            "📋 Ruta Oficial para Completar el Rescate Lunar:": "📋 Official route to complete the Lunar Rescue:",
+            "🚀 Programa CLPS de la NASA (Commercial Lunar Payload Services)": "🚀 NASA's CLPS program (Commercial Lunar Payload Services)",
+            "🌕 Seguir Explorando la Luna": "🌕 Keep exploring the Moon",
+            "🔄 Jugar de Nuevo": "🔄 Play again",
+            "🛒 Tienda de Equipo NASA & Base CLPS": "🛒 NASA Gear Shop & CLPS Base",
+            "Invierte tus Puntos NASA para mejorar tu traje, armas y base lunar": "Spend your NASA Points to upgrade your suit, weapons and lunar base",
+            "Cerrar [ESC]": "Close [ESC]",
+            "🛰️ Comparador de Sitios del Polo Sur Lunar": "🛰️ Lunar South Pole Site Comparison",
+            "Selecciona un sitio candidato Artemis/CLPS o simula coordenadas personalizadas": "Pick an Artemis/CLPS candidate site or simulate custom coordinates",
+            "🧭 Ingresar Coordenadas Lunares Personalizadas": "🧭 Enter Custom Lunar Coordinates",
+            "Latitud (-90° a +90°)": "Latitude (-90° to +90°)",
+            "Longitud (-180° a +180°)": "Longitude (-180° to +180°)",
+            "Simular Órbita": "Simulate orbit",
+            "Comandante Sara": "Commander Sara",
+            "Jefa de Operaciones Solares": "Head of Solar Operations",
+            "Reflector Pico Norte": "North Peak Reflector",
+            "¡Por fin llegas! Nuestros paneles están al 12% porque las crestas del Polo Sur tapan el Sol. Sal por la escotilla inferior, sigue la luz amarilla hasta el Reflector del Pico Norte y alinéalo. ¡Al volver te daré nuestra Pistola Fotónica NASA!": "You're finally here! Our panels are at 12% because the South Pole ridges are blocking the Sun. Go out through the lower hatch, follow the yellow light to the North Peak Reflector and align it. When you come back I'll give you our NASA Photonic Pistol!",
+            "Sigue el camino de luz amarilla hasta el Reflector del Pico Norte en la superficie lunar y presiona [E] cerca de él.": "Follow the yellow light path to the North Peak Reflector on the lunar surface and press [E] next to it.",
+            "¡Increíble trabajo! La energía de la base ha subido. Como prometí, aquí tienes la Pistola Fotónica NASA para defenderte de los Acechadores de la Penumbra.": "Incredible work! The base's power has gone up. As promised, here is the NASA Photonic Pistol to defend yourself from the Penumbra Stalkers.",
+            "Ingeniero Mateo": "Engineer Mateo",
+            "Especialista de Comunicaciones DSN": "DSN Communications Specialist",
+            "Antena Horizonte Sur": "South Horizon Antenna",
+            "Perdimos enlace directo con Houston porque la Tierra bajó tras el horizonte lunar. Ve a la Antena del Horizonte Sur y usa la Línea de Tiempo Orbital inferior hasta que el indicador de Tierra marque 🟢 Directa.": "We lost our direct link to Houston because Earth dropped behind the lunar horizon. Go to the South Horizon Antenna and use the Orbital Timeline at the bottom until the Earth indicator shows 🟢 Direct.",
+            "Ve a la Antena del Horizonte Sur y mueve el deslizador orbital inferior hasta que la Tierra sea visible.": "Go to the South Horizon Antenna and move the orbital slider at the bottom until Earth is visible.",
+            "¡Señal restablecida con la Red de Espacio Profundo (DSN)! Houston ya recibe nuestra telemetría en vivo.": "Signal restored with the Deep Space Network (DSN)! Houston is receiving our telemetry live.",
+            "Dra. Elena": "Dr. Elena",
+            "Geóloga Planetaria CLPS": "CLPS Planetary Geologist",
+            "Cráter de Hielo PSR-4": "PSR-4 Ice Crater",
+            "Detectamos hielo de agua en el fondo de un cráter en sombra permanente (PSR-4), vital para producir oxígeno y combustible. Ve allí con precaución: los Espectros Criogénicos protegen la zona.": "We detected water ice at the bottom of a permanently shadowed crater (PSR-4), vital for producing oxygen and fuel. Go there carefully: Cryogenic Specters guard the area.",
+            "Dirígete al Cráter de Hielo PSR-4 siguiendo la guía dorada para extraer la muestra criogénica.": "Head to the PSR-4 Ice Crater following the golden guide to extract the cryogenic sample.",
+            "¡Muestras de hielo confirmadas! Con esto podremos sostener una base permanente en el Polo Sur.": "Ice samples confirmed! With this we can sustain a permanent base at the South Pole.",
+            "Especialista Lucas": "Specialist Lucas",
+            "Ingeniero de Carga Útil": "Payload Engineer",
+            "Sonda Estrellada Surveyor-X": "Crashed Surveyor-X Probe",
+            "Una sonda precursora cayó cerca de los domos abandonados al sureste. Necesitamos recuperar su caja negra de efemérides. Puedes usar el Carrito Rover Lunar [R] estacionado afuera para llegar más rápido.": "A precursor probe crashed near the abandoned domes to the southeast. We need to recover its ephemeris black box. You can use the Lunar Rover Cart [R] parked outside to get there faster.",
+            "Conduce el Rover Lunar [R] hacia la Sonda Estrellada Surveyor-X al sureste y recupera su módulo de datos.": "Drive the Lunar Rover [R] to the crashed Surveyor-X Probe to the southeast and recover its data module.",
+            "¡Caja negra recuperada! Estos datos topográficos salvarán futuras misiones Artemis.": "Black box recovered! This topographic data will save future Artemis missions.",
+            "Dra. Valeria": "Dr. Valeria",
+            "Directora de Rescate Artemis": "Artemis Rescue Director",
+            "Torre Relé Orbital K-1": "K-1 Orbital Relay Tower",
+            "Es hora de activar la Torre Relé Orbital K-1 en la cresta noreste. Con ella garantizaremos comunicación continua incluso durante los eclipses de Tierra. ¡Ten cuidado, la zona está llena de monstruos!": "It's time to activate the K-1 Orbital Relay Tower on the northeast ridge. With it we will guarantee continuous communication even during Earth eclipses. Be careful, the area is full of monsters!",
+            "Llega hasta la Torre Relé Orbital K-1 al noreste y activa el transmisor principal.": "Get to the K-1 Orbital Relay Tower to the northeast and activate the main transmitter.",
+            "¡Misión Cumplida! El Polo Sur Lunar ahora es seguro para la exploración humana. ¡Eres un Héroe de la NASA!": "Mission accomplished! The Lunar South Pole is now safe for human exploration. You are a NASA Hero!",
+            "Cráter Shackleton (Borde)": "Shackleton Crater (Rim)",
+            "86% Luz Anual": "86% annual light",
+            "Intermitente (14d)": "Intermittent (14d)",
+            "Muy Alta (PSR)": "Very high (PSR)",
+            "Pico de luz casi eterna junto a cráteres en sombra permanente con hielo de agua.": "A peak of almost eternal light next to permanently shadowed craters with water ice.",
+            "Macizo Malapert": "Malapert Massif",
+            "78% Luz Anual": "78% annual light",
+            "Excelente (Directa)": "Excellent (Direct)",
+            "Moderada": "Moderate",
+            "Elevación de 5 km con vista privilegiada hacia la Tierra para enlace directo DSN.": "A 5 km high summit with a prime view of Earth for a direct DSN link.",
+            "Cresta de Conexión": "Connecting Ridge",
+            "82% Luz Anual": "82% annual light",
+            "Buena": "Good",
+            "Alta (Artemis III)": "High (Artemis III)",
+            "Sitio candidato principal de Artemis III que equilibra energía solar y hielo.": "Main Artemis III candidate site that balances solar power and ice.",
+            "Domo Hábitat Alpha": "Alpha Habitat Dome",
+            "Estación Criogénica Beta": "Beta Cryogenic Station",
+            "Torre de Relé DSN-01": "DSN-01 Relay Tower",
+            "Torre Repetidora K-1": "K-1 Repeater Tower",
+            "Módulo Estrellado Surveyor-X": "Crashed Surveyor-X Module",
+            "Cápsula Carga CLPS-02": "CLPS-02 Cargo Capsule",
+            "Guarida Cráter Oscuro": "Dark Crater Lair",
+            "Fosa de Penumbra Sur": "South Penumbra Pit",
+            "Sensor de Ángulo Solar Rasante": "Grazing Sun Angle Sensor",
+            "En el Polo Sur de la Luna, el Sol nunca sube más de unos pocos grados sobre el horizonte, proyectando sombras alargadas.": "At the Moon's South Pole, the Sun never rises more than a few degrees above the horizon, casting long shadows.",
+            "Elevación Máxima: +1.5° a +14.0° • Cráteres en Sombra Permanente (PSR)": "Maximum elevation: +1.5° to +14.0° • Permanently Shadowed Regions (PSR)",
+            "Repetidor de Línea de Visión Terrestre": "Earth Line-of-Sight Repeater",
+            "Debido a la libración lunar, la Tierra sube y baja sobre el horizonte cada mes, cortando las comunicaciones directas.": "Because of lunar libration, Earth rises and falls over the horizon each month, cutting direct communications.",
+            "Ventana DSN Directa: ~14 días terrestres por ciclo lunar": "Direct DSN window: ~14 Earth days per lunar cycle",
+            "Espectrómetro de Hielo de Agua": "Water Ice Spectrometer",
+            "Las temperaturas en los cráteres sin luz solar caen por debajo de -230 °C, atrapando hielo de agua milenario.": "Temperatures in craters without sunlight drop below -230 °C, trapping ancient water ice.",
+            "Temperatura: 40 K (-233 °C) • Recurso crítico ISRU": "Temperature: 40 K (-233 °C) • Critical ISRU resource",
+            "Acechador de Penumbra": "Penumbra Stalker",
+            "Acechador de Horizonte": "Horizon Stalker",
+            "Espectro Criogénico": "Cryogenic Specter",
+            "Guardián de Chatarra": "Scrap Guardian",
+            "Coloso de Regolito": "Regolith Colossus",
+            "Acechador del Domo": "Dome Stalker",
+            "1. Crisis en el Polo Sur Lunar (CLPS)": "1. Crisis at the Lunar South Pole (CLPS)",
+            "La misión de carga útil lunar de la NASA ha aterrizado cerca del Cráter Shackleton. Aunque hay valioso hielo de agua, las montañas polares bloquean el Sol y la comunicación directa con la Tierra.": "NASA's lunar payload mission has landed near Shackleton Crater. Although there is valuable water ice, the polar mountains block the Sun and direct communication with Earth.",
+            "⚠️ BATERÍA CRÍTICA: 12% • SIN SEÑAL DSN": "⚠️ CRITICAL BATTERY: 12% • NO DSN SIGNAL",
+            "2. Amenazas en la Sombra Permanente": "2. Threats in the Permanent Shadow",
+            "En las zonas donde nunca llega la luz solar emergen los Acechadores de la Penumbra. Deberás usar tu Consola Orbital para cambiar la fecha lunar, iluminar el terreno y usar el Carrito Rover Lunar.": "In the areas the sunlight never reaches, the Penumbra Stalkers emerge. You will need to use your Orbital Console to change the lunar date, light up the terrain and use the Lunar Rover Cart.",
+            "☀️ LA LUZ SOLAR DEBILITA A LOS MONSTRUOS": "☀️ SUNLIGHT WEAKENS THE MONSTERS",
+            "3. Tu Misión de Rescate NASA": "3. Your NASA Rescue Mission",
+            "Entra en la Nave CLPS, habla con los astronautas para aceptar sus tareas, sigue la luz amarilla guía en la Luna, gana puntos y mejora tu equipo en la Tienda Roblox.": "Enter the CLPS lander, talk to the astronauts to accept their tasks, follow the yellow guide light on the Moon, earn points and upgrade your gear in the Roblox Shop.",
+            "🎯 SIGUE LA LUZ AMARILLA GUÍA EN CADA MISIÓN": "🎯 FOLLOW THE YELLOW GUIDE LIGHT ON EVERY MISSION",
+            "¡Entrar a la Nave!": "Enter the lander!",
+            "🔫 Pistola Fotónica NASA": "🔫 NASA Photonic Pistol",
+            "Dispara rayos láser solares de largo alcance contra monstruos.": "Fires long-range solar laser beams at monsters.",
+            "🥾 Botas Gravitacionales Mk-II": "🥾 Mk-II Gravity Boots",
+            "Aumenta permanentemente la velocidad de movimiento de tu avatar.": "Permanently increases your avatar's movement speed.",
+            "📡 Escáner Orbital x2 Puntos": "📡 Orbital Scanner x2 Points",
+            "Duplica los Puntos NASA ganados al completar misiones.": "Doubles the NASA Points earned by completing missions.",
+            "🧥 Traje Térmico Artemis": "🧥 Artemis Thermal Suit",
+            "Protege contra la congelación de los Espectros Criogénicos y da +1 Vida.": "Protects against freezing from Cryogenic Specters and gives +1 Life.",
+            "☀️ Estación Solar Elevada (Base)": "☀️ Elevated Solar Station (Base)",
+            "Construye una cúpula de luz solar segura junto a la Nave CLPS.": "Builds a safe dome of sunlight next to the CLPS lander.",
+            "🛰️ Torre Repetidora DSN (Base)": "🛰️ DSN Repeater Tower (Base)",
+            "Mantiene el enlace directo con la Tierra 🟢 activo en todo momento.": "Keeps the direct link with Earth 🟢 active at all times.",
+            "Equipado": "Equipped",
+            "✓ Adquirido": "✓ Owned",
+            "Comprar Mejora": "Buy upgrade",
+            "Puntos Insuficientes": "Not enough points",
+            "✅ ¡Compraste {name}!": "✅ You bought {name}!",
+            "● Activo": "● Active",
+            "☀️ Energía:": "☀️ Power:",
+            "❄️ Hielo:": "❄️ Ice:",
+            "🛰️ Sitio activo cambiado a: {name}": "🛰️ Active site changed to: {name}",
+            "Coordenadas Personalizadas": "Custom Coordinates",
+            "Régimen Polar Rasante": "Grazing polar regime",
+            "Ciclo Día/Noche 14d": "Day/Night cycle 14d",
+            "Simulación Orbital Activa": "Orbital simulation active",
+            "Alta probabilidad PSR": "High PSR probability",
+            "Baja": "Low",
+            "Ubicación lunar personalizada ingresada desde la consola de misión.": "Custom lunar location entered from the mission console.",
+            "🧭 Simulando órbita en Lat {lat}°, Lon {lon}°": "🧭 Simulating orbit at Lat {lat}°, Lon {lon}°",
+            "✓ Datos ya registrados en la base NASA": "✓ Data already logged in the NASA database",
+            "Registrar Datos Científicos (+75 Puntos)": "Log scientific data (+75 points)",
+            "+75 Pts Ciencia": "+75 Science pts",
+            "🚶 Bajaste del Carrito Rover Lunar.": "🚶 You got off the Lunar Rover Cart.",
+            "🚙 ¡Conduciendo Rover Lunar VIPER! Usa WASD / Flechas.": "🚙 Driving the VIPER Lunar Rover! Use WASD / Arrow keys.",
+            "Acércate al Rover Lunar dorado para subirte con [R]": "Get close to the golden Lunar Rover and press [R] to board",
+            "Habla primero con la Comandante Sara para recibir tu Radio NASA.": "Talk to Commander Sara first to get your NASA radio.",
+            "🌕 Saliste a la superficie del Polo Sur Lunar.": "🌕 You stepped onto the surface of the Lunar South Pole.",
+            "🚀 Entraste a la cabina de la Nave CLPS.": "🚀 You entered the CLPS lander cabin.",
+            "Acércate a un Astronauta (!) o a la Escotilla inferior y presiona [E]": "Get close to an Astronaut (!) or the lower Hatch and press [E]",
+            "Sigue la Luz Amarilla Guía hasta el objetivo o acércate a una Baliza Azul [E]": "Follow the Yellow Guide Light to the objective or get close to a Blue Beacon [E]",
+            "⚠️ ¡La Tierra está oculta! Mueve la Línea de Tiempo Orbital hasta que marque 🟢 Directa.": "⚠️ Earth is hidden! Move the Orbital Timeline until it shows 🟢 Direct.",
+            "+{bonus} Puntos NASA!": "+{bonus} NASA points!",
+            "🔫 ¡Misión cumplida! Desbloqueaste la Pistola Fotónica NASA.": "🔫 Mission accomplished! You unlocked the NASA Photonic Pistol.",
+            "🔫 Pistola Fotónica [Espacio / Clic]": "🔫 Photonic Pistol [Space / Click]",
+            "🎉 ¡Tarea '{label}' completada! +{bonus} Puntos.": "🎉 Task '{label}' completed! +{bonus} points.",
+            "Paso {step}/5 hacia el final: Vuelve a la Nave CLPS o usa Radio [C] con {name}": "Step {step}/5 to the end: Go back to the CLPS lander or use Radio [C] with {name}",
+            "🏆 ¡5/5 Misiones Completadas! Rescate Lunar Exitoso.": "🏆 5/5 missions complete! Lunar rescue successful.",
+            "{points} Puntos NASA": "{points} NASA points",
+            "📻 ¡Recibiste el Radio Comunicador NASA! Presiona [C] cuando quieras.": "📻 You received the NASA communicator radio! Press [C] whenever you like.",
+            "🚨 {name} (¡Pidiendo Ayuda!)": "🚨 {name} (Asking for help!)",
+            "✅ Misión Completada": "✅ Mission complete",
+            "Objetivo: {label}": "Objective: {label}",
+            "¡Cadete, qué bueno verte! Toma este Radio Comunicador NASA [C] para mantenernos en contacto.": "Cadet, so good to see you! Take this NASA communicator radio [C] to keep in touch.",
+            "🔫 Pistola Fotónica": "🔫 Photonic Pistol",
+            "Recompensa: +{points} Pts{extra}": "Reward: +{points} pts{extra}",
+            "Sal de la nave y sigue la luz amarilla hacia: {label}": "Leave the lander and follow the yellow light to: {label}",
+            "🎯 Misión aceptada: {label}. ¡Sal por la escotilla!": "🎯 Mission accepted: {label}. Head out through the hatch!",
+            "🚀 Unidad CLPS completó el rescate. ¡Continúa las 5 misiones para ganar!": "🚀 The CLPS unit completed the rescue. Keep going with the 5 missions to win!",
+            "-1 ❤️ ¡Cuidado!": "-1 ❤️ Careful!",
+            "+50 Pts!": "+50 pts!",
+            "Día Lunar": "Lunar Day",
+            "Luz activa • {h}h restantes": "Light active • {h}h left",
+            "Sombra polar activa": "Polar shadow active",
+            "🟢 Directa": "🟢 Direct",
+            "🔴 Bloqueada": "🔴 Blocked",
+            "Ventana DSN: Activa": "DSN window: Active",
+            "Oculta tras horizonte": "Hidden behind horizon",
+            "Oculto": "Hidden",
+            "Oculta": "Hidden",
+            "MAPA 3D [E]": "3D MAP [E]",
+            "🚪 SALIR A LA LUNA [E]": "🚪 GO OUT TO THE MOON [E]",
+            "☀️ ESTACIÓN SOLAR ELEVADA (ZONA SEGURA)": "☀️ ELEVATED SOLAR STATION (SAFE ZONE)",
+            "🚀 NAVE CLPS [E ENTRAR]": "🚀 CLPS LANDER [E TO ENTER]",
+            "🚙 Rover Lunar [R]": "🚙 Lunar Rover [R]"
+        };
+        const EN_HTML = {
+            "gameover-clps": "<strong class=\"text-slate-200\">CLPS (Commercial Lunar Payload Services)</strong> is NASA's official initiative to hire American companies to send robotic landers and scientific instruments to the Moon, preparing the ground and resources for the astronauts of the <strong class=\"text-amber-300\">Artemis</strong> missions. Thanks to the CLPS lander's payload, an automatic recovery unit rescued your suit.",
+            "victory-route": "\n                    <li><strong class=\"text-white\">Step 1 (Commander Sara):</strong> Leave the lander <span class=\"mono text-sky-300\">[E]</span>, follow the yellow light to the <em>North Peak Reflector</em> and get the <strong>Photonic Pistol</strong>.</li>\n                    <li><strong class=\"text-white\">Step 2 (Engineer Mateo):</strong> Go to the <em>South Horizon Antenna</em> and adjust the <strong>Orbital Timeline</strong> until you get a 🟢 Direct link with Earth.</li>\n                    <li><strong class=\"text-white\">Step 3 (Dr. Elena):</strong> Explore the <em>PSR-4 Ice Crater</em> to analyze the frozen water protected by specters.</li>\n                    <li><strong class=\"text-white\">Step 4 (Specialist Lucas):</strong> Drive the <em>Lunar Rover Cart</em> <span class=\"mono text-sky-300\">[R]</span> to the <em>Surveyor-X Probe</em> to the southeast.</li>\n                    <li><strong class=\"text-white\">Step 5 (Dr. Valeria):</strong> Activate the <em>K-1 Orbital Relay Tower</em> on the northeast ridge to seal the South Pole communications.</li>\n                ",
+            "victory-clps-1": "According to <strong>NASA</strong>, <strong>CLPS</strong> lets the agency buy integrated commercial transport services from Earth to the surface of the Moon. Private aerospace companies design, build, launch and operate robotic landers that carry NASA scientific and technology payloads.",
+            "victory-clps-2": "Its main goals include studying lunar resources (such as water ice at the South Pole), testing navigation and communications technologies, and reducing risks before the human crews of the <strong class=\"text-amber-300\">Artemis</strong> program arrive."
+        };
+        /** Traduce un texto (con marcadores {nombre}); en español lo devuelve tal cual. */
+        function tr(text, params) {
+            let out = GAME_LANG === 'en' && Object.prototype.hasOwnProperty.call(EN, text) ? EN[text] : text;
+            if (params) out = out.replace(/\{(\w+)\}/g, (m, k) => (k in params ? String(params[k]) : m));
+            return out;
+        }
+        function localizeFields(obj, fields) {
+            if (GAME_LANG !== 'en') return;
+            fields.forEach((f) => { if (typeof obj[f] === 'string') obj[f] = tr(obj[f]); });
+        }
+        function translateStaticPage() {
+            document.documentElement.lang = GAME_LANG;
+            const back = '../index.html?lang=' + GAME_LANG;
+            document.querySelectorAll('#btnBackHome, #btnBackHomeStory').forEach((a) => { a.href = back; });
+            const picker = document.getElementById('gameLang');
+            picker.value = GAME_LANG;
+            picker.addEventListener('change', () => {
+                try { localStorage.setItem('inside-moon-153.lang', picker.value); } catch (e) { /* nada */ }
+                location.search = '?lang=' + picker.value;
+            });
+            if (GAME_LANG !== 'en') return;
+            document.title = 'Lunar Rescue Mission: South Pole (Roblox NASA Edition)';
+            document.querySelectorAll('[data-i18n-html]').forEach((node) => {
+                const html = EN_HTML[node.dataset.i18nHtml];
+                if (html) node.innerHTML = html;
+            });
+            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+            const nodes = [];
+            while (walker.nextNode()) nodes.push(walker.currentNode);
+            nodes.forEach((node) => {
+                if (node.parentElement && ['SCRIPT', 'STYLE', 'OPTION'].includes(node.parentElement.tagName)) return;
+                const raw = node.nodeValue;
+                const key = raw.trim().replace(/\s+/g, ' ');
+                if (key && Object.prototype.hasOwnProperty.call(EN, key)) node.nodeValue = raw.replace(raw.trim(), EN[key]);
+            });
+            document.querySelectorAll('[title]').forEach((node) => { node.title = tr(node.title); });
+        }
+        translateStaticPage();
+
         // =========================================================================
         // 1. MOTOR DE AUDIO SINTETIZADO (WEB AUDIO API - MÚSICA, VOCES Y EFECTOS)
         // =========================================================================
@@ -692,6 +970,10 @@
             }
         };
 
+        localizeFields(lunarLandingSites.shackleton, ['name', 'sunHours', 'earthComm', 'iceProximity', 'desc']);
+        localizeFields(lunarLandingSites.malapert, ['name', 'sunHours', 'earthComm', 'iceProximity', 'desc']);
+        localizeFields(lunarLandingSites.connecting, ['name', 'sunHours', 'earthComm', 'iceProximity', 'desc']);
+
         const npcs = [
             {
                 id: 'sara',
@@ -785,6 +1067,8 @@
             }
         ];
 
+        npcs.forEach((n) => localizeFields(n, ['name', 'role', 'targetLabel', 'introDialogue', 'activeDialogue', 'doneDialogue']));
+
         // Mini sitios en el mapa (Casas/Domos, Torres, Naves Estrelladas y Guaridas)
         const lunarStructures = [
             { type: 'dome', name: 'Domo Hábitat Alpha', x: 860, y: 880, radius: 65 },
@@ -796,6 +1080,8 @@
             { type: 'lair', name: 'Guarida Cráter Oscuro', x: 1580, y: 640, radius: 70 },
             { type: 'lair', name: 'Fosa de Penumbra Sur', x: 1220, y: 1820, radius: 70 }
         ];
+
+        lunarStructures.forEach((st) => localizeFields(st, ['name']));
 
         // Balizas azules de investigación científica
         const researchNodes = [
@@ -828,6 +1114,8 @@
             }
         ];
 
+        researchNodes.forEach((n) => localizeFields(n, ['title', 'body', 'stats']));
+
         // Carrito Rover Lunar conducible
         const lunarRover = {
             x: 680,
@@ -847,6 +1135,8 @@
             { id: 5, name: 'Coloso de Regolito', type: 'boss', x: 1880, y: 480, homeX: 1880, homeY: 480, hp: 140, maxHp: 140, speed: 2.0, color: '#f97316', respawnTimer: 0 },
             { id: 6, name: 'Acechador del Domo', type: 'shadow', x: 900, y: 920, homeX: 900, homeY: 920, hp: 65, maxHp: 65, speed: 2.3, color: '#a855f7', respawnTimer: 0 }
         ];
+
+        monsters.forEach((m) => localizeFields(m, ['name']));
 
         const projectiles = [];
         const floatingTexts = [];
@@ -902,6 +1192,10 @@
                 </svg>`
             }
         ];
+        storySlides.forEach((slide) => {
+            localizeFields(slide, ['title', 'text']);
+            if (GAME_LANG === 'en') slide.svg = slide.svg.replace(/>([^<>]+)<\/text>/g, (m, label) => '>' + tr(label.trim()) + '</text>');
+        });
         let currentStoryIndex = 0;
 
         function renderStorySlide() {
@@ -911,8 +1205,8 @@
             document.getElementById('storyText').textContent = slide.text;
             document.getElementById('storyIllustration').innerHTML = slide.svg;
             document.getElementById('btnNextStory').innerHTML = currentStoryIndex === storySlides.length - 1
-                ? '<span>¡Entrar a la Nave!</span><span>🚀</span>'
-                : '<span>Siguiente</span><span>➔</span>';
+                ? `<span>${tr('¡Entrar a la Nave!')}</span><span>🚀</span>`
+                : `<span>${tr('Siguiente')}</span><span>➔</span>`;
         }
         renderStorySlide();
 
@@ -1050,15 +1344,15 @@
                 player.x = lunarRover.x;
                 player.y = lunarRover.y + 34;
                 sfx.playTone(320, 'sine', 0.14);
-                showToast("🚶 Bajaste del Carrito Rover Lunar.", "#94a3b8");
+                showToast(tr("🚶 Bajaste del Carrito Rover Lunar."), "#94a3b8");
             } else if (Math.hypot(player.x - lunarRover.x, player.y - lunarRover.y) < 95) {
                 lunarRover.driven = true;
                 player.z = 0;
                 player.vz = 0;
                 sfx.playTone(540, 'triangle', 0.18);
-                showToast("🚙 ¡Conduciendo Rover Lunar VIPER! Usa WASD / Flechas.", "#38bdf8");
+                showToast(tr("🚙 ¡Conduciendo Rover Lunar VIPER! Usa WASD / Flechas."), "#38bdf8");
             } else {
-                showToast("Acércate al Rover Lunar dorado para subirte con [R]", "#facc15");
+                showToast(tr("Acércate al Rover Lunar dorado para subirte con [R]"), "#facc15");
             }
         }
 
@@ -1077,7 +1371,7 @@
             const dayNumber = 10 + lunarDay;
             const monthName = dayNumber <= 31 ? 'Oct' : 'Nov';
             const displayDay = dayNumber <= 31 ? dayNumber : dayNumber - 31;
-            document.getElementById('lunarDateLabel').textContent = `${String(displayDay).padStart(2, '0')} ${monthName} 2026 • Día Lunar ${String(lunarDay).padStart(2, '0')}`;
+            document.getElementById('lunarDateLabel').textContent = `${String(displayDay).padStart(2, '0')} ${monthName} 2026 • ${tr('Día Lunar')} ${String(lunarDay).padStart(2, '0')}`;
 
             const site = lunarLandingSites[game.activeSiteKey] || lunarLandingSites.shackleton;
             const isPolar = Math.abs(site.lat) > 75;
@@ -1100,15 +1394,15 @@
             const sign = game.sunElevation >= 0 ? '+' : '';
             document.getElementById('hudSunAngle').textContent = `${sign}${game.sunElevation.toFixed(1)}° (${solarEff}%)`;
             document.getElementById('hudSunCountdown').textContent = game.sunElevation > 0
-                ? `Luz activa • ${Math.max(1, Math.round(game.sunElevation * 1.4))}h restantes`
-                : 'Sombra polar activa';
+                ? tr('Luz activa • {h}h restantes', { h: Math.max(1, Math.round(game.sunElevation * 1.4)) })
+                : tr('Sombra polar activa');
 
-            document.getElementById('hudEarthSignal').textContent = game.earthVisible ? '🟢 Directa' : '🔴 Bloqueada';
+            document.getElementById('hudEarthSignal').textContent = tr(game.earthVisible ? '🟢 Directa' : '🔴 Bloqueada');
             document.getElementById('hudEarthSignal').className = `font-bold text-xs sm:text-sm ${game.earthVisible ? 'text-emerald-400' : 'text-rose-400'}`;
-            document.getElementById('hudEarthCountdown').textContent = game.earthVisible ? 'Ventana DSN: Activa' : 'Oculta tras horizonte';
+            document.getElementById('hudEarthCountdown').textContent = tr(game.earthVisible ? 'Ventana DSN: Activa' : 'Oculta tras horizonte');
 
-            document.getElementById('miniSunStatus').textContent = game.sunElevation > 0 ? 'Visible' : 'Oculto';
-            document.getElementById('miniEarthStatus').textContent = game.earthVisible ? 'Visible' : 'Oculta';
+            document.getElementById('miniSunStatus').textContent = tr(game.sunElevation > 0 ? 'Visible' : 'Oculto');
+            document.getElementById('miniEarthStatus').textContent = tr(game.earthVisible ? 'Visible' : 'Oculta');
 
             drawHorizonMiniChart();
         }
@@ -1157,7 +1451,7 @@
         function openRadioCommunicator() {
             if (!game.started) return;
             if (!game.hasRadio) {
-                showToast("Habla primero con la Comandante Sara para recibir tu Radio NASA.", "#facc15");
+                showToast(tr("Habla primero con la Comandante Sara para recibir tu Radio NASA."), "#facc15");
                 return;
             }
             if (game.paused && !document.getElementById('dialogueModal').classList.contains('hidden')) {
@@ -1207,12 +1501,12 @@
                 player.x = landerExterior.x;
                 player.y = landerExterior.y + 85;
                 sfx.playTone(380, 'triangle', 0.25, 0.12, 540);
-                showToast("🌕 Saliste a la superficie del Polo Sur Lunar.", "#facc15");
+                showToast(tr("🌕 Saliste a la superficie del Polo Sur Lunar."), "#facc15");
             } else {
                 player.x = airlockInterior.x;
                 player.y = airlockInterior.y - 45;
                 sfx.playTone(540, 'triangle', 0.25, 0.12, 380);
-                showToast("🚀 Entraste a la cabina de la Nave CLPS.", "#38bdf8");
+                showToast(tr("🚀 Entraste a la cabina de la Nave CLPS."), "#38bdf8");
             }
         }
 
@@ -1237,7 +1531,7 @@
                     switchScene('surface');
                     return;
                 }
-                showToast("Acércate a un Astronauta (!) o a la Escotilla inferior y presiona [E]", "#94a3b8");
+                showToast(tr("Acércate a un Astronauta (!) o a la Escotilla inferior y presiona [E]"), "#94a3b8");
             } else {
                 // Revisar objetivo de misión activa
                 const activeNpc = npcs.find(n => n.missionId === game.activeMissionId);
@@ -1257,7 +1551,7 @@
                     switchScene('ship');
                     return;
                 }
-                showToast("Sigue la Luz Amarilla Guía hasta el objetivo o acércate a una Baliza Azul [E]", "#38bdf8");
+                showToast(tr("Sigue la Luz Amarilla Guía hasta el objetivo o acércate a una Baliza Azul [E]"), "#38bdf8");
             }
         }
 
@@ -1266,7 +1560,7 @@
 
             // Validación especial para la misión 2 (Enlace Tierra Directo)
             if (npc.missionId === 'm2_comm' && !game.earthVisible) {
-                showToast("⚠️ ¡La Tierra está oculta! Mueve la Línea de Tiempo Orbital hasta que marque 🟢 Directa.", "#f43f5e");
+                showToast(tr("⚠️ ¡La Tierra está oculta! Mueve la Línea de Tiempo Orbital hasta que marque 🟢 Directa."), "#f43f5e");
                 return;
             }
 
@@ -1276,26 +1570,26 @@
             const bonus = game.hasScannerUpgrade ? npc.rewardPoints * 2 : npc.rewardPoints;
             game.points += bonus;
             sfx.playMissionComplete();
-            addFloatingText(player.x, player.y - 40, `+${bonus} Puntos NASA!`, '#facc15');
+            addFloatingText(player.x, player.y - 40, tr('+{bonus} Puntos NASA!', { bonus }), '#facc15');
 
             if (npc.missionId === 'm1_solar' && !game.hasPhotonicPistol) {
                 game.hasPhotonicPistol = true;
-                document.getElementById('weaponBadge').textContent = '🔫 Pistola Fotónica [Espacio / Clic]';
-                showToast("🔫 ¡Misión cumplida! Desbloqueaste la Pistola Fotónica NASA.", "#34d399");
+                document.getElementById('weaponBadge').textContent = tr('🔫 Pistola Fotónica [Espacio / Clic]');
+                showToast(tr("🔫 ¡Misión cumplida! Desbloqueaste la Pistola Fotónica NASA."), "#34d399");
             } else {
-                showToast(`🎉 ¡Tarea '${npc.targetLabel}' completada! +${bonus} Puntos.`, "#34d399");
+                showToast(tr("🎉 ¡Tarea '{label}' completada! +{bonus} Puntos.", { label: npc.targetLabel, bonus }), "#34d399");
             }
 
             // Asignar automáticamente la siguiente misión disponible
             const nextNpc = npcs.find(n => !game.completedMissions.has(n.missionId));
             if (nextNpc) {
                 const stepNum = game.completedMissions.size + 1;
-                document.getElementById('objectiveText').textContent = `Paso ${stepNum}/5 hacia el final: Vuelve a la Nave CLPS o usa Radio [C] con ${nextNpc.name}`;
+                document.getElementById('objectiveText').textContent = tr('Paso {step}/5 hacia el final: Vuelve a la Nave CLPS o usa Radio [C] con {name}', { step: stepNum, name: nextNpc.name });
             } else {
-                document.getElementById('objectiveText').textContent = '🏆 ¡5/5 Misiones Completadas! Rescate Lunar Exitoso.';
+                document.getElementById('objectiveText').textContent = tr('🏆 ¡5/5 Misiones Completadas! Rescate Lunar Exitoso.');
                 setTimeout(() => {
                     game.paused = true;
-                    document.getElementById('victoryFinalPoints').textContent = `${game.points} Puntos NASA`;
+                    document.getElementById('victoryFinalPoints').textContent = tr('{points} Puntos NASA', { points: game.points });
                     document.getElementById('victoryModal').classList.remove('hidden');
                 }, 900);
             }
@@ -1377,7 +1671,7 @@
             if (!game.hasRadio) {
                 game.hasRadio = true;
                 document.getElementById('btnOpenRadio').classList.remove('hidden');
-                showToast("📻 ¡Recibiste el Radio Comunicador NASA! Presiona [C] cuando quieras.", "#38bdf8");
+                showToast(tr("📻 ¡Recibiste el Radio Comunicador NASA! Presiona [C] cuando quieras."), "#38bdf8");
             }
 
             // Barra de canales de radio para cambiar entre astronautas
@@ -1401,7 +1695,7 @@
             }
 
             document.getElementById('dialogueName').textContent = isEmergencyIntro
-                ? `🚨 ${npc.name} (¡Pidiendo Ayuda!)`
+                ? tr('🚨 {name} (¡Pidiendo Ayuda!)', { name: npc.name })
                 : npc.name;
             document.getElementById('dialogueRole').textContent = npc.role;
 
@@ -1411,18 +1705,18 @@
 
             if (isDone) {
                 textToSpeak = npc.doneDialogue;
-                document.getElementById('dialogueRewardBadge').textContent = '✅ Misión Completada';
+                document.getElementById('dialogueRewardBadge').textContent = tr('✅ Misión Completada');
                 document.getElementById('btnAcceptMission').classList.add('hidden');
             } else if (isActive) {
                 textToSpeak = npc.activeDialogue;
-                document.getElementById('dialogueRewardBadge').textContent = `Objetivo: ${npc.targetLabel}`;
+                document.getElementById('dialogueRewardBadge').textContent = tr('Objetivo: {label}', { label: npc.targetLabel });
                 document.getElementById('btnAcceptMission').classList.add('hidden');
             } else {
                 textToSpeak = isEmergencyIntro
-                    ? `¡Cadete, qué bueno verte! Toma este Radio Comunicador NASA [C] para mantenernos en contacto. ${npc.introDialogue}`
+                    ? `${tr('¡Cadete, qué bueno verte! Toma este Radio Comunicador NASA [C] para mantenernos en contacto.')} ${npc.introDialogue}`
                     : npc.introDialogue;
-                const extra = npc.missionId === 'm1_solar' ? ' + 🔫 Pistola Fotónica' : '';
-                document.getElementById('dialogueRewardBadge').textContent = `Recompensa: +${npc.rewardPoints} Pts${extra}`;
+                const extra = npc.missionId === 'm1_solar' ? ' + ' + tr('🔫 Pistola Fotónica') : '';
+                document.getElementById('dialogueRewardBadge').textContent = tr('Recompensa: +{points} Pts{extra}', { points: npc.rewardPoints, extra });
                 document.getElementById('btnAcceptMission').classList.remove('hidden');
             }
 
@@ -1449,10 +1743,10 @@
         document.getElementById('btnAcceptMission').addEventListener('click', () => {
             if (!selectedNpc) return;
             game.activeMissionId = selectedNpc.missionId;
-            document.getElementById('objectiveText').textContent = `Sal de la nave y sigue la luz amarilla hacia: ${selectedNpc.targetLabel}`;
+            document.getElementById('objectiveText').textContent = tr('Sal de la nave y sigue la luz amarilla hacia: {label}', { label: selectedNpc.targetLabel });
             sfx.playTone(620, 'triangle', 0.2, 0.14);
             closeDialogueModal();
-            showToast(`🎯 Misión aceptada: ${selectedNpc.targetLabel}. ¡Sal por la escotilla!`, "#facc15");
+            showToast(tr("🎯 Misión aceptada: {label}. ¡Sal por la escotilla!", { label: selectedNpc.targetLabel }), "#facc15");
         });
 
         // =========================================================================
@@ -1467,7 +1761,7 @@
                 isOwned: () => game.hasPhotonicPistol,
                 buy: () => {
                     game.hasPhotonicPistol = true;
-                    document.getElementById('weaponBadge').textContent = '🔫 Pistola Fotónica [Espacio / Clic]';
+                    document.getElementById('weaponBadge').textContent = tr('🔫 Pistola Fotónica [Espacio / Clic]');
                 }
             },
             {
@@ -1519,6 +1813,8 @@
             }
         ];
 
+        shopCatalog.forEach((item) => localizeFields(item, ['name', 'desc']));
+
         function openShopModal() {
             game.paused = true;
             const grid = document.getElementById('shopItemsGrid');
@@ -1533,7 +1829,7 @@
                         <div class="flex items-center justify-between gap-2 mb-1">
                             <h4 class="font-bold text-white text-sm sm:text-base">${item.name}</h4>
                             <span class="mono text-xs font-bold px-2.5 py-0.5 rounded-full ${owned ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
-                                ${owned ? 'Equipado' : item.cost + ' Pts'}
+                                ${owned ? tr('Equipado') : item.cost + ' Pts'}
                             </span>
                         </div>
                         <p class="text-xs text-slate-400 mb-3">${item.desc}</p>
@@ -1543,7 +1839,7 @@
                         : canAfford ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
                         : 'bg-slate-800 text-slate-500 cursor-not-allowed'
                     }">
-                        ${owned ? '✓ Adquirido' : canAfford ? 'Comprar Mejora' : 'Puntos Insuficientes'}
+                        ${owned ? tr('✓ Adquirido') : canAfford ? tr('Comprar Mejora') : tr('Puntos Insuficientes')}
                     </button>
                 `;
                 if (!owned && canAfford) {
@@ -1553,7 +1849,7 @@
                         sfx.playMissionComplete();
                         updateHUD();
                         openShopModal();
-                        showToast(`✅ ¡Compraste ${item.name}!`, "#34d399");
+                        showToast(tr("✅ ¡Compraste {name}!", { name: item.name }), "#34d399");
                     });
                 }
                 grid.appendChild(card);
@@ -1581,21 +1877,21 @@
                 card.innerHTML = `
                     <div class="flex items-center justify-between mb-1">
                         <h4 class="font-bold text-sm text-white">${site.name}</h4>
-                        ${isSelected ? '<span class="text-xs text-sky-300 font-bold">● Activo</span>' : ''}
+                        ${isSelected ? `<span class="text-xs text-sky-300 font-bold">${tr('● Activo')}</span>` : ''}
                     </div>
                     <div class="mono text-[11px] text-amber-300 mb-2">Lat: ${site.lat}° | Lon: ${site.lon}°</div>
                     <p class="text-xs text-slate-400 mb-3">${site.desc}</p>
                     <div class="space-y-1 text-[11px]">
-                        <div>☀️ Energía: <span class="text-slate-200 font-semibold">${site.sunHours}</span></div>
-                        <div>🌍 Tierra: <span class="text-slate-200 font-semibold">${site.earthComm}</span></div>
-                        <div>❄️ Hielo: <span class="text-slate-200 font-semibold">${site.iceProximity}</span></div>
+                        <div>${tr('☀️ Energía:')} <span class="text-slate-200 font-semibold">${site.sunHours}</span></div>
+                        <div>${tr('🌍 Tierra:')} <span class="text-slate-200 font-semibold">${site.earthComm}</span></div>
+                        <div>${tr('❄️ Hielo:')} <span class="text-slate-200 font-semibold">${site.iceProximity}</span></div>
                     </div>
                 `;
                 card.addEventListener('click', () => {
                     game.activeSiteKey = key;
                     updateOrbitalParameters();
                     openSitePlannerModal();
-                    showToast(`🛰️ Sitio activo cambiado a: ${site.name}`, "#38bdf8");
+                    showToast(tr("🛰️ Sitio activo cambiado a: {name}", { name: site.name }), "#38bdf8");
                 });
                 grid.appendChild(card);
             });
@@ -1613,18 +1909,18 @@
             const lat = parseFloat(document.getElementById('customLatInput').value) || -89.5;
             const lon = parseFloat(document.getElementById('customLonInput').value) || 0;
             lunarLandingSites.custom = {
-                name: 'Coordenadas Personalizadas',
+                name: tr('Coordenadas Personalizadas'),
                 lat: Math.max(-90, Math.min(90, lat)),
                 lon: Math.max(-180, Math.min(180, lon)),
-                sunHours: Math.abs(lat) > 75 ? 'Régimen Polar Rasante' : 'Ciclo Día/Noche 14d',
-                earthComm: 'Simulación Orbital Activa',
-                iceProximity: Math.abs(lat) > 80 ? 'Alta probabilidad PSR' : 'Baja',
-                desc: 'Ubicación lunar personalizada ingresada desde la consola de misión.'
+                sunHours: tr(Math.abs(lat) > 75 ? 'Régimen Polar Rasante' : 'Ciclo Día/Noche 14d'),
+                earthComm: tr('Simulación Orbital Activa'),
+                iceProximity: tr(Math.abs(lat) > 80 ? 'Alta probabilidad PSR' : 'Baja'),
+                desc: tr('Ubicación lunar personalizada ingresada desde la consola de misión.')
             };
             game.activeSiteKey = 'custom';
             updateOrbitalParameters();
             closeSitePlannerModal();
-            showToast(`🧭 Simulando órbita en Lat ${lat}°, Lon ${lon}°`, "#38bdf8");
+            showToast(tr("🧭 Simulando órbita en Lat {lat}°, Lon {lon}°", { lat, lon }), "#38bdf8");
         });
 
         function inspectResearchNode(node) {
@@ -1635,11 +1931,11 @@
             document.getElementById('researchStats').textContent = node.stats;
             const btn = document.getElementById('btnClaimResearch');
             if (node.claimed) {
-                btn.textContent = '✓ Datos ya registrados en la base NASA';
+                btn.textContent = tr('✓ Datos ya registrados en la base NASA');
                 btn.disabled = true;
                 btn.className = 'w-full bg-slate-800 text-slate-400 font-bold py-2.5 rounded-xl text-sm';
             } else {
-                btn.textContent = 'Registrar Datos Científicos (+75 Puntos)';
+                btn.textContent = tr('Registrar Datos Científicos (+75 Puntos)');
                 btn.disabled = false;
                 btn.className = 'w-full roblox-btn bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-sm';
             }
@@ -1656,7 +1952,7 @@
             selectedResearchNode.claimed = true;
             game.points += 75;
             sfx.playMissionComplete();
-            addFloatingText(player.x, player.y - 35, '+75 Pts Ciencia', '#38bdf8');
+            addFloatingText(player.x, player.y - 35, tr('+75 Pts Ciencia'), '#38bdf8');
             updateHUD();
             closeResearchModal();
         });
@@ -1675,7 +1971,7 @@
             document.getElementById('gameOverModal').classList.add('hidden');
             game.paused = false;
             updateHUD();
-            showToast("🚀 Unidad CLPS completó el rescate. ¡Continúa las 5 misiones para ganar!", "#34d399");
+            showToast(tr("🚀 Unidad CLPS completó el rescate. ¡Continúa las 5 misiones para ganar!"), "#34d399");
         });
 
         document.getElementById('btnContinueExplore').addEventListener('click', () => {
@@ -1724,7 +2020,7 @@
                 m.respawnTimer = 600; // Reaparece después de 10 segundos
                 game.points += 50;
                 sfx.playTone(680, 'triangle', 0.25, 0.14, 920);
-                addFloatingText(m.x, m.y - 45, '+50 Pts!', '#34d399');
+                addFloatingText(m.x, m.y - 45, tr('+50 Pts!'), '#34d399');
                 updateHUD();
             }
         }
@@ -1862,7 +2158,7 @@
                             player.lives--;
                             player.invulnTimer = 75;
                             sfx.playHurt();
-                            addFloatingText(player.x, player.y - 35, '-1 ❤️ ¡Cuidado!', '#f43f5e');
+                            addFloatingText(player.x, player.y - 35, tr('-1 ❤️ ¡Cuidado!'), '#f43f5e');
                             updateHUD();
                             if (player.lives <= 0) {
                                 game.paused = true;
@@ -1985,14 +2281,14 @@
             ctx.fillStyle = '#e0f2fe';
             ctx.font = 'bold 10px Fredoka';
             ctx.textAlign = 'center';
-            ctx.fillText('MAPA 3D [E]', holoX, holoY + 4);
+            ctx.fillText(tr('MAPA 3D [E]'), holoX, holoY + 4);
 
             // Escotilla inferior hacia la superficie lunar
             ctx.fillStyle = '#facc15';
             ctx.fillRect(airlockInterior.x - 52, airlockInterior.y - 12, 104, 22);
             ctx.fillStyle = '#0f172a';
             ctx.font = 'bold 11px Fredoka';
-            ctx.fillText('🚪 SALIR A LA LUNA [E]', airlockInterior.x, airlockInterior.y + 3);
+            ctx.fillText(tr('🚪 SALIR A LA LUNA [E]'), airlockInterior.x, airlockInterior.y + 3);
 
             // Dibujar Astronautas NPC
             npcs.forEach(npc => {
@@ -2054,7 +2350,7 @@
                 ctx.fillStyle = '#fef08a';
                 ctx.font = 'bold 11px Fredoka';
                 ctx.textAlign = 'center';
-                ctx.fillText('☀️ ESTACIÓN SOLAR ELEVADA (ZONA SEGURA)', sx, sy - 25);
+                ctx.fillText(tr('☀️ ESTACIÓN SOLAR ELEVADA (ZONA SEGURA)'), sx, sy - 25);
             }
 
             // Mini sitios en el mapa (Domos, Torres, Naves Estrelladas, Guaridas)
@@ -2268,7 +2564,7 @@
             ctx.fillStyle = '#facc15';
             ctx.font = 'bold 12px Fredoka';
             ctx.textAlign = 'center';
-            ctx.fillText('🚀 NAVE CLPS [E ENTRAR]', 0, -78);
+            ctx.fillText(tr('🚀 NAVE CLPS [E ENTRAR]'), 0, -78);
             ctx.restore();
         }
 
@@ -2315,7 +2611,7 @@
                 ctx.fillStyle = '#38bdf8';
                 ctx.font = 'bold 11px Fredoka';
                 ctx.textAlign = 'center';
-                ctx.fillText('🚙 Rover Lunar [R]', x, y - 26);
+                ctx.fillText(tr('🚙 Rover Lunar [R]'), x, y - 26);
             }
         }
 

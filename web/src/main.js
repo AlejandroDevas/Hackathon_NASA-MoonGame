@@ -8,7 +8,7 @@ import '@fontsource/barlow-condensed/latin-700.css';
 import '@fontsource/ibm-plex-mono/latin-400.css';
 import '@fontsource/ibm-plex-mono/latin-500.css';
 import { ensureTerrain, loadSite } from './data/siteData.js';
-import { t } from './i18n.js';
+import { setLocale, t } from './i18n.js';
 import { litStart } from './metrics/overview.js';
 import { DEFAULT_THRESHOLDS } from './metrics/scenario.js';
 import { clampTime } from './panel/controls.js';
@@ -24,6 +24,20 @@ import { mountInterface } from './ui/interface.js';
 import './ui/ui.css';
 
 const SITES_URL = `${import.meta.env.BASE_URL}sites`;
+const LANG_KEY = 'inside-moon-153.lang';
+
+/** The language to start in: ?lang=es|en (the game links back with it), then the one saved by the last visit, then Spanish. */
+function startingLocale() {
+  const wanted = new URLSearchParams(window.location.search).get('lang');
+  try {
+    if (wanted === 'es' || wanted === 'en') return wanted;
+    const saved = window.localStorage.getItem(LANG_KEY);
+    if (saved === 'es' || saved === 'en') return saved;
+  } catch {
+    /* no storage: Spanish */
+  }
+  return wanted === 'en' ? 'en' : 'es';
+}
 const DAY_MS = 24 * 3_600_000;
 const OPENING_YEAR = 2027;
 const OPENING_STAY_MS = 7 * DAY_MS;
@@ -67,6 +81,8 @@ async function main() {
     setSplashText('app.loadingTerrain');
     await ensureTerrain(sites.get(first));
     const timeMs = openingTime(sites.get(first));
+    const locale = startingLocale();
+    setLocale(locale);
     const store = createStore({
       scenarios: { A: { siteId: first, timeMs }, B: null },
       windowMs: 7 * DAY_MS,
@@ -77,7 +93,7 @@ async function main() {
       lrocTexture: true,
       viewMode: 'follow',
       panelOpen: false,
-      locale: 'es',
+      locale,
     });
     const audioCue = createAudioCue({ createMusic: createAmbientMusic, createHum: createRoverHum });
     const scene = mountScene(document.getElementById('scene'), store, sites, audioCue);

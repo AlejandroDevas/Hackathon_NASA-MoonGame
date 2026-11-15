@@ -11,7 +11,7 @@ Responde a la pregunta de planificación —¿qué sitio y qué fecha dan mejor 
 - **Ventana de Análisis:** mejores ventanas de aterrizaje de 2026 a 2030, calendario de luz, gráfico polar del cielo y comparación de los cinco sitios con exportación a CSV.
 - **Escena 3D:** terreno LOLA real de 5 m con sombras reales, un rover NASA que se conduce hasta el módulo de aterrizaje del sitio, señales con datos del lugar, una Tierra con imagen NASA que gira con la hora, polvo con gravedad lunar y, en cuatro sitios, un mapa de tonos de imágenes LROC.
 - **Cinco sitios con datos reales:** Connecting Ridge (Site 01), Shackleton Rim (Site 04), Nobile Rim 1 (Site 06), Haworth y Malapert Massif (Site 23).
-- **Español e inglés**, todo estático y sin servidor, y funciona sin conexión (la página principal no hace peticiones a terceros; una prueba lo vigila). La excepción es el [juego](#juego-misión-rescate-lunar), que es una página aparte y sí las necesita.
+- **Español e inglés**, todo estático y sin servidor, y funciona sin conexión (la página no hace peticiones a terceros; una prueba lo vigila, también para el [juego](#juego-misión-rescate-lunar)).
 
 ## Estado del proyecto
 
@@ -81,8 +81,9 @@ Un botón dorado con un mando, **Juego**, a la izquierda del menú de la barra s
 
 - **Dónde está:** `web/public/juego/index.html` (una sola página con su código; se publica en `<sitio>/juego/index.html`). El botón es un enlace normal (`./juego/index.html`), así que funciona con cualquier ruta base.
 - **Volver:** en el juego hay un botón **← Volver a Inside Moon 153** en la pantalla de introducción y otro, **← Inside Moon 153**, el primero de la barra de arriba durante la partida. Los dos enlazan con `../index.html`. Mientras hay un diálogo o la tienda abiertos, esa barra queda tapada: se cierran primero.
-- **Idioma y conexión:** el juego está solo en español y **necesita conexión a internet**: carga Tailwind CSS desde `cdn.tailwindcss.com` y las fuentes Fredoka y JetBrains Mono desde Google Fonts, así que esos dos servicios ven la visita (la página principal no los usa). Sin conexión se ve sin estilos. Hacerlo local queda en [Ideas y pendiente](#ideas-y-pendiente).
-- **Origen:** es el archivo entregado por el equipo, sin cambios en el juego salvo los dos botones de vuelta. Es independiente de la app: no comparte código, datos ni estado con ella, y sus textos (por ejemplo, las cifras o las descripciones de la NASA) no están revisados contra las fuentes del resto del proyecto.
+- **Sin internet:** el juego no pide nada a terceros. El CSS (Tailwind 3, el mismo que servía su CDN) está compilado en `web/public/juego/tailwind.css` (18 KB) y las fuentes Fredoka y JetBrains Mono (licencia OFL, de `@fontsource`) están en `web/public/juego/fonts/` (unos 90 KB). Si se cambian las clases de `index.html`, se regeneran con `npm --prefix web run build-game` (`web/scripts/build-game-assets.mjs`; `tailwindcss` es solo una dependencia de desarrollo).
+- **Idioma:** español e inglés. Empieza en el idioma de la página principal (el botón del juego lo pasa con `?lang=`, y los dos comparten la elección en `localStorage`); la pantalla de introducción tiene un selector **ES/EN** (cambiarlo recarga el juego, así que conviene hacerlo antes de jugar), y los botones de vuelta devuelven a la página en el mismo idioma. El texto original está en español dentro del código y el inglés sale de un diccionario (`EN`, unas 200 entradas) que la función `tr()` aplica a los textos de la pantalla, a los datos (personajes, sitios, tienda, historia) y a los mensajes. Una prueba comprueba que no queda nada sin traducir.
+- **Origen:** es el archivo entregado por el equipo, sin cambios en la jugabilidad; solo se le añadieron los dos botones de vuelta, el inglés y los archivos locales. Es independiente de la app: no comparte código ni datos con ella (solo la elección de idioma), y sus textos (por ejemplo, las cifras o las descripciones de la NASA) no están revisados contra las fuentes del resto del proyecto.
 
 ## Ventana de Análisis
 
@@ -168,7 +169,8 @@ Los kernels SPICE (`de421.bsp`, `moon_pa_de421_1900-2050.bpc`, `moon_080317.tf`,
 | Rover | NASA 3D Resources, *Mars 2020 Perseverance Rover* | NASA/JPL-Caltech; `web/public/models/README.md` |
 | Módulo de aterrizaje | NASA 3D Resources, *Apollo Lunar Module* | `web/public/models/README.md` |
 | Tierra | NASA Earth Observatory, *Blue Marble: Next Generation* | Recoloreado el océano; `web/public/textures/README.md` |
-| Fuentes tipográficas | Barlow, Barlow Condensed, IBM Plex Mono | Licencia OFL (paquetes `@fontsource`) |
+| Fuentes tipográficas | Barlow, Barlow Condensed, IBM Plex Mono; en el juego, Fredoka y JetBrains Mono | Licencia OFL (paquetes `@fontsource`) |
+| CSS del juego | Tailwind CSS 3.4 | Licencia MIT; solo se usa para compilar `web/public/juego/tailwind.css` |
 
 NASA no respalda este proyecto. Los modelos y las imágenes de NASA se usan según las [guías de uso de medios de NASA](https://www.nasa.gov/nasa-brand-center/images-and-media/).
 
@@ -209,5 +211,4 @@ En la página, los nombres aparecen discretos al final del planificador (menú �
 - Un modelo de rover lunar: NASA 3D Resources no ofrece un LRV en GLB, y el rover actual es el de Marte.
 - Inclinar el eje de la Tierra y usar la fase real de la Luna de las efemérides.
 - Coordenadas de aterrizaje concretas en vez del centro del DEM, y más regiones.
-- Hacer el juego independiente de internet (Tailwind compilado y fuentes locales) y traducirlo al inglés.
 - Partir el JavaScript en bloques (hoy es un solo paquete de unos 767 kB, 212 kB comprimido) y precargar los terrenos de los sitios que faltan.

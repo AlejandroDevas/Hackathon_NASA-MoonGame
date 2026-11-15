@@ -52,7 +52,7 @@ describe('the game button in the top bar', () => {
     mount();
     const link = q('game-link');
     expect(link.tagName).toBe('A');
-    expect(link.getAttribute('href')).toBe(GAME_URL);
+    expect(link.getAttribute('href')).toBe(`${GAME_URL}?lang=es`);
     expect(link.textContent).toContain(es['app.game']);
     expect(link.getAttribute('aria-label')).toBe(es['app.gameLabel']);
     expect(link.nextElementSibling.className).toContain('topbar-menu');
@@ -61,6 +61,8 @@ describe('the game button in the top bar', () => {
     q('locale').dispatchEvent(new Event('change', { bubbles: true }));
     expect(link.textContent).toContain(en['app.game']);
     expect(link.getAttribute('aria-label')).toBe(en['app.gameLabel']);
+    expect(link.getAttribute('href')).toBe(`${GAME_URL}?lang=en`); // the game opens in the language of the page
+    expect(window.localStorage.getItem('inside-moon-153.lang')).toBe('en'); // and remembers it
   });
 
   test('the tutorial explains it, and also the volume slider, each pointing at its control', () => {
@@ -73,7 +75,7 @@ describe('the game button in the top bar', () => {
       const { target } = TUTORIAL_STEPS.find((step) => step.id === id);
       expect(document.querySelector(target), id).not.toBeNull();
     }
-    expect(en['tutorial.game.text']).toContain('Spanish');
+    expect(en['tutorial.game.text']).toContain('offline');
   });
 });
 
