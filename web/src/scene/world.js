@@ -139,7 +139,7 @@ export function createWorld(site) {
 
   const earth = new THREE.Mesh(
     new THREE.SphereGeometry(BODY_DISTANCE_M * Math.tan(EARTH_RADIUS_DEG * RAD), 32, 32),
-    new THREE.MeshStandardMaterial({ color: 0xc8c2b4, roughness: 1, metalness: 0 }),
+    new THREE.MeshStandardMaterial({ color: 0x3a6fb0, roughness: 1, metalness: 0 }),
   );
   earth.name = 'earth';
   earth.castShadow = false;

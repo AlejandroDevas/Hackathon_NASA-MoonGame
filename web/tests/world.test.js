@@ -174,3 +174,10 @@ describe('world look and shadow lift', () => {
   });
 });
 
+describe('the Earth in the sky', () => {
+  test('is blue (the real colour of the planet, not a grey ball that reads as another Moon)', () => {
+    const { r, g, b } = createWorld(loadTinySite()).earth.material.color;
+    expect(b).toBeGreaterThan(r);
+    expect(b).toBeGreaterThan(g);
+  });
+});
