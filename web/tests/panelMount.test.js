@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { setLocale } from '../src/i18n.js';
 import { DEFAULT_THRESHOLDS } from '../src/metrics/scenario.js';
-import { mountPanel } from '../src/panel/panel.js';
 import { createStore } from '../src/state.js';
+import { mountInterface } from '../src/ui/interface.js';
 import { HOUR, T0, loadTinySite } from './helpers.js';
 
 const site = loadTinySite();
@@ -36,10 +36,12 @@ function setup(audioCue) {
       setCursor: (ms) => timelines.cursors.push(ms),
     };
   };
-  const root = document.createElement('div');
-  document.body.append(root);
-  mountPanel(root, store, siteList, sites, { renderTimeline, audioCue });
-  return { store, root, timelines };
+  const drawer = document.createElement('div');
+  drawer.id = 'app';
+  document.body.append(drawer);
+  mountInterface(drawer, store, siteList, sites, { renderTimeline, audioCue });
+  // the bars are outside the drawer: look everywhere in the page
+  return { store, root: document.body, timelines };
 }
 
 const q = (root, id) => root.querySelector(`[data-testid="${id}"]`);
@@ -227,12 +229,19 @@ describe('interface and verdict cues', () => {
     expect(audioCue.played).toContain('click');
   });
 
-  test('changing a toolbar select plays the click cue', () => {
+  test('changing the language select plays the click cue', () => {
     const audioCue = cueSpy();
     const { root } = setup(audioCue);
-    const speed = q(root, 'speed');
-    speed.value = speed.options[0].value;
-    speed.dispatchEvent(new Event('change', { bubbles: true }));
+    const select = q(root, 'locale');
+    select.value = 'en';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(audioCue.played).toContain('click');
+  });
+
+  test('the player bar buttons play the click cue too', () => {
+    const audioCue = cueSpy();
+    const { root } = setup(audioCue);
+    q(root, 'skip-fwd-hour').click();
     expect(audioCue.played).toContain('click');
   });
 

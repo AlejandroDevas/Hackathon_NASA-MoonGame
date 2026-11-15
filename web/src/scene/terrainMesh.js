@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { REGOLITH_TILE_M } from './regolith.js';
-import { gridToScene } from './terrainData.js';
 
 function hash2D(x, y) {
   const n = Math.sin(x * 127.1 + y * 311.7) * 43758.5453123;
@@ -58,8 +57,167 @@ export function applyAlbedoStrength(geometry, strength) {
   geometry.attributes.color.needsUpdate = true;
 }
 
+/** Evenly spaced sample indices from a0 to a1 inclusive; the last step is shorter if `stride` does not divide the span. */
+function axisSamples(a0, a1, stride) {
+  const out = [];
+  for (let v = a0; v < a1; v += stride) out.push(v);
+  out.push(a1);
+  return out;
+}
+
 /**
- * Triangle mesh of the height map in scene coordinates (x east, y up, z south).
+ * Triangle mesh of a rectangle of the height map (rows r0..r1, columns c0..c1) in scene
+ * coordinates (x east, y up, z south), sampled every `stride` cells.
+ *
+ * Normals come straight from the height differences (the same gradient that gives the slope
+ * shade), so neighbouring pieces with different strides still shade alike. With `skirtM > 0` a
+ * vertical skirt of that depth hangs from the four borders: where two pieces of different detail
+ * meet, their edges differ by a metre or two and the skirt hides the crack.
+ * @param {import('./terrainData.js').Terrain} terrain
+ * @param {{r0: number, r1: number, c0: number, c1: number}} box
+ * @param {number} [stride]
+ * @param {Uint8Array|null} [albedo] the site's LROC tone map (one byte per terrain cell)
+ * @param {{skirtM?: number, albedoStrength?: number}} [options]
+ */
+export function buildChunkGeometry(terrain, box, stride = 1, albedo = null, { skirtM = 0, albedoStrength = ALBEDO_STRENGTH } = {}) {
+  const { rows, cols, heights, pixelM, minM, maxM } = terrain;
+  const rowList = axisSamples(box.r0, box.r1, stride);
+  const colList = axisSamples(box.c0, box.c1, stride);
+  const nr = rowList.length;
+  const nc = colList.length;
+  const gridCount = nr * nc;
+  const skirtCount = skirtM > 0 ? 2 * (nr + nc) : 0;
+  const total = gridCount + skirtCount;
+  const positions = new Float32Array(total * 3);
+  const normals = new Float32Array(total * 3);
+  const colors = new Float32Array(total * 3);
+  const uvs = new Float32Array(total * 2);
+  const hasAlbedo = Boolean(albedo) && albedo.length === rows * cols;
+  const baseGrey = hasAlbedo ? new Float32Array(total) : null;
+  const factor = hasAlbedo ? new Float32Array(total) : null;
+
+  const beta = (terrain.northBearingDeg * Math.PI) / 180;
+  const cosB = Math.cos(beta);
+  const sinB = Math.sin(beta);
+  const [obsR, obsC] = terrain.observerRc;
+
+  for (let i = 0; i < nr; i++) {
+    const r = rowList[i];
+    const up = (obsR - r) * pixelM;
+    const rm = Math.max(r - 1, 0);
+    const rp = Math.min(r + 1, rows - 1);
+    for (let j = 0; j < nc; j++) {
+      const c = colList[j];
+      const right = (c - obsC) * pixelM;
+      const v = i * nc + j;
+      const k = v * 3;
+      const x = right * cosB - up * sinB;
+      const z = -(up * cosB + right * sinB);
+      const h = heights[r * cols + c];
+      positions[k] = x;
+      positions[k + 1] = h;
+      positions[k + 2] = z;
+
+      // gradient from the neighbouring cells (one-sided at the border), per metre
+      const cm = Math.max(c - 1, 0);
+      const cp = Math.min(c + 1, cols - 1);
+      const hx = (heights[r * cols + cp] - heights[r * cols + cm]) / ((cp - cm) * pixelM);
+      const hy = (heights[rp * cols + c] - heights[rm * cols + c]) / ((rp - rm) * pixelM);
+      const length = Math.sqrt(hx * hx + hy * hy + 1);
+      const nRight = -hx / length;
+      const nUp = hy / length;
+      normals[k] = nRight * cosB - nUp * sinB;
+      normals[k + 1] = 1 / length;
+      normals[k + 2] = -(nUp * cosB + nRight * sinB);
+
+      const slopeDeg = (Math.atan(Math.hypot(hx, hy)) * 180) / Math.PI;
+      const grey = terrainColor(h, minM, maxM, r, c, slopeDeg);
+      colors[k] = grey;
+      colors[k + 1] = grey * 0.995;
+      colors[k + 2] = Math.min(1, grey * 1.012);
+      uvs[v * 2] = x / REGOLITH_TILE_M;
+      uvs[v * 2 + 1] = z / REGOLITH_TILE_M;
+      if (hasAlbedo) {
+        baseGrey[v] = grey;
+        factor[v] = albedoFactor(albedo[r * cols + c]);
+      }
+    }
+  }
+
+  // skirt vertices: copies of the border vertices, dropped by skirtM (top, bottom, left, right sides)
+  const skirt = { top: [], bottom: [], left: [], right: [] };
+  if (skirtCount) {
+    let next = gridCount;
+    const copyDown = (source) => {
+      const v = next++;
+      positions.set(positions.subarray(source * 3, source * 3 + 3), v * 3);
+      positions[v * 3 + 1] -= skirtM;
+      normals.set(normals.subarray(source * 3, source * 3 + 3), v * 3);
+      colors.set(colors.subarray(source * 3, source * 3 + 3), v * 3);
+      uvs.set(uvs.subarray(source * 2, source * 2 + 2), v * 2);
+      if (hasAlbedo) {
+        baseGrey[v] = baseGrey[source];
+        factor[v] = factor[source];
+      }
+      return v;
+    };
+    for (let j = 0; j < nc; j++) skirt.top.push([j, copyDown(j)]);
+    for (let j = 0; j < nc; j++) skirt.bottom.push([(nr - 1) * nc + j, copyDown((nr - 1) * nc + j)]);
+    for (let i = 0; i < nr; i++) skirt.left.push([i * nc, copyDown(i * nc)]);
+    for (let i = 0; i < nr; i++) skirt.right.push([i * nc + nc - 1, copyDown(i * nc + nc - 1)]);
+  }
+
+  const quads = (nr - 1) * (nc - 1);
+  const skirtQuads = skirtCount ? 2 * (nr - 1) + 2 * (nc - 1) : 0;
+  const indexCount = (quads + skirtQuads) * 6;
+  const indices = total > 65535 ? new Uint32Array(indexCount) : new Uint16Array(indexCount);
+  let n = 0;
+  for (let i = 0; i < nr - 1; i++) {
+    for (let j = 0; j < nc - 1; j++) {
+      const a = i * nc + j; // (r, c)
+      const b = (i + 1) * nc + j; // (r + 1, c)
+      const c = i * nc + j + 1; // (r, c + 1)
+      const d = (i + 1) * nc + j + 1; // (r + 1, c + 1)
+      indices[n++] = a; // counter-clockwise seen from above
+      indices[n++] = b;
+      indices[n++] = c;
+      indices[n++] = b;
+      indices[n++] = d;
+      indices[n++] = c;
+    }
+  }
+  // each skirt quad faces outwards from the piece it hangs from
+  const wall = (side, flip) => {
+    for (let s = 0; s < side.length - 1; s++) {
+      const [a, ad] = side[s];
+      const [b, bd] = side[s + 1];
+      if (!flip) indices.set([a, b, ad, b, bd, ad], n);
+      else indices.set([b, a, bd, a, ad, bd], n);
+      n += 6;
+    }
+  };
+  if (skirtCount) {
+    wall(skirt.top, false);
+    wall(skirt.bottom, true);
+    wall(skirt.left, true);
+    wall(skirt.right, false);
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+  geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+  if (hasAlbedo) {
+    geometry.userData.albedo = { base: baseGrey, factor };
+    applyAlbedoStrength(geometry, albedoStrength);
+  }
+  return geometry;
+}
+
+/**
+ * Triangle mesh of the whole height map in scene coordinates (x east, y up, z south).
  * `stride` thins the grid (2 -> one vertex every 10 m for a 5 m DEM).
  * `albedo`, if given, is the site's LROC tone map (one byte per terrain cell); the vertices are
  * then tinted by it (see applyAlbedoStrength).
@@ -68,63 +226,5 @@ export function applyAlbedoStrength(geometry, strength) {
  * @param {Uint8Array|null} [albedo]
  */
 export function buildTerrainGeometry(terrain, stride = 2, albedo = null) {
-  const nr = Math.floor((terrain.rows - 1) / stride) + 1;
-  const nc = Math.floor((terrain.cols - 1) / stride) + 1;
-  const positions = new Float32Array(nr * nc * 3);
-  const colors = new Float32Array(nr * nc * 3);
-  const uvs = new Float32Array(nr * nc * 2);
-  const { rows, cols, heights, pixelM } = terrain;
-  const hasAlbedo = albedo && albedo.length === rows * cols;
-  const baseGrey = hasAlbedo ? new Float32Array(nr * nc) : null;
-  const factor = hasAlbedo ? new Float32Array(nr * nc) : null;
-  for (let i = 0; i < nr; i++) {
-    for (let j = 0; j < nc; j++) {
-      const r = i * stride;
-      const c = j * stride;
-      const { x, z } = gridToScene(terrain, r, c);
-      const k = (i * nc + j) * 3;
-      positions[k] = x;
-      positions[k + 1] = terrain.heights[r * terrain.cols + c];
-      positions[k + 2] = z;
-      // slope from the central difference of the neighbouring cells (clamped at the border)
-      const hx = (heights[r * cols + Math.min(c + 1, cols - 1)] - heights[r * cols + Math.max(c - 1, 0)]) / (2 * pixelM);
-      const hy = (heights[Math.min(r + 1, rows - 1) * cols + c] - heights[Math.max(r - 1, 0) * cols + c]) / (2 * pixelM);
-      const slopeDeg = (Math.atan(Math.hypot(hx, hy)) * 180) / Math.PI;
-      const grey = terrainColor(heights[r * cols + c], terrain.minM, terrain.maxM, r, c, slopeDeg);
-      uvs[(i * nc + j) * 2] = x / REGOLITH_TILE_M;
-      uvs[(i * nc + j) * 2 + 1] = z / REGOLITH_TILE_M;
-      if (hasAlbedo) {
-        baseGrey[i * nc + j] = grey;
-        factor[i * nc + j] = albedoFactor(albedo[r * cols + c]);
-      }
-      colors[k] = grey;
-      colors[k + 1] = grey * 0.995;
-      colors[k + 2] = Math.min(1, grey * 1.012);
-    }
-  }
-
-  const indices = new Uint32Array((nr - 1) * (nc - 1) * 6);
-  let n = 0;
-  for (let i = 0; i < nr - 1; i++) {
-    for (let j = 0; j < nc - 1; j++) {
-      const a = i * nc + j; // (r, c)
-      const b = (i + 1) * nc + j; // (r + 1, c)
-      const c = i * nc + j + 1; // (r, c + 1)
-      const d = (i + 1) * nc + j + 1; // (r + 1, c + 1)
-      indices.set([a, b, c, b, d, c], n); // counter-clockwise seen from above
-      n += 6;
-    }
-  }
-
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-  geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-  geometry.computeVertexNormals();
-  if (hasAlbedo) {
-    geometry.userData.albedo = { base: baseGrey, factor };
-    applyAlbedoStrength(geometry, ALBEDO_STRENGTH);
-  }
-  return geometry;
+  return buildChunkGeometry(terrain, { r0: 0, r1: terrain.rows - 1, c0: 0, c1: terrain.cols - 1 }, stride, albedo);
 }

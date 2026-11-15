@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "test": "vitest run"
+    "test": "vitest run",
+    "plan-starts": "node scripts/plan-starts.mjs"
   },
   "dependencies": {
     "@fontsource/barlow": "^5.3.0",

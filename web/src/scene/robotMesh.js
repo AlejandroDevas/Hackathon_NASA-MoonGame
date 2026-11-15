@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { mergeByMaterial } from './mergeModel.js';
 
 /**
  * A small six-wheeled rover built from primitives (about 1.8 m long). The origin is
@@ -54,6 +55,7 @@ export async function loadNasaRover(robot, url, decoderPath = `${import.meta.env
     loader.setDRACOLoader(draco);
     const gltf = await loader.loadAsync(url);
     const model = gltf.scene;
+    mergeByMaterial(model); // hundreds of small meshes become a few dozen draw calls
     if (!robot.parent) {
       disposeModel(model);
       return null;

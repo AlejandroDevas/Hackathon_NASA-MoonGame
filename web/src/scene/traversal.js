@@ -14,6 +14,9 @@ const NEIGHBOURS = [
   [-1, -1],
 ];
 
+/** How far from the goal the rover starts (metres). */
+export const START_DISTANCE_M = 400;
+
 /** Slope limits a site may get, lowest first; planStart picks the lowest one that is winnable. */
 export const SLOPE_LADDER_DEG = [15, 20, 25, 30, 35, 40, 45];
 /** Spacing (m) of the extra slope samples taken along each route edge. */

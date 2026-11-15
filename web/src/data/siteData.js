@@ -1,4 +1,4 @@
-import { parseTerrain } from '../scene/terrainData.js';
+import { parseTerrain, terrainFingerprint } from '../scene/terrainData.js';
 
 const BYTES_PER_SAMPLE = 16; // 4 float32 values
 
@@ -56,6 +56,20 @@ async function loadAlbedo(site) {
 }
 
 /**
+ * The precomputed rover start of a site (see scripts/plan-starts.mjs), or null when there is none.
+ * It is only a shortcut: without it the app works the start out itself.
+ * @returns {Promise<object|null>}
+ */
+async function loadStart(site) {
+  try {
+    const response = await fetch(`${site.dir}/start.json`);
+    return response.ok ? await response.json() : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Load the terrain height map of a site the first time it is needed (about 2 MB).
  * Resolves to the terrain, or null for a site without one; repeated calls share one request.
  * @returns {Promise<object|null>}
@@ -68,7 +82,8 @@ export function ensureTerrain(site) {
       .then((response) => response.arrayBuffer())
       .then(async (buffer) => {
         const terrain = parseTerrain(buffer, site.info.terrain);
-        site.albedo = await loadAlbedo(site);
+        site.terrainFingerprint = terrainFingerprint(buffer);
+        [site.albedo, site.start] = await Promise.all([loadAlbedo(site), loadStart(site)]);
         site.terrain = terrain;
         return site.terrain;
       })
@@ -99,6 +114,8 @@ export async function loadSite(baseUrl, id, { terrain: withTerrain = true } = {}
     eph: parseEphemeris(buffer, info.ephemeris),
     terrain: null,
     albedo: null,
+    start: null,
+    terrainFingerprint: null,
     terrainPromise: null,
   };
   if (withTerrain) await ensureTerrain(site);

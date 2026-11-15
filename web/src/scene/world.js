@@ -5,7 +5,8 @@ import { earthYaw, subLunarLongitudeDeg } from './earthView.js';
 import { createCloudTexture, createEarthTexture } from './earthTexture.js';
 import { createGlowTexture } from './glow.js';
 import { createRegolithTexture } from './regolith.js';
-import { ALBEDO_STRENGTH, applyAlbedoStrength, buildTerrainGeometry } from './terrainMesh.js';
+import { createTerrainLod } from './terrainLod.js';
+import { ALBEDO_STRENGTH } from './terrainMesh.js';
 
 const RAD = Math.PI / 180;
 const SUN_LIGHT_DISTANCE_M = 6_000; // keeps the shadow frustum tight around the 5 km terrain
@@ -103,22 +104,18 @@ export function createWorld(site) {
 
   // Procedural regolith grain (not imagery): colour variation plus a bump map that the grazing sunlight picks out.
   const regolith = createRegolithTexture();
-  const terrainMesh = new THREE.Mesh(
-    // Use every 5 m LOLA sample rather than thinning the scene to 10 m.
-    buildTerrainGeometry(site.terrain, 1, site.albedo ?? null),
-    new THREE.MeshStandardMaterial({
-      vertexColors: true,
-      color: 0xaaa79e,
-      map: regolith,
-      bumpMap: regolith,
-      bumpScale: 2.2,
-      roughness: 0.96,
-      metalness: 0,
-    }),
-  );
-  terrainMesh.name = 'terrain';
-  terrainMesh.castShadow = true;
-  terrainMesh.receiveShadow = true;
+  // The 5 m terrain is drawn as chunks whose detail drops with distance from the camera (see terrainLod.js).
+  const terrainMaterial = new THREE.MeshStandardMaterial({
+    vertexColors: true,
+    color: 0xaaa79e,
+    map: regolith,
+    bumpMap: regolith,
+    bumpScale: 2.2,
+    roughness: 0.96,
+    metalness: 0,
+  });
+  const terrain = createTerrainLod(site.terrain, { albedo: site.albedo ?? null, material: terrainMaterial });
+  const terrainMesh = terrain.group;
   scene.add(terrainMesh);
 
   const eyeY = heightAt(site.terrain, 0, 0) + 2;
@@ -185,7 +182,6 @@ export function createWorld(site) {
   earth.receiveShadow = false;
   scene.add(earth);
 
-  /** Move the Sun and Earth; `timeMs` (optional) turns the Earth so the right continents face the Moon. */
   /** Swap the Earth's surface texture (NASA's image once it has loaded); the previous one is freed. */
   function setEarthMap(texture) {
     earth.material.map?.dispose();
@@ -193,6 +189,7 @@ export function createWorld(site) {
     earth.material.needsUpdate = true;
   }
 
+  /** Move the Sun and Earth; `timeMs` (optional) turns the Earth so the right continents face the Moon. */
   function updateSky(sky, timeMs = null) {
     const s = directionFromAzEl(sky.sun.azDeg, sky.sun.elDeg);
     sun.position.set(s.x, s.y, s.z).multiplyScalar(lightDistance);
@@ -213,12 +210,21 @@ export function createWorld(site) {
         material?.dispose();
       }
     });
+    terrain.dispose();
     sun.shadow.map?.dispose();
+  }
+
+  /**
+   * Choose the level of detail of each terrain chunk for a camera at `position`.
+   * @returns {boolean} whether any chunk changed, so the shadow map needs redrawing
+   */
+  function updateLod(position, budget) {
+    return terrain.update(position, budget);
   }
 
   /** Show (true) or hide the LROC tone variation on the terrain; no effect on a site without a tone map. */
   function setLrocTexture(on) {
-    applyAlbedoStrength(terrainMesh.geometry, on ? ALBEDO_STRENGTH : 0);
+    terrain.setAlbedoStrength(on ? ALBEDO_STRENGTH : 0);
   }
 
   /** Visual aid only: lighten the shadows without touching any calculation. */
@@ -226,5 +232,5 @@ export function createWorld(site) {
     ambient.intensity = on ? ambientBase * SHADOW_LIFT_FACTOR : ambientBase;
   }
 
-  return { scene, sun, sunDisc, sunGlow, earth, terrainMesh, ambient, updateSky, setEarthMap, setLrocTexture, setShadowLift, eyeY, dispose };
+  return { scene, sun, sunDisc, sunGlow, earth, terrainMesh, ambient, terrain, updateLod, updateSky, setEarthMap, setLrocTexture, setShadowLift, eyeY, dispose };
 }

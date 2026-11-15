@@ -95,3 +95,15 @@ export function normalAt(t, x, z) {
   const length = Math.hypot(dhdx, 1, dhdz);
   return { x: -dhdx / length, y: 1 / length, z: -dhdz / length };
 }
+
+/**
+ * A short fingerprint of the raw terrain bytes (FNV-1a over 32-bit words plus the length), used to tell
+ * whether data computed from a terrain, such as the rover's start, still belongs to it.
+ * @param {ArrayBuffer} buffer
+ */
+export function terrainFingerprint(buffer) {
+  const words = new Uint32Array(buffer, 0, buffer.byteLength >> 2);
+  let hash = 2166136261;
+  for (let i = 0; i < words.length; i++) hash = Math.imul(hash ^ words[i], 16777619) >>> 0;
+  return `${hash.toString(16)}:${buffer.byteLength}`;
+}

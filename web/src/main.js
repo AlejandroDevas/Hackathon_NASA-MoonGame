@@ -11,7 +11,6 @@ import { ensureTerrain, loadSite } from './data/siteData.js';
 import { t } from './i18n.js';
 import { DEFAULT_THRESHOLDS } from './metrics/scenario.js';
 import { clampTime } from './panel/controls.js';
-import { mountPanel } from './panel/panel.js';
 import './panel/panel.css';
 import { renderTimeline } from './panel/timeline.js';
 import { mountScene } from './scene/view3d.js';
@@ -20,6 +19,8 @@ import { createAudioCue } from './scene/audioCue.js';
 import { createRoverHum } from './scene/roverHum.js';
 import './scene/scene.css';
 import { createStore } from './state.js';
+import { mountInterface } from './ui/interface.js';
+import './ui/ui.css';
 
 const SITES_URL = `${import.meta.env.BASE_URL}sites`;
 const DAY_MS = 24 * 3_600_000;
@@ -47,12 +48,13 @@ async function main() {
       shadowLift: false,
       lrocTexture: true,
       viewMode: 'follow',
+      panelOpen: false,
       locale: 'es',
     });
     const audioCue = createAudioCue({ createMusic: createAmbientMusic, createHum: createRoverHum });
     const scene = mountScene(document.getElementById('scene'), store, sites, audioCue);
     if (import.meta.env.DEV) window.__navigator = scene.debug;
-    mountPanel(root, store, siteList, sites, { renderTimeline, audioCue });
+    mountInterface(root, store, siteList, sites, { renderTimeline, audioCue });
   } catch (error) {
     root.textContent = t('app.loadError', { message: error.message });
   }

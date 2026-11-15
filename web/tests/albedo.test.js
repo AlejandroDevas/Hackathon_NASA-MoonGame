@@ -1,8 +1,9 @@
+import * as THREE from 'three';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { ensureTerrain } from '../src/data/siteData.js';
 import { setLocale } from '../src/i18n.js';
 import { DEFAULT_THRESHOLDS } from '../src/metrics/scenario.js';
-import { mountPanel } from '../src/panel/panel.js';
+import { mountInterface } from '../src/ui/interface.js';
 import { createWorld } from '../src/scene/world.js';
 import { ALBEDO_NEUTRAL, ALBEDO_STRENGTH, albedoFactor, applyAlbedoStrength, buildTerrainGeometry } from '../src/scene/terrainMesh.js';
 import { createStore } from '../src/state.js';
@@ -81,11 +82,19 @@ describe('terrain colours with an LROC tone map', () => {
   });
 });
 
+/** Grey of the terrain vertex at grid cell (r, c), at full detail (the camera is put right above the site). */
+function vertexGrey(world, r, c) {
+  world.updateLod(new THREE.Vector3(0, 100, 0), Infinity);
+  const chunk = world.terrain.chunks.find(({ box }) => r >= box.r0 && r <= box.r1 && c >= box.c0 && c <= box.c1);
+  expect(chunk.lod).toBe(0);
+  const { box } = chunk;
+  return chunk.mesh.geometry.attributes.color.array[((r - box.r0) * (box.c1 - box.c0 + 1) + (c - box.c0)) * 3];
+}
+
 describe('the world and the LROC switch', () => {
   test('setLrocTexture hides and shows the tint on the terrain mesh', () => {
     const world = createWorld({ ...tiny, albedo: toneMap() });
-    const { cols } = tiny.terrain;
-    const bright = () => world.terrainMesh.geometry.attributes.color.array[(50 * cols + 50) * 3];
+    const bright = () => vertexGrey(world, 50, 50);
     const on = bright();
     world.setLrocTexture(false);
     const off = bright();
@@ -97,10 +106,10 @@ describe('the world and the LROC switch', () => {
 
   test('a site without a tone map is unaffected by the switch', () => {
     const world = createWorld({ ...tiny, albedo: null });
-    const before = Array.from(world.terrainMesh.geometry.attributes.color.array.slice(0, 60));
+    const before = vertexGrey(world, 50, 50);
     world.setLrocTexture(false);
     world.setLrocTexture(true);
-    expect(Array.from(world.terrainMesh.geometry.attributes.color.array.slice(0, 60))).toEqual(before);
+    expect(vertexGrey(world, 50, 50)).toBe(before);
   });
 });
 
@@ -167,10 +176,10 @@ describe('the LROC button in the panel', () => {
       viewMode: 'follow',
       locale: 'es',
     });
-    const root = document.createElement('div');
-    document.body.append(root);
-    mountPanel(root, store, siteList, sites, { renderTimeline: () => ({ destroy() {}, setCursor() {} }), audioCue: null });
-    return { store, root };
+    const drawer = document.createElement('div');
+    document.body.append(drawer);
+    mountInterface(drawer, store, siteList, sites, { renderTimeline: () => ({ destroy() {}, setCursor() {} }), audioCue: null });
+    return { store, root: document.body };
   }
   const button = (root) => root.querySelector('[data-testid="lroc-toggle"]');
 
