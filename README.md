@@ -6,7 +6,8 @@ Responde a la pregunta de planificación —¿qué sitio y qué fecha dan mejor 
 
 ## Qué incluye
 
-- **Panel de planificación:** elevación del Sol y de la Tierra, tiempo hasta el ocaso solar y terrestre (con la fecha cuando falta un mes o más), % de luz, racha de luz continua más larga, noche más larga, mayor hueco sin Tierra, y un semáforo de viabilidad con umbrales editables. Gráfica de elevación contra el horizonte con cursor arrastrable, animación del paso del tiempo y modo **Comparar** (dos escenarios lado a lado).
+- **Interfaz tipo reproductor:** la escena 3D ocupa toda la pantalla; arriba, el nombre, el idioma, cuatro botones de la vista y un menú; abajo, un reproductor del tiempo simulado. El planificador (métricas, gráfica, umbrales y comparación) es un cajón oculto que se abre desde el menú.
+- **Planificador:** elevación del Sol y de la Tierra, tiempo hasta el ocaso solar y terrestre (con la fecha cuando falta un mes o más), % de luz, racha de luz continua más larga, noche más larga, mayor hueco sin Tierra, y un semáforo de viabilidad con umbrales editables. Gráfica de elevación con cursor arrastrable y modo **Comparar** (dos escenarios lado a lado).
 - **Ventana de Análisis:** mejores ventanas de aterrizaje de 2026 a 2030, calendario de luz, gráfico polar del cielo y comparación de los cinco sitios con exportación a CSV.
 - **Escena 3D:** terreno LOLA real de 5 m con sombras reales, un rover NASA que se conduce hasta el módulo de aterrizaje del sitio, señales con datos del lugar, una Tierra con imagen NASA que gira con la hora, polvo con gravedad lunar y, en cuatro sitios, un mapa de tonos de imágenes LROC.
 - **Cinco sitios con datos reales:** Connecting Ridge (Site 01), Shackleton Rim (Site 04), Nobile Rim 1 (Site 06), Haworth y Malapert Massif (Site 23).
@@ -40,17 +41,23 @@ data-pipeline/ (Python, se ejecuta una vez)       web/public/sites/<id>/        
 - **Activos locales:** las fuentes (Barlow, Barlow Condensed e IBM Plex Mono, licencia OFL), los modelos 3D (`web/public/models/`), el decodificador Draco (`web/public/draco/`) y la imagen de la Tierra (`web/public/textures/`) van incluidos, así que no hay peticiones a terceros.
 - **Qué se calcula dónde:** Python precalcula posiciones (Skyfield) y horizonte (a partir del DEM); el navegador calcula visibilidad, cuentas atrás, porcentajes, mejores ventanas y veredictos. No se usa ninguna librería de efemérides en el navegador.
 
-## Panel de planificación
+## Interfaz
 
-- **Escenario:** sitio, fecha y hora (UTC) y ventana de análisis (1 día, 7 días o 1 día lunar de 29,5 días). **Comparar** añade un escenario B con la misma estructura y una tarjeta de diferencias respecto a A.
+- **Barra superior:** a la izquierda el nombre de la aplicación y, a su derecha, el selector de idioma (ES/EN). A la derecha, de derecha a izquierda: **Activar sonido**, **Aclarar sombras**, **Imagen LROC** y **Vista libre** (o **Seguir al robot**), y en la esquina el **menú desplegable**. En pantallas estrechas los botones muestran solo su icono (siguen teniendo nombre para lectores de pantalla).
+- **Menú:** **Planificador** (abre o cierra el cajón de la derecha), **Análisis** (abre la ventana de Análisis) y **Comparar** (activa o quita el escenario B; al activarlo se abre el planificador). Se maneja con el teclado: flechas, Inicio/Fin, Esc para cerrarlo.
+- **Barra inferior, como un reproductor de vídeo:**
+  - **Saltos:** −1 día, −1 hora, +1 hora y +1 día, parando en los extremos de los datos.
+  - **Reproducir:** un triángulo que se convierte en el signo de pausa. Si se pulsa al final de los datos, vuelve a empezar desde el principio.
+  - **Línea de tiempo:** un control deslizante sobre **todo el tiempo calculado** (de 2026 a 2030, una muestra por hora), con marcas de cada año y el momento actual en UTC. Arrastrarla o usar las flechas del teclado mueve el escenario A; en modo Comparar el B se mueve igual, manteniendo la diferencia entre sus fechas. Si la animación está en marcha, sigue desde el nuevo punto.
+  - **Velocidad:** un botón con la velocidad actual que abre un menú: 1 h/s, 6 h/s, 1 d/s, 7 d/s o 30 d/s.
+- **Planificador (cajón de la derecha):** oculto al abrir la página. Contiene el escenario (sitio, fecha y hora en UTC, ventana de análisis de 1 día, 7 días o 1 día lunar), el veredicto, las cuentas atrás, las métricas, la gráfica de elevación con cursor arrastrable (ratón o flechas) y, en modo Comparar, una tarjeta de diferencias respecto a A. Se cierra con su botón, con Esc (con el foco dentro) o desde el menú; cerrado, no recibe foco ni lo lee un lector de pantalla. Con Comparar se ensancha.
 - **Veredicto:** *Viable*, *Dudoso* o *No viable* según tres umbrales editables: elevación solar mínima (0° por defecto), oscuridad máxima (120 h) y hueco máximo sin Tierra (48 h). Cada estado conserva su etiqueta de texto.
-- **Cuentas atrás:** ocaso o salida del Sol y de la Tierra. Cuando faltan 30 días o más, bajo la duración aparece la fecha ("≈ 7 may 2029 (UTC)").
-- **Gráfica:** elevación del Sol y de la Tierra contra el horizonte (uPlot). El cursor se arrastra con el ratón o se mueve con las flechas.
-- **Barra de herramientas:** idioma, velocidad de la animación (1 h/s, 6 h/s, 1 d/s), reproducir, sonido, aclarar sombras, imagen LROC, vista libre/seguir al robot, Análisis y Comparar.
+- **Cuentas atrás:** ocaso o salida del Sol y de la Tierra. Cuando faltan 30 días o más, bajo la duración aparece la fecha («≈ 7 may 2029 (UTC)»).
+- **Elegir el sitio** se hace en el planificador (el selector «Sitio» de cada escenario).
 
 ## Escena 3D
 
-El terreno del sitio seleccionado en el escenario A se ve a la izquierda del panel (arriba en móvil). El Sol y la Tierra se colocan según la fecha del panel y la animación los mueve. El rover parte a ~400 m del módulo de aterrizaje y el objetivo es llegar hasta él: a menos de 25 m se abre el cartel del lugar.
+La escena muestra el sitio seleccionado en el escenario A a pantalla completa; la barra superior y la inferior flotan encima y los avisos de la escena (Sol y Tierra, ayuda de controles, cartel del sitio) se colocan fuera de ellas. El Sol y la Tierra se colocan según la fecha del panel y la animación los mueve. El rover parte a ~400 m del módulo de aterrizaje y el objetivo es llegar hasta él: a menos de 25 m se abre el cartel del lugar.
 
 - **Controles:** W/↑ avanzar, S/↓ retroceder, A/D o ←/→ girar, Shift turbo. Las teclas se ignoran mientras escribes en un campo del panel. En **vista libre** se arrastra para girar y la rueda acerca.
 - **Terreno:** la malla es la altura LOLA real de un recorte de 5 km de lado (1001 × 1001 muestras de 5 m), dibujada por bloques de 320 m con nivel de detalle según la distancia a la cámara (vértices cada 5, 10, 20 o 40 m; ver [Rendimiento](#rendimiento)). El grano fino es un regolito **procedural** que se repite cada 32 m (con cráteres pequeños, usado también como mapa de relieve para que la luz rasante lo marque), con un moteado suave y un tono algo más claro en las pendientes fuertes. Más allá del recorte hay una silueta oscura del horizonte lejano.

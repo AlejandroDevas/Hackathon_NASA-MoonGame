@@ -19,16 +19,18 @@ La interfaz debe ayudar a explorar el terreno lunar y, a la vez, responder rápi
 
 ## Estructura final aplicada
 
-- **Escritorio:** terreno 3D a la izquierda y planificador con scroll a la derecha. En comparar, el panel gana anchura y muestra A/B en dos columnas.
-- **Móvil:** vista 3D en la parte superior, controles en una columna y métricas en tarjetas apiladas.
+- **Escritorio y móvil:** la escena 3D ocupa toda la pantalla; la barra superior y la inferior son fijas y translúcidas; el planificador es un cajón que entra por la derecha, entre las dos barras, y empieza cerrado. En móvil el cajón ocupa todo el ancho y la barra inferior pasa a dos filas (la línea de tiempo arriba; los controles y la velocidad abajo).
 - **Sistema visual:** negro `#090909`, carbón `#141414` / `#1d1d1b`, blanco cálido `#f4f1e9`, gris `#aaa69b`, dorado `#d4ad5b`; verde/ámbar/rojo solo para estados de viabilidad.
-- **Componentes del panel:** controles agrupados, veredictos tipo etiqueta, cuentas atrás destacadas (con la fecha debajo cuando faltan 30 días o más), métricas con separadores y gráfica con cursor arrastrable.
-- **Barra de herramientas:** idioma, velocidad, reproducir, sonido, aclarar sombras, imagen LROC (desactivada, con explicación, en el sitio que queda fuera del mosaico), vista libre o seguir al robot, Análisis y Comparar. Los botones con estado usan `aria-pressed`.
+- **Componentes del planificador:** controles agrupados, veredictos tipo etiqueta, cuentas atrás destacadas (con la fecha debajo cuando faltan 30 días o más), métricas con separadores y gráfica con cursor arrastrable.
+- **Barra superior:** nombre de la aplicación (con la leyenda pequeña encima) y selector de idioma a la izquierda; a la derecha, de derecha a izquierda, sonido, aclarar sombras, imagen LROC (desactivada, con explicación, en el sitio que queda fuera del mosaico) y vista libre o seguir al robot, y el menú en la esquina con Planificador, Análisis y Comparar. Los botones con estado usan `aria-pressed`; por debajo de ~1180 px solo muestran el icono, con el nombre accesible intacto. El menú es un `role="menu"` con teclado completo.
+- **Barra inferior (reproductor):** cuatro saltos (−1 d, −1 h, +1 h, +1 d), un botón de reproducir en forma de triángulo que pasa a pausa, una línea de tiempo sobre todo el rango calculado con marcas de año y el momento en UTC, y un botón de velocidad con su menú. Mismos colores que el resto: dorado para el botón principal y el tramo recorrido.
 - **Ventana de Análisis:** capa modal (`role="dialog"`, foco atrapado, se cierra con Esc o con el fondo) de hasta 1180 px, con sus propios controles y cuatro secciones (mejores ventanas, calendario de luz, cielo, comparación de sitios). Los gráficos son SVG con los mismos colores: dorado para el Sol, blanco para la Tierra y gris para el relieve; los estados de viabilidad conservan su texto.
 - **HUD de la escena:** ayuda de controles abajo a la izquierda, panel del Sol y la Tierra arriba a la izquierda, etiquetas flotantes de los puntos de interés (con una lista equivalente solo para lectores de pantalla) y el cartel del sitio arriba a la derecha, con datos calculados y enlaces a las fuentes. Todo en negro translúcido con borde dorado, sin tapar el terreno más de lo necesario.
 - **Escena de superficie:** altura LOLA real a 5 m con grano procedural y, en cuatro sitios, un mapa de tonos LROC que se puede apagar. Modelos NASA: rover Perseverance (GLB) y módulo lunar Apolo (GLB), cada uno con un modelo procedural de respaldo; rocas instanciadas; polvo con gravedad lunar; Sol con halo; y la Tierra con la imagen Blue Marble, con nubes procedurales y fase real por la luz del Sol.
 
 ## Decisiones que cambiaron
+
+- **La interfaz pasó de panel fijo a escena completa con barras (2026-11-15).** Antes el planificador ocupaba un 38 % de la pantalla a la derecha; ahora la escena es lo principal y el planificador se abre a petición desde el menú. El selector de sitio sigue dentro del planificador; si resulta incómodo, un selector de sitio en la barra superior sería el siguiente paso.
 
 - **La Tierra volvió a ser azul.** Primero se dibujó gris cálido siguiendo la regla de «no introducir azules decorativos»; una esfera gris se leía como otra Luna. El azul de la Tierra es el color real del planeta (imagen de NASA), no decoración, y es el único azul de la escena; la interfaz sigue sin azules.
 - **El tono del suelo LROC se exagera** (×1,7) porque a Sol rasante apenas se vería; está documentado en el README y el botón «Imagen LROC» lo compara con el terreno liso.

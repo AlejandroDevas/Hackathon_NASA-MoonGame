@@ -3,7 +3,7 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 import { ensureTerrain } from '../src/data/siteData.js';
 import { setLocale } from '../src/i18n.js';
 import { DEFAULT_THRESHOLDS } from '../src/metrics/scenario.js';
-import { mountPanel } from '../src/panel/panel.js';
+import { mountInterface } from '../src/ui/interface.js';
 import { createWorld } from '../src/scene/world.js';
 import { ALBEDO_NEUTRAL, ALBEDO_STRENGTH, albedoFactor, applyAlbedoStrength, buildTerrainGeometry } from '../src/scene/terrainMesh.js';
 import { createStore } from '../src/state.js';
@@ -176,10 +176,10 @@ describe('the LROC button in the panel', () => {
       viewMode: 'follow',
       locale: 'es',
     });
-    const root = document.createElement('div');
-    document.body.append(root);
-    mountPanel(root, store, siteList, sites, { renderTimeline: () => ({ destroy() {}, setCursor() {} }), audioCue: null });
-    return { store, root };
+    const drawer = document.createElement('div');
+    document.body.append(drawer);
+    mountInterface(drawer, store, siteList, sites, { renderTimeline: () => ({ destroy() {}, setCursor() {} }), audioCue: null });
+    return { store, root: document.body };
   }
   const button = (root) => root.querySelector('[data-testid="lroc-toggle"]');
 

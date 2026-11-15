@@ -1,17 +1,8 @@
-import { setLocale, t } from '../i18n.js';
+import { t } from '../i18n.js';
 import { evaluateScenario, viability } from '../metrics/scenario.js';
-import { createAnalysis } from './analysis.js';
 import { renderDiff } from './compare.js';
 import { clampTime, renderControls } from './controls.js';
-import { createPlayer } from './player.js';
 import { renderScenarioCard } from './scenarioCard.js';
-
-const HOUR_MS = 3_600_000;
-const SPEEDS = [
-  { key: 'speed.1h', ms: HOUR_MS },
-  { key: 'speed.6h', ms: 6 * HOUR_MS },
-  { key: 'speed.1d', ms: 24 * HOUR_MS },
-];
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -21,24 +12,17 @@ function el(tag, className, text) {
 }
 
 /**
- * Mount the whole planner UI into `root` and keep it in sync with `store`.
+ * Mount the planner into `root` (a drawer on the right, closed until the menu opens it) and keep it in
+ * sync with `store`. The tools of the top bar and the player live in `../ui/`.
  * @param {HTMLElement} root
  * @param {object} store state store (see state.js)
  * @param {Array<{id: string, name: string}>} siteList
  * @param {Map<string, object>} sites loaded sites by id
- * @param {{renderTimeline: Function}} deps chart renderer, injected so the panel does not depend on uPlot
+ * @param {{renderTimeline: Function, audioCue?: object, playback?: {pause(): void}}} deps chart renderer, injected so the panel does not depend on uPlot
  */
-export function mountPanel(root, store, siteList, sites, { renderTimeline, audioCue }) {
-  let player = null;
-  let speedMs = SPEEDS[1].ms;
+export function mountPanel(root, store, siteList, sites, { renderTimeline, audioCue, playback }) {
   let structureKey = null;
   let views = {};
-  let playButton = null;
-  let soundButton = null;
-  let shadowButton = null;
-  let viewButton = null;
-  let lrocButton = null;
-  const analysis = createAnalysis(store, siteList, sites);
 
   // One delegated listener: the root survives rebuilds, so it also covers re-created controls.
   root.addEventListener('click', (event) => {
@@ -105,7 +89,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
           timeline = renderTimeline(chartEl, site, timeMs, timeMs + state.windowMs, timeMs, {
             getTime: () => store.get().scenarios[slot]?.timeMs ?? timeMs,
             onScrub: (ms) => {
-              player?.stop(); // dragging takes over from the animation
+              playback?.pause(); // dragging takes over from the animation
               const { scenarios } = store.get();
               const scenario = scenarios[slot];
               if (!scenario) return;
@@ -124,79 +108,19 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
     };
   }
 
-  function buildHeader() {
-    const header = el('header', 'app-header');
-    const brand = el('div', 'app-brand');
-    brand.append(el('p', 'app-kicker', t('app.kicker')), el('h1', '', t('app.title')));
-    header.append(brand);
-    const tools = el('div', 'header-tools');
-
-    const locale = el('select');
-    locale.dataset.testid = 'locale';
-    locale.setAttribute('aria-label', t('ctl.language'));
-    for (const code of ['es', 'en']) locale.add(new Option(code.toUpperCase(), code, false, code === store.get().locale));
-    locale.addEventListener('change', () => {
-      setLocale(locale.value);
-      store.set({ locale: locale.value });
-    });
-
-    const speed = el('select');
-    speed.dataset.testid = 'speed';
-    speed.setAttribute('aria-label', t('ctl.speed'));
-    for (const s of SPEEDS) speed.add(new Option(t(s.key), String(s.ms), false, s.ms === speedMs));
-    speed.addEventListener('change', () => {
-      speedMs = Number(speed.value);
-      if (store.get().playing) {
-        player?.stop();
-        player = createPlayer(store, sites, speedMs);
-        player.start();
-      }
-    });
-
-    playButton = el('button', 'btn-primary');
-    playButton.dataset.testid = 'play-toggle';
-    playButton.addEventListener('click', () => {
-      if (store.get().playing) {
-        player?.stop();
-      } else {
-        player = createPlayer(store, sites, speedMs);
-        player.start();
-      }
-    });
-
-    soundButton = el('button');
-    soundButton.dataset.testid = 'sound-toggle';
-    soundButton.addEventListener('click', () => {
-      const enabled = !store.get().soundEnabled;
-      const active = audioCue ? audioCue.setEnabled(enabled) : enabled;
-      store.set({ soundEnabled: active });
-    });
-
-    shadowButton = el('button');
-    shadowButton.dataset.testid = 'shadow-lift-toggle';
-    shadowButton.addEventListener('click', () => store.set({ shadowLift: !store.get().shadowLift }));
-
-    lrocButton = el('button');
-    lrocButton.dataset.testid = 'lroc-toggle';
-    lrocButton.addEventListener('click', () => store.set({ lrocTexture: store.get().lrocTexture === false }));
-
-    viewButton = el('button');
-    viewButton.dataset.testid = 'view-toggle';
-    viewButton.addEventListener('click', () => store.set({ viewMode: store.get().viewMode === 'free' ? 'follow' : 'free' }));
-
-    const analysisButton = el('button', '', t('analysis.open'));
-    analysisButton.dataset.testid = 'analysis-open';
-    analysisButton.addEventListener('click', () => analysis.open());
-
-    const compare = el('button', '', store.get().scenarios.B ? t('app.compareOff') : t('app.compare'));
-    compare.dataset.testid = 'compare-toggle';
-    compare.addEventListener('click', () => {
-      const { scenarios } = store.get();
-      store.set({ scenarios: { A: scenarios.A, B: scenarios.B ? null : { ...scenarios.A } } });
-    });
-
-    tools.append(locale, speed, playButton, soundButton, shadowButton, lrocButton, viewButton, analysisButton, compare);
-    header.append(tools);
+  /** The heading of the drawer and its close button. */
+  function buildDrawerHeader() {
+    const header = el('header', 'drawer-header');
+    const title = el('h2', 'drawer-title', t('ui.panelTitle'));
+    const close = el('button', 'drawer-close');
+    close.type = 'button';
+    close.dataset.testid = 'panel-close';
+    close.setAttribute('aria-label', t('ui.panelClose'));
+    close.title = t('ui.panelClose');
+    close.innerHTML =
+      '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+    close.addEventListener('click', () => store.set({ panelOpen: false }));
+    header.append(title, close);
     return header;
   }
 
@@ -205,7 +129,9 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
     views = {};
     root.replaceChildren();
     root.classList.add('app');
-    root.append(buildHeader());
+    root.setAttribute('role', 'region');
+    root.setAttribute('aria-label', t('ui.panelTitle'));
+    root.append(buildDrawerHeader());
 
     const grid = el('section', 'scenarios');
     for (const slot of state.scenarios.B ? ['A', 'B'] : ['A']) {
@@ -216,28 +142,23 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
     root.append(grid, el('footer', 'app-footer', t('app.attribution')));
   }
 
+  /** Open or close the drawer; closed, it is taken out of the tab order and hidden from screen readers. */
+  function syncDrawer(state) {
+    const open = Boolean(state.panelOpen);
+    root.classList.toggle('open', open);
+    root.classList.toggle('compare-open', Boolean(state.scenarios.B));
+    root.setAttribute('aria-hidden', String(!open));
+    if (open) root.removeAttribute('inert');
+    else root.setAttribute('inert', '');
+  }
+
   function update(state) {
     const key = `${state.locale}|${state.scenarios.B ? 'AB' : 'A'}`;
     if (key !== structureKey) {
       structureKey = key;
       rebuild(state);
     }
-    document.documentElement.lang = state.locale;
-    root.classList.toggle('compare-open', Boolean(state.scenarios.B));
-    playButton.textContent = state.playing ? t('app.pause') : t('app.play');
-    playButton.setAttribute('aria-pressed', String(state.playing));
-    soundButton.textContent = state.soundEnabled ? t('app.soundOff') : t('app.soundOn');
-    soundButton.setAttribute('aria-pressed', String(state.soundEnabled));
-    soundButton.setAttribute('aria-label', state.soundEnabled ? t('app.soundOff') : t('app.soundOn'));
-    shadowButton.textContent = t('app.shadowLift');
-    shadowButton.setAttribute('aria-pressed', String(Boolean(state.shadowLift)));
-    const hasLroc = Boolean(sites.get(state.scenarios.A.siteId)?.info.albedo);
-    lrocButton.textContent = t('app.lroc');
-    lrocButton.disabled = !hasLroc;
-    lrocButton.title = hasLroc ? '' : t('app.lrocNone');
-    lrocButton.setAttribute('aria-pressed', String(hasLroc && state.lrocTexture !== false));
-    viewButton.textContent = state.viewMode === 'free' ? t('app.viewFollow') : t('app.viewFree');
-    viewButton.setAttribute('aria-pressed', String(state.viewMode === 'free'));
+    syncDrawer(state);
     const metricsA = views.A.update(state);
     if (views.B && metricsA) views.B.update(state, metricsA);
   }
