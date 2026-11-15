@@ -12,7 +12,7 @@ import { buildPoiMarkers, createPoiTags } from './poiTags.js';
 import { findPois } from './pois.js';
 import { createRobotMesh, loadNasaRover } from './robotMesh.js';
 import { createSignPanel } from './signPanel.js';
-import { MAX_SLOPE_DEG, createRobot, followCamera, nextSignOpen, stepRobot } from './robot.js';
+import { MAX_SLOPE_DEG, createRobot, followCamera, nextSignOpen, speedFraction, stepRobot } from './robot.js';
 import { skyAt } from './sky.js';
 import { contains, heightAt, normalAt } from './terrainData.js';
 import { buildRocks, placeRocks } from './rocks.js';
@@ -298,12 +298,15 @@ export function mountScene(container, store, sites, audioCue = null) {
 
   /** Grains from the rear wheels while the rover drives; they fly on lunar-gravity parabolas. */
   function throwDust(dt) {
+    let speed = 0;
     if (dt > 0 && lastPos) {
       const dx = robot.x - lastPos.x;
       const dz = robot.z - lastPos.z;
       const moved = Math.hypot(dx, dz);
+      speed = speedFraction(moved, dt);
       if (moved > 0.001 && moved < 6) dust.emitFromWheels(robot, moved, dx / moved, dz / moved, moved / dt);
     }
+    audioCue?.setRoverSpeed?.(speed); // the motor is heard through the chassis only while driving
     lastPos = { x: robot.x, z: robot.z };
     dust.update(dt, (x, z) => heightAt(site.terrain, x, z));
   }

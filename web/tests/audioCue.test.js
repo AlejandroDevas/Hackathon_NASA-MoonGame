@@ -8,6 +8,7 @@ class FakeAudioContext {
     this.state = 'suspended';
     this.currentTime = 0;
     this.oscillators = [];
+    this.gains = [];
     this.noiseSources = [];
     this.filters = [];
     this.buffersCreated = 0;
@@ -58,7 +59,18 @@ class FakeAudioContext {
   }
 
   createGain() {
-    return { gain: { setValueAtTime() {}, exponentialRampToValueAtTime() {} }, connect() {} };
+    const g = {
+      gain: {
+        last: undefined,
+        setValueAtTime: (value) => (g.gain.last = value),
+        exponentialRampToValueAtTime() {},
+        setTargetAtTime: (value) => (g.gain.last = value),
+      },
+      connectedTo: [],
+      connect: (target) => g.connectedTo.push(target),
+    };
+    this.gains.push(g);
+    return g;
   }
 
   close() {
@@ -236,5 +248,194 @@ describe('radio cue (Quindar tones and static)', () => {
     const context = FakeAudioContext.instances[0];
     expect(context.oscillators).toHaveLength(0);
     expect(context.noiseSources).toHaveLength(0);
+  });
+});
+
+describe('master volume', () => {
+  const enabled = (options = {}) => {
+    const cue = createAudioCue({ AudioContextClass: FakeAudioContext, ...options });
+    cue.setEnabled(true);
+    return { cue, context: FakeAudioContext.instances[0] };
+  };
+  const masterOf = (context) => context.gains.find((g) => g.connectedTo.includes(context.destination));
+
+  test('there is one master gain into the speakers, at 0.6 by default', () => {
+    const { context } = enabled();
+    expect(masterOf(context).gain.last).toBe(0.6);
+  });
+
+  test('cues go through the master gain, never straight to the speakers', () => {
+    const { cue, context } = enabled();
+    cue.play('click');
+    cue.play('radio');
+    const master = masterOf(context);
+    const others = context.gains.filter((g) => g !== master);
+    expect(others.length).toBeGreaterThan(0);
+    for (const g of others) {
+      expect(g.connectedTo).toContain(master);
+      expect(g.connectedTo).not.toContain(context.destination);
+    }
+  });
+
+  test('setVolume changes the master gain and clamps to 0..1', () => {
+    const { cue, context } = enabled();
+    cue.setVolume(0.3);
+    expect(masterOf(context).gain.last).toBe(0.3);
+    cue.setVolume(5);
+    expect(masterOf(context).gain.last).toBe(1);
+    cue.setVolume(-1);
+    expect(masterOf(context).gain.last).toBe(0);
+  });
+
+  test('a volume chosen before sound is enabled is used when the context is built', () => {
+    const cue = createAudioCue({ AudioContextClass: FakeAudioContext });
+    cue.setVolume(0.25);
+    cue.setEnabled(true);
+    expect(masterOf(FakeAudioContext.instances[0]).gain.last).toBe(0.25);
+  });
+
+  test('setVolume ignores values that are not numbers', () => {
+    const { cue, context } = enabled();
+    cue.setVolume(0.4);
+    cue.setVolume(Number.NaN);
+    expect(masterOf(context).gain.last).toBe(0.4);
+  });
+});
+
+describe('ambient music lifecycle', () => {
+  function spyMusic() {
+    const music = { calls: [], created: [] };
+    music.factory = (context, output) => {
+      music.created.push({ context, output });
+      return {
+        start: () => music.calls.push('start'),
+        stop: () => music.calls.push('stop'),
+        setSunElevation: (deg) => music.calls.push(['sun', deg]),
+        dispose: () => music.calls.push('dispose'),
+      };
+    };
+    return music;
+  }
+
+  test('no music is made unless a factory is given', () => {
+    const cue = createAudioCue({ AudioContextClass: FakeAudioContext });
+    expect(() => {
+      cue.setEnabled(true);
+      cue.setSunElevation(1);
+      cue.setEnabled(false);
+    }).not.toThrow();
+  });
+
+  test('music is created only when sound is enabled, and is fed by the master gain', () => {
+    const music = spyMusic();
+    const cue = createAudioCue({ AudioContextClass: FakeAudioContext, createMusic: music.factory });
+    expect(music.created).toHaveLength(0);
+    cue.setEnabled(true);
+    const context = FakeAudioContext.instances[0];
+    expect(music.created).toHaveLength(1);
+    expect(music.created[0].context).toBe(context);
+    expect(music.created[0].output.connectedTo).toContain(context.destination);
+    expect(music.calls).toEqual(['start']);
+  });
+
+  test('muting stops the music and enabling again restarts the same instance', () => {
+    const music = spyMusic();
+    const cue = createAudioCue({ AudioContextClass: FakeAudioContext, createMusic: music.factory });
+    cue.setEnabled(true);
+    cue.setEnabled(false);
+    cue.setEnabled(true);
+    expect(music.created).toHaveLength(1);
+    expect(music.calls).toEqual(['start', 'stop', 'start']);
+  });
+
+  test('the Sun elevation is forwarded, including one given before the music exists', () => {
+    const music = spyMusic();
+    const cue = createAudioCue({ AudioContextClass: FakeAudioContext, createMusic: music.factory });
+    cue.setSunElevation(2);
+    cue.setEnabled(true);
+    cue.setSunElevation(-1);
+    expect(music.calls).toEqual([['sun', 2], 'start', ['sun', -1]]);
+  });
+
+  test('dispose disposes the music', () => {
+    const music = spyMusic();
+    const cue = createAudioCue({ AudioContextClass: FakeAudioContext, createMusic: music.factory });
+    cue.setEnabled(true);
+    cue.dispose();
+    expect(music.calls).toContain('dispose');
+  });
+
+  test('music that fails to build leaves the sound off instead of breaking the page', () => {
+    const cue = createAudioCue({
+      AudioContextClass: FakeAudioContext,
+      createMusic: () => {
+        throw new Error('boom');
+      },
+    });
+    expect(cue.setEnabled(true)).toBe(false);
+  });
+});
+
+describe('rover hum lifecycle', () => {
+  function spyHum() {
+    const hum = { calls: [], created: [] };
+    hum.factory = (context, output) => {
+      hum.created.push({ context, output });
+      return {
+        start: () => hum.calls.push('start'),
+        stop: () => hum.calls.push('stop'),
+        setSpeed: (v) => hum.calls.push(['speed', v]),
+        dispose: () => hum.calls.push('dispose'),
+      };
+    };
+    return hum;
+  }
+  const build = (hum) => createAudioCue({ AudioContextClass: FakeAudioContext, createHum: hum.factory });
+
+  test('no hum is made unless a factory is given', () => {
+    const cue = createAudioCue({ AudioContextClass: FakeAudioContext });
+    expect(() => {
+      cue.setEnabled(true);
+      cue.setRoverSpeed(0.5);
+      cue.setEnabled(false);
+    }).not.toThrow();
+  });
+
+  test('the hum exists only once sound is enabled, and is fed by the master gain', () => {
+    const hum = spyHum();
+    const cue = build(hum);
+    expect(hum.created).toHaveLength(0);
+    cue.setEnabled(true);
+    const context = FakeAudioContext.instances[0];
+    expect(hum.created).toHaveLength(1);
+    expect(hum.created[0].output.connectedTo).toContain(context.destination);
+    expect(hum.calls).toEqual(['start']);
+  });
+
+  test('muting stops the hum and enabling again restarts the same instance', () => {
+    const hum = spyHum();
+    const cue = build(hum);
+    cue.setEnabled(true);
+    cue.setEnabled(false);
+    cue.setEnabled(true);
+    expect(hum.created).toHaveLength(1);
+    expect(hum.calls).toEqual(['start', 'stop', 'start']);
+  });
+
+  test('the rover speed is forwarded, including one given before the hum exists', () => {
+    const hum = spyHum();
+    const cue = build(hum);
+    cue.setRoverSpeed(0.4);
+    cue.setEnabled(true);
+    cue.setRoverSpeed(0.9);
+    expect(hum.calls).toEqual([['speed', 0.4], 'start', ['speed', 0.9]]);
+  });
+
+  test('dispose disposes the hum', () => {
+    const hum = spyHum();
+    const cue = build(hum);
+    cue.setEnabled(true);
+    cue.dispose();
+    expect(hum.calls).toContain('dispose');
   });
 });

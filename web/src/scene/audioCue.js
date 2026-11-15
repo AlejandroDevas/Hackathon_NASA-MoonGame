@@ -17,14 +17,22 @@ const NOISE = {
   radio: [[0.25, 0.6, 0.02, 1800]],
 };
 
+const DEFAULT_VOLUME = 0.6;
+
 /**
  * Small optional Web Audio cue. The AudioContext is created only after an explicit
  * user action (browsers block audio before that), and never if Web Audio is missing.
  * @param {{ AudioContextClass?: typeof AudioContext | null }} [options] injectable for tests
  */
-export function createAudioCue({ AudioContextClass } = {}) {
+export function createAudioCue({ AudioContextClass, createMusic = null, createHum = null } = {}) {
   let context = null;
   let enabled = false;
+  let master = null; // every sound goes through this gain, which is the volume control
+  let music = null;
+  let hum = null; // the rover's motor, heard through its chassis
+  let roverSpeed = 0;
+  let volume = DEFAULT_VOLUME;
+  let sunElevationDeg = null;
   let noiseBuffer = null; // one second of white noise, built on first use and reused
 
   function getNoiseBuffer() {
@@ -50,7 +58,7 @@ export function createAudioCue({ AudioContextClass } = {}) {
     gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + length - 0.01);
     source.connect(filter);
     filter.connect(gain);
-    gain.connect(context.destination);
+    gain.connect(master);
     source.start(now + offset);
     source.stop(now + offset + length);
   }
@@ -58,7 +66,11 @@ export function createAudioCue({ AudioContextClass } = {}) {
   return {
     setEnabled(next) {
       enabled = Boolean(next);
-      if (!enabled) return false;
+      if (!enabled) {
+        music?.stop();
+        hum?.stop();
+        return false;
+      }
 
       const ContextClass =
         AudioContextClass === undefined ? window.AudioContext || window.webkitAudioContext : AudioContextClass;
@@ -68,11 +80,26 @@ export function createAudioCue({ AudioContextClass } = {}) {
       }
       try {
         context ??= new ContextClass();
+        if (!master) {
+          master = context.createGain();
+          master.gain.setValueAtTime(volume, context.currentTime);
+          master.connect(context.destination);
+        }
+        if (!music && createMusic) {
+          music = createMusic(context, master);
+          if (music && sunElevationDeg !== null) music.setSunElevation(sunElevationDeg);
+        }
+        if (!hum && createHum) {
+          hum = createHum(context, master);
+          if (hum && roverSpeed > 0) hum.setSpeed(roverSpeed); // it starts at rest otherwise
+        }
       } catch {
         enabled = false; // e.g. the browser refuses to create a context: stay silent instead of breaking the page
         return false;
       }
       if (context.state === 'suspended') context.resume().catch(() => {});
+      music?.start();
+      hum?.start();
       return enabled;
     },
     /** @param {string} [name] a key of CUES (and optionally NOISE); the sign cue by default, silence for an unknown name */
@@ -89,14 +116,36 @@ export function createAudioCue({ AudioContextClass } = {}) {
         gain.gain.exponentialRampToValueAtTime(peak, now + offset + Math.min(0.025, length / 4));
         gain.gain.exponentialRampToValueAtTime(0.0001, now + offset + length - 0.01);
         oscillator.connect(gain);
-        gain.connect(context.destination);
+        gain.connect(master);
         oscillator.start(now + offset);
         oscillator.stop(now + offset + length);
       }
       for (const band of NOISE[name] ?? []) playNoise(now, band);
     },
+    /** Master volume, 0..1. Kept if the context does not exist yet. */
+    setVolume(next) {
+      const value = Number(next);
+      if (!Number.isFinite(value)) return;
+      volume = Math.min(1, Math.max(0, value));
+      if (master && context) master.gain.setTargetAtTime(volume, context.currentTime, 0.05);
+    },
+    /** Lets the music follow the light. @param {number} deg Sun elevation in degrees */
+    setSunElevation(deg) {
+      sunElevationDeg = deg;
+      music?.setSunElevation(deg);
+    },
+    /** Drives the rover's motor hum. @param {number} fraction speed as a fraction of top speed, 0..1 */
+    setRoverSpeed(fraction) {
+      roverSpeed = fraction;
+      hum?.setSpeed(fraction);
+    },
     dispose() {
       enabled = false;
+      music?.dispose();
+      music = null;
+      hum?.dispose();
+      hum = null;
+      master = null;
       if (context && context.state !== 'closed') context.close();
       context = null;
       noiseBuffer = null;

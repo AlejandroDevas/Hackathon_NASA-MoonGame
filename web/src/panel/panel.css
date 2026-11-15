@@ -43,7 +43,8 @@ body {
 .header-tools button:hover, .header-tools select:hover { border-color: var(--sun); background: var(--surface-raised); }
 .header-tools button:active { transform: translateY(1px); }
 .header-tools button[aria-pressed='true']:not(.btn-primary) { border-color: var(--sun); color: var(--sun); }
-.header-tools select:focus-visible, .header-tools button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
+.header-tools input[type='range'] { width: 96px; min-height: 40px; margin: 0; accent-color: var(--sun); cursor: pointer; }
+.header-tools select:focus-visible, .header-tools button:focus-visible, .header-tools input[type='range']:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 .btn-primary { border-color: var(--sun) !important; background: var(--sun) !important; color: var(--ink) !important; font-weight: 700 !important; }
 .btn-primary:hover { filter: brightness(1.06); }
 .btn-primary[aria-pressed='true'] { background: #493a24 !important; color: var(--sun) !important; }

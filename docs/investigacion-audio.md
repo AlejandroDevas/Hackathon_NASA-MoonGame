@@ -1,6 +1,6 @@
 # Investigación de audio: música y efectos de sonido
 
-Fecha: 2026-11-15. Estado: fases 1 (clic y veredictos) y 2 (llamada de radio Quindar con estática) implementadas; el resto es propuesta.
+Fecha: 2026-11-15. Estado: fases 1 (clic y veredictos), 2 (llamada de radio Quindar con estática) y 3 (música generativa y volumen) y 4 (zumbido del rover por el chasis) implementadas; el resto es propuesta.
 
 ## 1. Restricciones del proyecto que condicionan la elección
 

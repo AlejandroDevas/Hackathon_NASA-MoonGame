@@ -15,7 +15,9 @@ import { mountPanel } from './panel/panel.js';
 import './panel/panel.css';
 import { renderTimeline } from './panel/timeline.js';
 import { mountScene } from './scene/view3d.js';
+import { createAmbientMusic } from './scene/ambientMusic.js';
 import { createAudioCue } from './scene/audioCue.js';
+import { createRoverHum } from './scene/roverHum.js';
 import './scene/scene.css';
 import { createStore } from './state.js';
 
@@ -47,7 +49,7 @@ async function main() {
       viewMode: 'follow',
       locale: 'es',
     });
-    const audioCue = createAudioCue();
+    const audioCue = createAudioCue({ createMusic: createAmbientMusic, createHum: createRoverHum });
     const scene = mountScene(document.getElementById('scene'), store, sites, audioCue);
     if (import.meta.env.DEV) window.__navigator = scene.debug;
     mountPanel(root, store, siteList, sites, { renderTimeline, audioCue });

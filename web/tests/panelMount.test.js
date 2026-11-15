@@ -273,3 +273,55 @@ describe('interface and verdict cues', () => {
     }).not.toThrow();
   });
 });
+
+describe('volume and music controls', () => {
+  test('a volume slider starts at the stored volume', () => {
+    const { root } = setup();
+    const slider = q(root, 'volume');
+    expect(slider.type).toBe('range');
+    expect(Number(slider.value)).toBeCloseTo(0.6);
+    expect(slider.getAttribute('aria-label')).toBe('Volumen');
+  });
+
+  test('moving the slider sets the cue volume and the stored volume', () => {
+    const volumes = [];
+    const { root, store } = setup({ setEnabled: (next) => next, setVolume: (v) => volumes.push(v) });
+    const slider = q(root, 'volume');
+    slider.value = '0.3';
+    slider.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(volumes).toEqual([0.3]);
+    expect(store.get().volume).toBe(0.3);
+  });
+
+  test('the slider keeps the stored volume when the panel is rebuilt (language change)', () => {
+    const { root, store } = setup();
+    store.set({ volume: 0.2 });
+    store.set({ locale: 'en' });
+    expect(Number(q(root, 'volume').value)).toBeCloseTo(0.2);
+  });
+
+  test('moving the slider works without an audio cue', () => {
+    const { root } = setup();
+    const slider = q(root, 'volume');
+    slider.value = '0.5';
+    expect(() => slider.dispatchEvent(new Event('input', { bubbles: true }))).not.toThrow();
+  });
+
+  test('the Sun elevation of scenario A is sent to the cue', () => {
+    const elevations = [];
+    const { root } = setup({ setEnabled: (next) => next, setSunElevation: (deg) => elevations.push(deg) });
+    expect(elevations.length).toBeGreaterThan(0);
+    expect(elevations.every((deg) => Number.isFinite(deg))).toBe(true);
+    expect(q(root, 'sun-countdown')).toBeTruthy();
+  });
+
+  test('scenario B does not drive the music', () => {
+    const elevations = [];
+    const { store } = setup({ setEnabled: (next) => next, setSunElevation: (deg) => elevations.push(deg) });
+    store.set({ scenarios: { ...store.get().scenarios, B: { siteId: 'other', timeMs: T0 + 9 * HOUR } } });
+    const afterB = elevations.length;
+    store.set({ windowMs: 48 * HOUR });
+    // each update sends exactly one elevation (A's), never two
+    expect(elevations.length - afterB).toBe(1);
+  });
+});

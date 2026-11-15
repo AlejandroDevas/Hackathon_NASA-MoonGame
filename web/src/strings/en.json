@@ -23,6 +23,7 @@
   "ctl.site": "Site",
   "ctl.language": "Language",
   "ctl.speed": "Animation speed",
+  "ctl.volume": "Volume",
   "ctl.time": "Date and time (UTC)",
   "ctl.window": "Analysis window",
   "ctl.window.1d": "1 day",

@@ -80,3 +80,16 @@ export function followCamera(state) {
 export function nextSignOpen(open, distanceM) {
   return open ? distanceM <= SIGN_CLOSE_M : distanceM < SIGN_OPEN_M;
 }
+
+/**
+ * How fast the rover went in one frame, as a fraction (0..1) of its boosted top speed. A jump far
+ * beyond what it can drive (it was placed somewhere else, not driven) counts as standing still.
+ * @param {number} movedM distance covered this frame, in metres
+ * @param {number} dtSeconds frame time
+ */
+export function speedFraction(movedM, dtSeconds) {
+  if (!(dtSeconds > 0) || !(movedM > 0)) return 0;
+  const top = ROBOT_SPEED * BOOST_FACTOR;
+  const speed = movedM / dtSeconds;
+  return speed > top * 2 ? 0 : Math.min(1, speed / top);
+}

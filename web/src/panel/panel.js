@@ -89,6 +89,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
         if (slot === 'A') {
           if (lastLevel !== null && verdict.level !== lastLevel && !state.playing) audioCue?.play?.(`verdict-${verdict.level}`);
           lastLevel = verdict.level;
+          audioCue?.setSunElevation?.(metrics.sunElDeg); // the music follows the light
         }
         if (diffEl && metricsA) renderDiff(diffEl, metricsA, metrics);
 
@@ -172,6 +173,20 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
       store.set({ soundEnabled: active });
     });
 
+    const volume = el('input');
+    volume.type = 'range';
+    volume.min = '0';
+    volume.max = '1';
+    volume.step = '0.05';
+    volume.value = String(store.get().volume ?? 0.6);
+    volume.dataset.testid = 'volume';
+    volume.setAttribute('aria-label', t('ctl.volume'));
+    volume.addEventListener('input', () => {
+      const next = Number(volume.value);
+      store.set({ volume: next });
+      audioCue?.setVolume?.(next);
+    });
+
     shadowButton = el('button');
     shadowButton.dataset.testid = 'shadow-lift-toggle';
     shadowButton.addEventListener('click', () => store.set({ shadowLift: !store.get().shadowLift }));
@@ -195,7 +210,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
       store.set({ scenarios: { A: scenarios.A, B: scenarios.B ? null : { ...scenarios.A } } });
     });
 
-    tools.append(locale, speed, playButton, soundButton, shadowButton, lrocButton, viewButton, analysisButton, compare);
+    tools.append(locale, speed, playButton, soundButton, volume, shadowButton, lrocButton, viewButton, analysisButton, compare);
     header.append(tools);
     return header;
   }

@@ -6,6 +6,7 @@ import {
   createRobot,
   followCamera,
   nextSignOpen,
+  speedFraction,
   stepRobot,
 } from '../src/scene/robot.js';
 import { heightAt } from '../src/scene/terrainData.js';
@@ -128,5 +129,24 @@ describe('stepRobot with a custom slope limit', () => {
     const r = stepRobot(createRobot(twentyDegrees, 0, 0, 90), go, twentyDegrees, 1);
     expect(r.blocked).toBe(false);
     expect(r.x).toBeCloseTo(4, 6);
+  });
+});
+
+describe('speedFraction', () => {
+  test('is 0 when no time has passed or the rover did not move', () => {
+    expect(speedFraction(1, 0)).toBe(0);
+    expect(speedFraction(0, 0.016)).toBe(0);
+  });
+
+  test('walking speed is a third of the boosted top speed', () => {
+    expect(speedFraction(ROBOT_SPEED * 0.1, 0.1)).toBeCloseTo(1 / BOOST_FACTOR);
+  });
+
+  test('boosted speed is 1', () => {
+    expect(speedFraction(ROBOT_SPEED * BOOST_FACTOR * 0.1, 0.1)).toBeCloseTo(1);
+  });
+
+  test('a jump far beyond the top speed (teleport on site change) counts as 0, not as flat out', () => {
+    expect(speedFraction(500, 0.016)).toBe(0);
   });
 });
