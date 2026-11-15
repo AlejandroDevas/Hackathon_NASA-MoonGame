@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { directionFromAzEl } from './sky.js';
 import { gridToScene, heightAt } from './terrainData.js';
 import { earthYaw, subLunarLongitudeDeg } from './earthView.js';
-import { createEarthTexture } from './earthTexture.js';
+import { createCloudTexture, createEarthTexture } from './earthTexture.js';
 import { createGlowTexture } from './glow.js';
 import { createRegolithTexture } from './regolith.js';
 import { buildTerrainGeometry } from './terrainMesh.js';
@@ -172,11 +172,27 @@ export function createWorld(site) {
     new THREE.MeshStandardMaterial({ map: createEarthTexture(), roughness: 1, metalness: 0 }),
   );
   earth.name = 'earth';
+  // clouds: a transparent shell a hair above the surface, lit by the same Sun
+  const clouds = new THREE.Mesh(
+    new THREE.SphereGeometry(BODY_DISTANCE_M * Math.tan(EARTH_RADIUS_DEG * RAD) * 1.012, 48, 32),
+    new THREE.MeshStandardMaterial({ map: createCloudTexture(), transparent: true, depthWrite: false, roughness: 1, metalness: 0 }),
+  );
+  clouds.name = 'earth-clouds';
+  clouds.castShadow = false;
+  clouds.receiveShadow = false;
+  earth.add(clouds);
   earth.castShadow = false;
   earth.receiveShadow = false;
   scene.add(earth);
 
   /** Move the Sun and Earth; `timeMs` (optional) turns the Earth so the right continents face the Moon. */
+  /** Swap the Earth's surface texture (NASA's image once it has loaded); the previous one is freed. */
+  function setEarthMap(texture) {
+    earth.material.map?.dispose();
+    earth.material.map = texture;
+    earth.material.needsUpdate = true;
+  }
+
   function updateSky(sky, timeMs = null) {
     const s = directionFromAzEl(sky.sun.azDeg, sky.sun.elDeg);
     sun.position.set(s.x, s.y, s.z).multiplyScalar(lightDistance);
@@ -205,5 +221,5 @@ export function createWorld(site) {
     ambient.intensity = on ? ambientBase * SHADOW_LIFT_FACTOR : ambientBase;
   }
 
-  return { scene, sun, sunDisc, sunGlow, earth, terrainMesh, ambient, updateSky, setShadowLift, eyeY, dispose };
+  return { scene, sun, sunDisc, sunGlow, earth, terrainMesh, ambient, updateSky, setEarthMap, setShadowLift, eyeY, dispose };
 }

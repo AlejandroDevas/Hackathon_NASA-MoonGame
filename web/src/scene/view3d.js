@@ -6,6 +6,7 @@ import { horizonAt } from '../metrics/visibility.js';
 import { siteOverview } from '../metrics/overview.js';
 import { createInput } from './input.js';
 import { createDust } from './dust.js';
+import { loadEarthImage } from './earthTexture.js';
 import { buildLander, disposeObject, footingAt, loadApolloModule } from './lander.js';
 import { buildPoiMarkers, createPoiTags } from './poiTags.js';
 import { findPois } from './pois.js';
@@ -132,6 +133,13 @@ export function mountScene(container, store, sites, audioCue = null) {
     world.scene.add(robotMesh);
     dust = createDust();
     world.scene.add(dust.mesh);
+    // NASA's Earth image replaces the procedural surface once loaded (if this world is still on screen)
+    const forWorld = world;
+    loadEarthImage(`${import.meta.env.BASE_URL}textures/earth.jpg`).then((texture) => {
+      if (!texture) return;
+      if (world !== forWorld) texture.dispose();
+      else forWorld.setEarthMap(texture);
+    });
     lastPos = null;
     if (!poiCache.has(id)) poiCache.set(id, findPois(site.terrain));
     pois = poiCache.get(id);

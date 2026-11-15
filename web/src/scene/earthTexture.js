@@ -100,14 +100,32 @@ const TUNDRA = [138, 140, 120];
 const ICE = [236, 240, 245];
 
 /**
+ * How much cloud covers each texel, 0..0.9: procedural noise, thicker in the mid latitudes
+ * and at the equator. Row 0 is the north pole.
+ */
+export function cloudCover(width = EARTH_WIDTH, height = EARTH_HEIGHT) {
+  const clouds = fbm(width, height, 8, 5, 91);
+  const cover = new Float32Array(width * height);
+  for (let y = 0; y < height; y++) {
+    const lat = 90 - (y / (height - 1)) * 180;
+    const band = 0.72 + 0.3 * Math.cos((lat * Math.PI) / 30) * Math.cos((lat * Math.PI) / 90);
+    for (let x = 0; x < width; x++) {
+      const i = y * width + x;
+      cover[i] = smoothstep(0.4, 0.68, clouds[i] * band + (clouds[i] - 0.5) * 0.4) * 0.9;
+    }
+  }
+  return cover;
+}
+
+/**
  * RGBA bytes (equirectangular: u = (longitude + 180) / 360, v from the north pole down)
  * of oceans, land, polar ice and clouds. Deterministic.
  * @returns {Uint8Array}
  */
-export function earthPixels(width = EARTH_WIDTH, height = EARTH_HEIGHT) {
+export function earthPixels(width = EARTH_WIDTH, height = EARTH_HEIGHT, { clouds: withClouds = true } = {}) {
   const coastNoise = fbm(width, height, 12, 4, 31);
   const climate = fbm(width, height, 6, 3, 57);
-  const clouds = fbm(width, height, 8, 5, 91);
+  const cover = withClouds ? cloudCover(width, height) : null;
   const pixels = new Uint8Array(width * height * 4);
   for (let y = 0; y < height; y++) {
     const lat = 90 - (y / (height - 1)) * 180;
@@ -132,10 +150,7 @@ export function earthPixels(width = EARTH_WIDTH, height = EARTH_HEIGHT) {
         color = mixColor(OCEAN_DEEP, OCEAN_SHALLOW, 0.25 + 0.5 * coastNoise[i]);
         color = mixColor(color, ICE, smoothstep(76, 84, Math.abs(lat)));
       }
-      // clouds: thicker bands in the mid latitudes and at the equator
-      const band = 0.72 + 0.3 * Math.cos((lat * Math.PI) / 30) * Math.cos((lat * Math.PI) / 90);
-      const cloud = smoothstep(0.4, 0.68, clouds[i] * band + (clouds[i] - 0.5) * 0.4) * 0.9;
-      color = mixColor(color, [250, 250, 252], cloud);
+      if (cover) color = mixColor(color, [250, 250, 252], cover[i]);
       pixels.set([color[0], color[1], color[2], 255], i * 4);
     }
   }
@@ -150,20 +165,57 @@ export function flipRows(pixels, width, height) {
   return out;
 }
 
-let cached = null;
+let cachedEarth = null;
+let cachedClouds = null;
 
-/** A new texture each call (a world disposes its own), from pixels computed once. */
-export function createEarthTexture() {
-  cached ??= flipRows(earthPixels(), EARTH_WIDTH, EARTH_HEIGHT);
-  const texture = new THREE.DataTexture(cached, EARTH_WIDTH, EARTH_HEIGHT, THREE.RGBAFormat);
+function configure(texture, name, anisotropy) {
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.ClampToEdgeWrapping;
   texture.magFilter = THREE.LinearFilter;
   texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.generateMipmaps = true;
-  texture.anisotropy = 4;
+  texture.anisotropy = anisotropy;
   texture.needsUpdate = true;
-  texture.name = 'earth';
+  texture.name = name;
   return texture;
+}
+
+/**
+ * The procedural Earth (no clouds: they are a separate shell). Used while NASA's image
+ * loads, or if it cannot. A new texture each call (a world disposes its own).
+ */
+export function createEarthTexture() {
+  cachedEarth ??= flipRows(earthPixels(EARTH_WIDTH, EARTH_HEIGHT, { clouds: false }), EARTH_WIDTH, EARTH_HEIGHT);
+  return configure(new THREE.DataTexture(cachedEarth, EARTH_WIDTH, EARTH_HEIGHT, THREE.RGBAFormat), 'earth', 4);
+}
+
+/** White RGBA with the cloud cover as alpha (row 0 = north pole, like earthPixels). */
+export function cloudPixels(width = EARTH_WIDTH, height = EARTH_HEIGHT) {
+  const cover = cloudCover(width, height);
+  const pixels = new Uint8Array(width * height * 4);
+  for (let i = 0; i < cover.length; i++) pixels.set([252, 252, 255, Math.round(cover[i] * 255)], i * 4);
+  return pixels;
+}
+
+/** Transparent cloud layer for a second, slightly larger sphere over the Earth. */
+export function createCloudTexture() {
+  cachedClouds ??= flipRows(cloudPixels(), EARTH_WIDTH, EARTH_HEIGHT);
+  return configure(new THREE.DataTexture(cachedClouds, EARTH_WIDTH, EARTH_HEIGHT, THREE.RGBAFormat), 'clouds', 4);
+}
+
+/**
+ * NASA's Blue Marble Next Generation image (January 2004 base map, resized to 2048 x 1024,
+ * deep ocean recoloured: see public/textures/README.md). Resolves to the texture, or to null
+ * (with a console warning) when it cannot be loaded, so the procedural Earth stays.
+ * @param {string} url
+ */
+export async function loadEarthImage(url) {
+  try {
+    const texture = await new THREE.TextureLoader().loadAsync(url);
+    return configure(texture, 'earth-nasa-blue-marble', 8);
+  } catch (error) {
+    console.warn('NASA Earth image could not be loaded; keeping the procedural Earth.', error);
+    return null;
+  }
 }
