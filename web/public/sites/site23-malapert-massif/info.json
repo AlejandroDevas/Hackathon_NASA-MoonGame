@@ -8,25 +8,31 @@
   "sign": {
     "es": {
       "title": "Macizo Malapert (Sitio 23)",
-      "body": "El macizo Malapert es una región candidata de Artemis III en el polo sur lunar. El terreno elevado puede favorecer comunicaciones y luz, mientras que la topografía cercana determina las condiciones en cada punto.",
+      "body": "El macizo Malapert es una gran montaña cerca del polo sur, a unos 0° de longitud. Se cree que es un resto del borde de la cuenca Polo Sur–Aitken, una de las mayores cicatrices de impacto del Sistema Solar.",
+      "why": "Una montaña alta puede ver la Tierra de forma casi continua y tener buena luz en su borde: dos ventajas clave para comunicaciones y energía. Esta herramienta te deja comprobarlo con números.",
       "facts": [
+        "LROC: se cree que es un resto del borde de la cuenca Polo Sur–Aitken, formada hace más de 4.000 millones de años.",
+        "Las páginas de NASA/LRO sobre Malapert destacan su buena visibilidad de la Tierra y la alta iluminación de su borde; compruébalo en «Tierra visible» y «Luz solar» de esta herramienta.",
         "NASA incluyó Malapert Massif entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
-        "PGDA identifica el Sitio 23 como Malapert massif y publica su topografía LOLA a 5 m por píxel."
+        "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
       ]
     },
     "en": {
       "title": "Malapert Massif (Site 23)",
-      "body": "Malapert Massif is an Artemis III candidate region at the lunar south pole. Elevated terrain may favor communications and lighting, while nearby topography determines conditions at each point.",
+      "body": "Malapert Massif is a large mountain near the south pole, at about 0° longitude. It is thought to be a remnant of the rim of the South Pole–Aitken basin, one of the largest impact scars in the Solar System.",
+      "why": "A tall mountain can see Earth almost continuously and have good light on its rim: two key advantages for communications and power. This tool lets you check it with numbers.",
       "facts": [
+        "LROC: it is thought to be a remnant of the South Pole–Aitken basin rim, which formed more than 4 billion years ago.",
+        "NASA/LRO pages on Malapert highlight its good Earth visibility and the high illumination of its rim; check it in this tool's \"Earth visible\" and \"Sunlight\" figures.",
         "NASA included Malapert Massif among the nine revised Artemis III candidate regions in 2024.",
-        "PGDA identifies Site 23 as Malapert massif and publishes its LOLA topography at 5 m per pixel."
+        "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
       ]
     }
   },
   "sources": [
+    "https://lroc.im-ldi.com/posts/1294",
     "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
     "https://pgda.gsfc.nasa.gov/products/78",
-    "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
     "https://doi.org/10.1016/j.pss.2020.105119"
   ],
   "ephemeris": {
@@ -43,7 +49,7 @@
     "file": "terrain.bin",
     "rows": 1001,
     "cols": 1001,
-    "pixel_m": 5.0,
+    "pixel_m": 5,
     "min_m": 4069.996337890625,
     "max_m": 4927.72265625,
     "observer_rc": [
@@ -56,18 +62,18 @@
     "sources": [
       {
         "file": "Site23_final_adj_5mpp_surf.tif",
-        "pixel_m": 5.0,
+        "pixel_m": 5,
         "requested_range_m": [
           0,
-          10000.0
+          10000
         ]
       },
       {
         "file": "LDEM_80S_80MPP_ADJ.TIF",
-        "pixel_m": 80.0,
+        "pixel_m": 80,
         "requested_range_m": [
-          7500.0,
-          300000.0
+          7500,
+          300000
         ]
       }
     ]

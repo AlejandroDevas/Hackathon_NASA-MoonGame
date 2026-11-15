@@ -8,22 +8,29 @@
   "sign": {
     "es": {
       "title": "Haworth",
-      "body": "Haworth es una de las regiones candidatas de Artemis III cerca del polo sur. En estas latitudes, el Sol recorre el cielo muy cerca del horizonte y pequeñas diferencias del relieve cambian las ventanas de iluminación.",
+      "body": "Haworth es un cráter de unos 50 km de diámetro cerca del polo sur; buena parte de su interior está en sombra permanente. La región cartografiada a 5 m cubre su entorno.",
+      "why": "Los cráteres como Haworth guardan zonas que no ven el Sol desde hace miles de millones de años: son los lugares donde se busca hielo de agua para futuras misiones.",
       "facts": [
+        "Un estudio con el altímetro LOLA analizó el interior en sombra permanente de Haworth, Shoemaker y Faustini, tres cráteres anteriores al período Nectárico, es decir, muy antiguos (Tye et al. 2015, NTRS 20150006822).",
         "NASA incluyó Haworth entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
-        "PGDA ofrece un DEM LOLA específico de Haworth a 5 m por píxel, en referencia lunar MOON_ME de DE421."
+        "PGDA ofrece un DEM LOLA específico de Haworth a 5 m por píxel, en el marco lunar MOON_ME de DE421.",
+        "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
       ]
     },
     "en": {
       "title": "Haworth",
-      "body": "Haworth is one of the Artemis III candidate regions near the lunar south pole. At these latitudes, the Sun travels close to the horizon, and small terrain differences change the available lighting windows.",
+      "body": "Haworth is a crater about 50 km across near the south pole; much of its interior is permanently shadowed. The 5 m map covers its surroundings.",
+      "why": "Craters like Haworth hold areas that have not seen the Sun for billions of years: they are where water ice is sought for future missions.",
       "facts": [
+        "A study with the LOLA altimeter analysed the permanently shadowed interiors of Haworth, Shoemaker and Faustini, three pre-Nectarian (very old) craters (Tye et al. 2015, NTRS 20150006822).",
         "NASA included Haworth among the nine revised Artemis III candidate regions in 2024.",
-        "PGDA provides a dedicated 5 m per pixel LOLA DEM for Haworth, referenced to the lunar MOON_ME frame of DE421."
+        "PGDA provides a dedicated 5 m per pixel LOLA DEM for Haworth, referenced to the lunar MOON_ME frame of DE421.",
+        "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
       ]
     }
   },
   "sources": [
+    "https://ntrs.nasa.gov/citations/20150006822",
     "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
     "https://pgda.gsfc.nasa.gov/products/78",
     "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
@@ -43,7 +50,7 @@
     "file": "terrain.bin",
     "rows": 1001,
     "cols": 1001,
-    "pixel_m": 5.0,
+    "pixel_m": 5,
     "min_m": 1408.6746826171875,
     "max_m": 1822.6756591796875,
     "observer_rc": [
@@ -56,18 +63,18 @@
     "sources": [
       {
         "file": "Haworth_final_adj_5mpp_surf.tif",
-        "pixel_m": 5.0,
+        "pixel_m": 5,
         "requested_range_m": [
           0,
-          10000.0
+          10000
         ]
       },
       {
         "file": "LDEM_80S_80MPP_ADJ.TIF",
-        "pixel_m": 80.0,
+        "pixel_m": 80,
         "requested_range_m": [
-          7500.0,
-          300000.0
+          7500,
+          300000
         ]
       }
     ]

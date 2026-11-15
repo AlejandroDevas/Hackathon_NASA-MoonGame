@@ -8,24 +8,33 @@
   "sign": {
     "es": {
       "title": "Borde de Shackleton (Sitio 04)",
-      "body": "Esta región del polo sur lunar está representada por topografía LOLA de alta resolución. El relieve local controla cuándo el Sol asoma sobre el horizonte y cuándo la Tierra queda visible desde el terreno.",
+      "body": "Shackleton es un cráter de unos 21 km de ancho y más de 4 km de profundidad. Casi todo su interior está en sombra permanente; los picos de su borde, en cambio, reciben luz solar.",
+      "why": "Es el contraste más extremo del polo sur: el frío eterno del fondo, donde puede haber hielo, a pocos kilómetros de bordes con mucha luz y buena línea de vista.",
       "facts": [
-        "El producto de PGDA identifica el Sitio 04 como el borde de Shackleton y ofrece un DEM de elevación a 5 m por píxel.",
-        "Los DEM polares de esta familia tienen cerca del 90 % de sus píxeles interpolados; la incertidumbre típica de altura citada por Barker et al. es de 0,30–0,50 m."
+        "Shackleton mide unos 21 km de diámetro y más de 4 km de profundidad (NASA).",
+        "El altímetro láser LOLA de LRO lo muestra como un cráter antiguo (más de 3.000 millones de años) y muy bien conservado: sus paredes interiores están menos erosionadas que el suelo y el borde (Zuber et al. 2012, NTRS 20120013758).",
+        "Su suelo es más brillante que el terreno vecino; se propuso hielo superficial (~20 %) como explicación posible, pero sigue siendo una hipótesis (Zuber et al. 2012).",
+        "Las listas de regiones candidatas de NASA nombran zonas cercanas, como «Connecting Ridge» y «Peak Near Shackleton»; este mapa (Sitio 04) viene de los estudios LOLA de Barker et al. 2021.",
+        "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
       ]
     },
     "en": {
       "title": "Shackleton Rim (Site 04)",
-      "body": "This lunar south pole region is represented by high-resolution LOLA topography. Local relief controls when the Sun rises above the horizon and when Earth is visible from the terrain.",
+      "body": "Shackleton is a crater about 21 km wide and more than 4 km deep. Almost all of its interior is permanently shadowed; the peaks on its rim, however, receive sunlight.",
+      "why": "It is the most extreme contrast at the south pole: the eternal cold of the floor, where ice may exist, a few kilometres from brightly lit rims with a good line of sight.",
       "facts": [
-        "PGDA identifies Site 04 as Shackleton rim and provides a 5 m per pixel elevation DEM.",
-        "About 90% of pixels in this family of polar DEMs are interpolated; Barker et al. report typical height uncertainty of 0.30–0.50 m."
+        "Shackleton is about 21 km in diameter and more than 4 km deep (NASA).",
+        "LRO's LOLA laser altimeter shows an ancient (over 3 billion years) and unusually well-preserved crater: its inner walls are fresher than the floor and rim (Zuber et al. 2012, NTRS 20120013758).",
+        "Its floor is brighter than the surrounding terrain; about 20% surface ice was proposed as a possible explanation, but it remains a hypothesis (Zuber et al. 2012).",
+        "NASA candidate-region lists name nearby areas such as \"Connecting Ridge\" and \"Peak Near Shackleton\"; this map (Site 04) comes from the LOLA studies by Barker et al. 2021.",
+        "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
       ]
     }
   },
   "sources": [
+    "https://ntrs.nasa.gov/citations/20120013758",
+    "https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-Moon/",
     "https://pgda.gsfc.nasa.gov/products/78",
-    "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
     "https://doi.org/10.1016/j.pss.2020.105119"
   ],
   "ephemeris": {
@@ -42,7 +51,7 @@
     "file": "terrain.bin",
     "rows": 1001,
     "cols": 1001,
-    "pixel_m": 5.0,
+    "pixel_m": 5,
     "min_m": -836.4898681640625,
     "max_m": 1739.121826171875,
     "observer_rc": [
@@ -55,18 +64,18 @@
     "sources": [
       {
         "file": "Site04_final_adj_5mpp_surf.tif",
-        "pixel_m": 5.0,
+        "pixel_m": 5,
         "requested_range_m": [
           0,
-          10000.0
+          10000
         ]
       },
       {
         "file": "LDEM_80S_80MPP_ADJ.TIF",
-        "pixel_m": 80.0,
+        "pixel_m": 80,
         "requested_range_m": [
-          7500.0,
-          300000.0
+          7500,
+          300000
         ]
       }
     ]

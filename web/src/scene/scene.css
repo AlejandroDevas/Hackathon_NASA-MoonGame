@@ -25,16 +25,42 @@
 .scene-sign p { margin: 0 0 9px; font-size: 13px; }
 .scene-sign ul { margin: 0 0 9px; padding-left: 18px; font-size: 13px; }
 .scene-sign-hint { color: var(--muted); font-size: 12px !important; }
-.scene-route { position: absolute; top: 16px; left: 16px; max-width: min(360px, calc(100% - 32px)); padding: 9px 13px; border: 1px solid var(--amber); border-radius: 4px; background: #090909e8; color: var(--amber); font-size: 13px; font-weight: 500; }
+.scene-route { position: absolute; top: 84px; left: 16px; max-width: min(360px, calc(100% - 32px)); padding: 9px 13px; border: 1px solid var(--amber); border-radius: 4px; background: #090909e8; color: var(--amber); font-size: 13px; font-weight: 500; }
 .scene-route[hidden] { display: none; }
 
 @media (max-width: 520px) {
   .scene-root { height: 52vh; min-height: 270px; }
   .scene-help { left: 10px; bottom: 10px; max-width: calc(100% - 20px); font-size: 10px; }
   .scene-sign { top: 10px; right: 10px; width: min(360px, calc(100% - 20px)); max-height: 58%; }
-  .scene-route { top: 10px; left: 10px; max-width: calc(100% - 20px); }
+  .scene-route { top: 82px; left: 10px; max-width: calc(100% - 20px); }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .scene-sign { transition-duration: .01ms; }
+}
+
+/* landmarks, sky readout and sign details */
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; list-style: none; }
+.scene-tags { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.scene-tag { position: absolute; left: 0; top: 0; display: grid; gap: 1px; padding: 5px 9px; border: 1px solid #d4ad5b66; border-radius: 4px; background: #090909cc; color: var(--text); font-size: 11px; line-height: 1.25; white-space: nowrap; text-align: center; will-change: transform; }
+.scene-tag[hidden] { display: none; }
+.scene-tag::after { content: ''; position: absolute; left: 50%; top: 100%; width: 1px; height: 6px; background: #d4ad5b99; }
+.scene-tag-name { font-weight: 600; color: var(--sun); letter-spacing: .02em; }
+.scene-tag-high .scene-tag-name, .scene-tag-low .scene-tag-name { color: var(--earth); }
+.scene-tag-detail { color: var(--muted); font-family: var(--font-mono); font-size: 10px; }
+.scene-sky { position: absolute; left: 16px; top: 16px; display: grid; gap: 3px; max-width: min(520px, calc(100% - 32px)); padding: 8px 12px; border: 1px solid #d4ad5b55; border-radius: 4px; background: #090909df; font-family: var(--font-mono); font-size: 11px; backdrop-filter: blur(8px); }
+.scene-sky-sun { color: var(--sun); }
+.scene-sky-earth { color: var(--earth); }
+.scene-sky-row.hidden-body { opacity: .62; }
+.scene-sign.open { pointer-events: auto; }
+.scene-sign h4 { margin: 0 0 4px; color: var(--sun); font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
+.scene-sign-block { margin: 0 0 11px; padding-top: 9px; border-top: 1px solid var(--border); }
+.scene-sign-data { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; margin: 0 0 6px; }
+.scene-sign-data dt { color: var(--muted); font-size: 11px; }
+.scene-sign-data dd { margin: 0; font-family: var(--font-mono); font-size: 13px; }
+.scene-sign-note, .scene-sign-sources { color: var(--muted); font-size: 11px !important; }
+.scene-sign-sources a { color: var(--sun); }
+
+@media (max-width: 520px) {
+  .scene-sky { left: 10px; top: 10px; max-width: calc(100% - 20px); font-size: 10px; }
 }

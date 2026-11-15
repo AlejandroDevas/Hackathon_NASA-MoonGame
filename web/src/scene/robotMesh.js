@@ -39,11 +39,19 @@ export function createRobotMesh() {
   return robot;
 }
 
-/** Load NASA's detailed rover model into the existing steerable wrapper. */
-export async function loadNasaRover(robot, url) {
+/**
+ * Load NASA's detailed rover model into the existing steerable wrapper. The GLB is
+ * Draco-compressed, so the (local) Draco decoder in `decoderPath` is needed to open it.
+ */
+export async function loadNasaRover(robot, url, decoderPath = `${import.meta.env.BASE_URL}draco/`) {
+  let draco = null;
   try {
     const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+    const { DRACOLoader } = await import('three/addons/loaders/DRACOLoader.js');
     const loader = new GLTFLoader();
+    draco = new DRACOLoader();
+    draco.setDecoderPath(decoderPath);
+    loader.setDRACOLoader(draco);
     const gltf = await loader.loadAsync(url);
     const model = gltf.scene;
     if (!robot.parent) {
@@ -83,6 +91,8 @@ export async function loadNasaRover(robot, url) {
   } catch (error) {
     console.warn('NASA rover model could not be loaded; keeping the simplified rover.', error);
     return null;
+  } finally {
+    draco?.dispose();
   }
 }
 

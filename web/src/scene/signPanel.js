@@ -1,10 +1,41 @@
-import { t } from '../i18n.js';
+import { formatDuration, t } from '../i18n.js';
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
   if (text !== undefined) node.textContent = text;
   return node;
+}
+
+const percent = (fraction) => `${Math.round(fraction * 100)} %`;
+
+/** "pgda.gsfc.nasa.gov", "doi.org"... used as the visible name of a source link. */
+function sourceLabel(url) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
+}
+
+function dataBlock(overview) {
+  const years = `${new Date(overview.fromMs).getUTCFullYear()}–${new Date(overview.toMs).getUTCFullYear()}`;
+  const list = el('dl', 'scene-sign-data');
+  const rows = [
+    ['sign.sunFraction', percent(overview.sunFraction)],
+    ['sign.longestSun', formatDuration(overview.longestSunMs)],
+    ['sign.longestDark', formatDuration(overview.longestDarkMs)],
+    ['sign.earthFraction', percent(overview.earthFraction)],
+    ['sign.longestEarthGap', formatDuration(overview.longestEarthGapMs)],
+  ];
+  for (const [key, value] of rows) {
+    const row = el('div');
+    row.append(el('dt', '', t(key)), el('dd', '', value));
+    list.append(row);
+  }
+  const wrap = el('section', 'scene-sign-block');
+  wrap.append(el('h4', '', t('sign.data', { years })), list, el('p', 'scene-sign-note', t('sign.dataNote')));
+  return wrap;
 }
 
 /**
@@ -20,11 +51,38 @@ export function createSignPanel() {
 
   return {
     el: root,
-    setInfo(info, locale) {
+    /**
+     * @param {object} info the site's info.json
+     * @param {string} locale
+     * @param {object} [overview] whole-dataset statistics (see siteOverview); omitted in tests
+     */
+    setInfo(info, locale, overview = null) {
       const sign = info.sign[locale] ?? info.sign.es;
       const facts = el('ul');
       for (const fact of sign.facts) facts.append(el('li', '', fact));
-      root.replaceChildren(el('h3', '', sign.title), el('p', '', sign.body), facts, el('p', 'scene-sign-hint', t('scene.signClose')));
+      const parts = [el('h3', '', sign.title), el('p', '', sign.body)];
+      if (sign.why) {
+        const why = el('section', 'scene-sign-block');
+        why.append(el('h4', '', t('sign.why')), el('p', '', sign.why));
+        parts.push(why);
+      }
+      parts.push(facts);
+      if (overview) parts.push(dataBlock(overview));
+      if (info.sources?.length) {
+        const sources = el('p', 'scene-sign-sources');
+        sources.append(`${t('sign.sources')}: `);
+        info.sources.forEach((url, i) => {
+          const link = el('a', '', sourceLabel(url));
+          link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          if (i > 0) sources.append(' · ');
+          sources.append(link);
+        });
+        parts.push(sources);
+      }
+      parts.push(el('p', 'scene-sign-hint', t('scene.signClose')));
+      root.replaceChildren(...parts);
     },
     setOpen(next) {
       open = Boolean(next);

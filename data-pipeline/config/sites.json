@@ -9,26 +9,32 @@
     "sign": {
       "es": {
         "title": "Cresta de conexión (Sitio 01)",
-        "body": "Una de las zonas del polo sur lunar estudiadas con topografía láser LOLA de 5 m por píxel. Aquí el Sol nunca se aleja mucho del horizonte, así que el relieve decide qué puntos reciben luz casi continua y cuáles se quedan en sombra.",
+        "body": "Es la cresta que une los bordes de los cráteres Shackleton y de Gerlache. Su altura la mantiene al sol buena parte del tiempo, pero ningún punto está siempre iluminado: el relieve decide cuánto.",
+        "why": "Para una misión con paneles solares es una de las zonas más prometedoras: ventanas largas de luz, y cráteres en sombra permanente (posible hielo de agua) a poca distancia.",
         "facts": [
+          "LROC: las partes altas de la cresta pueden estar iluminadas hasta ~90 % del tiempo, pero ningún punto lo está siempre (LROC, «Islands in the Dark»).",
+          "Un estudio de NASA sobre actividades extravehiculares de Artemis III cita ~56 % de iluminación anual en el punto estudiado; las cifras difieren porque miden puntos y métodos distintos (NTRS 20210026296).",
           "Entre el 1 de enero de 2024 y el 1 de enero de 2026, el Sitio 1 fue el de mayor superficie con iluminación media superior al 70 % a 1 m sobre el suelo (Barker et al. 2021).",
-          "A 5 m sobre el suelo, el Sitio 1 tiene periodos de iluminación continua más largos que los demás sitios estudiados.",
-          "Cerca del 90 % de los píxeles del mapa están interpolados; el error de altura típico es de 0,30 a 0,50 m (RMS)."
+          "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
         ]
       },
       "en": {
         "title": "Connecting Ridge (Site 01)",
-        "body": "One of the lunar south pole regions mapped with 5 m/pixel LOLA laser topography. Here the Sun never strays far from the horizon, so terrain decides which spots get near-continuous light and which stay in shadow.",
+        "body": "This is the ridge joining the rims of Shackleton and de Gerlache craters. Its height keeps it in sunlight much of the time, but no point is always lit: terrain decides how much.",
+        "why": "For a solar-powered mission it is one of the most promising places: long lighting windows, with permanently shadowed craters (possible water ice) nearby.",
         "facts": [
+          "LROC: the higher parts of the ridge can be lit up to ~90% of the time, but no point is permanently lit (LROC, \"Islands in the Dark\").",
+          "A NASA study of Artemis III spacewalk capability cites ~56% annual illumination at the studied spot; figures differ because they measure different points and methods (NTRS 20210026296).",
           "Between 1 Jan 2024 and 1 Jan 2026, Site 1 had the largest area with average illumination above 70% at 1 m above the surface (Barker et al. 2021).",
-          "At 5 m above the surface, Site 1 has longer continuous illumination periods than the other sites studied.",
-          "About 90% of the map's pixels are interpolated; typical height error is 0.30 to 0.50 m (RMS)."
+          "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
         ]
       }
     },
     "sources": [
+      "https://lroc.im-ldi.com/images/1105",
+      "https://ntrs.nasa.gov/api/citations/20210026296/downloads/Scoville%20Final%20presentation%20-%20compressed.pptx.pdf",
+      "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
       "https://pgda.gsfc.nasa.gov/products/78",
-      "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "https://doi.org/10.1016/j.pss.2020.105119"
     ]
   },
@@ -42,24 +48,33 @@
     "sign": {
       "es": {
         "title": "Borde de Shackleton (Sitio 04)",
-        "body": "Esta región del polo sur lunar está representada por topografía LOLA de alta resolución. El relieve local controla cuándo el Sol asoma sobre el horizonte y cuándo la Tierra queda visible desde el terreno.",
+        "body": "Shackleton es un cráter de unos 21 km de ancho y más de 4 km de profundidad. Casi todo su interior está en sombra permanente; los picos de su borde, en cambio, reciben luz solar.",
+        "why": "Es el contraste más extremo del polo sur: el frío eterno del fondo, donde puede haber hielo, a pocos kilómetros de bordes con mucha luz y buena línea de vista.",
         "facts": [
-          "El producto de PGDA identifica el Sitio 04 como el borde de Shackleton y ofrece un DEM de elevación a 5 m por píxel.",
-          "Los DEM polares de esta familia tienen cerca del 90 % de sus píxeles interpolados; la incertidumbre típica de altura citada por Barker et al. es de 0,30–0,50 m."
+          "Shackleton mide unos 21 km de diámetro y más de 4 km de profundidad (NASA).",
+          "El altímetro láser LOLA de LRO lo muestra como un cráter antiguo (más de 3.000 millones de años) y muy bien conservado: sus paredes interiores están menos erosionadas que el suelo y el borde (Zuber et al. 2012, NTRS 20120013758).",
+          "Su suelo es más brillante que el terreno vecino; se propuso hielo superficial (~20 %) como explicación posible, pero sigue siendo una hipótesis (Zuber et al. 2012).",
+          "Las listas de regiones candidatas de NASA nombran zonas cercanas, como «Connecting Ridge» y «Peak Near Shackleton»; este mapa (Sitio 04) viene de los estudios LOLA de Barker et al. 2021.",
+          "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
         ]
       },
       "en": {
         "title": "Shackleton Rim (Site 04)",
-        "body": "This lunar south pole region is represented by high-resolution LOLA topography. Local relief controls when the Sun rises above the horizon and when Earth is visible from the terrain.",
+        "body": "Shackleton is a crater about 21 km wide and more than 4 km deep. Almost all of its interior is permanently shadowed; the peaks on its rim, however, receive sunlight.",
+        "why": "It is the most extreme contrast at the south pole: the eternal cold of the floor, where ice may exist, a few kilometres from brightly lit rims with a good line of sight.",
         "facts": [
-          "PGDA identifies Site 04 as Shackleton rim and provides a 5 m per pixel elevation DEM.",
-          "About 90% of pixels in this family of polar DEMs are interpolated; Barker et al. report typical height uncertainty of 0.30–0.50 m."
+          "Shackleton is about 21 km in diameter and more than 4 km deep (NASA).",
+          "LRO's LOLA laser altimeter shows an ancient (over 3 billion years) and unusually well-preserved crater: its inner walls are fresher than the floor and rim (Zuber et al. 2012, NTRS 20120013758).",
+          "Its floor is brighter than the surrounding terrain; about 20% surface ice was proposed as a possible explanation, but it remains a hypothesis (Zuber et al. 2012).",
+          "NASA candidate-region lists name nearby areas such as \"Connecting Ridge\" and \"Peak Near Shackleton\"; this map (Site 04) comes from the LOLA studies by Barker et al. 2021.",
+          "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
         ]
       }
     },
     "sources": [
+      "https://ntrs.nasa.gov/citations/20120013758",
+      "https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-Moon/",
       "https://pgda.gsfc.nasa.gov/products/78",
-      "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "https://doi.org/10.1016/j.pss.2020.105119"
     ]
   },
@@ -73,53 +88,67 @@
     "sign": {
       "es": {
         "title": "Borde de Nobile 1 (Sitio 06)",
-        "body": "Nobile Rim 1 es una región candidata del polo sur lunar. Su relieve y orientación hacen que las ventanas de luz y la visibilidad de la Tierra dependan del punto exacto del terreno.",
+        "body": "Región del borde del cráter Nobile, un cráter de unos 79 km de diámetro cerca del polo sur. Su relieve y su orientación hacen que la luz y la visibilidad de la Tierra dependan mucho del punto exacto.",
+        "why": "Nobile Rim 1 está entre las nueve regiones que NASA revisó en 2024 para Artemis III: es un ejemplo de zona donde la luz y la comunicación hay que comprobarlas punto por punto.",
         "facts": [
-          "El producto de PGDA identifica el Sitio 06 como Nobile rim 1 y ofrece un DEM de elevación LOLA a 5 m por píxel.",
-          "La cuadrícula está en el marco lunar MOON_ME de DE421 y usa estereográfica polar con coordenadas en metros."
+          "El cráter Nobile mide unos 79 km y lleva el nombre del explorador y aviador italiano Umberto Nobile (nombre aprobado por la IAU en 1994; USGS Gazetteer).",
+          "NASA incluyó Nobile Rim 1 entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
+          "La cuadrícula del mapa está en el marco lunar MOON_ME de DE421 y usa proyección estereográfica polar con coordenadas en metros.",
+          "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
         ]
       },
       "en": {
         "title": "Nobile Rim 1 (Site 06)",
-        "body": "Nobile Rim 1 is a candidate lunar south pole region. Its relief and orientation mean that lighting windows and Earth visibility depend on the exact point on the terrain.",
+        "body": "A region on the rim of Nobile crater, about 79 km across, near the south pole. Its relief and orientation make light and Earth visibility depend strongly on the exact spot.",
+        "why": "Nobile Rim 1 is among the nine regions NASA reviewed in 2024 for Artemis III: a place where light and communications must be checked spot by spot.",
         "facts": [
-          "PGDA identifies Site 06 as Nobile rim 1 and provides a 5 m per pixel LOLA elevation DEM.",
-          "The grid uses the lunar MOON_ME frame of DE421 and polar stereographic coordinates in metres."
+          "Nobile crater is about 79 km across and is named for the Italian explorer and aviator Umberto Nobile (name approved by the IAU in 1994; USGS Gazetteer).",
+          "NASA included Nobile Rim 1 among the nine revised Artemis III candidate regions in 2024.",
+          "The map grid uses the DE421 lunar MOON_ME frame and a polar stereographic projection with coordinates in metres.",
+          "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
         ]
       }
     },
     "sources": [
+      "https://planetarynames.wr.usgs.gov/Feature/4321",
+      "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
       "https://pgda.gsfc.nasa.gov/products/78",
-      "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "https://doi.org/10.1016/j.pss.2020.105119"
     ]
   },
   {
     "id": "haworth",
     "name": "Haworth",
-    "lat_deg": -86.7639420,
+    "lat_deg": -86.763942,
     "lon_deg": -22.7770238,
     "observer_height_m": 2.0,
     "coordinates_source": "Centro geométrico de la extensión del DEM Haworth_final_adj_5mpp_surf.tif de PGDA (x -52900..-23100 m, y 75600..105400 m, estereográfica polar MOON_ME), convertido a lat/lon con pyproj. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
     "sign": {
       "es": {
         "title": "Haworth",
-        "body": "Haworth es una de las regiones candidatas de Artemis III cerca del polo sur. En estas latitudes, el Sol recorre el cielo muy cerca del horizonte y pequeñas diferencias del relieve cambian las ventanas de iluminación.",
+        "body": "Haworth es un cráter de unos 50 km de diámetro cerca del polo sur; buena parte de su interior está en sombra permanente. La región cartografiada a 5 m cubre su entorno.",
+        "why": "Los cráteres como Haworth guardan zonas que no ven el Sol desde hace miles de millones de años: son los lugares donde se busca hielo de agua para futuras misiones.",
         "facts": [
+          "Un estudio con el altímetro LOLA analizó el interior en sombra permanente de Haworth, Shoemaker y Faustini, tres cráteres anteriores al período Nectárico, es decir, muy antiguos (Tye et al. 2015, NTRS 20150006822).",
           "NASA incluyó Haworth entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
-          "PGDA ofrece un DEM LOLA específico de Haworth a 5 m por píxel, en referencia lunar MOON_ME de DE421."
+          "PGDA ofrece un DEM LOLA específico de Haworth a 5 m por píxel, en el marco lunar MOON_ME de DE421.",
+          "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
         ]
       },
       "en": {
         "title": "Haworth",
-        "body": "Haworth is one of the Artemis III candidate regions near the lunar south pole. At these latitudes, the Sun travels close to the horizon, and small terrain differences change the available lighting windows.",
+        "body": "Haworth is a crater about 50 km across near the south pole; much of its interior is permanently shadowed. The 5 m map covers its surroundings.",
+        "why": "Craters like Haworth hold areas that have not seen the Sun for billions of years: they are where water ice is sought for future missions.",
         "facts": [
+          "A study with the LOLA altimeter analysed the permanently shadowed interiors of Haworth, Shoemaker and Faustini, three pre-Nectarian (very old) craters (Tye et al. 2015, NTRS 20150006822).",
           "NASA included Haworth among the nine revised Artemis III candidate regions in 2024.",
-          "PGDA provides a dedicated 5 m per pixel LOLA DEM for Haworth, referenced to the lunar MOON_ME frame of DE421."
+          "PGDA provides a dedicated 5 m per pixel LOLA DEM for Haworth, referenced to the lunar MOON_ME frame of DE421.",
+          "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
         ]
       }
     },
     "sources": [
+      "https://ntrs.nasa.gov/citations/20150006822",
       "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
       "https://pgda.gsfc.nasa.gov/products/78",
       "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
@@ -136,25 +165,31 @@
     "sign": {
       "es": {
         "title": "Macizo Malapert (Sitio 23)",
-        "body": "El macizo Malapert es una región candidata de Artemis III en el polo sur lunar. El terreno elevado puede favorecer comunicaciones y luz, mientras que la topografía cercana determina las condiciones en cada punto.",
+        "body": "El macizo Malapert es una gran montaña cerca del polo sur, a unos 0° de longitud. Se cree que es un resto del borde de la cuenca Polo Sur–Aitken, una de las mayores cicatrices de impacto del Sistema Solar.",
+        "why": "Una montaña alta puede ver la Tierra de forma casi continua y tener buena luz en su borde: dos ventajas clave para comunicaciones y energía. Esta herramienta te deja comprobarlo con números.",
         "facts": [
+          "LROC: se cree que es un resto del borde de la cuenca Polo Sur–Aitken, formada hace más de 4.000 millones de años.",
+          "Las páginas de NASA/LRO sobre Malapert destacan su buena visibilidad de la Tierra y la alta iluminación de su borde; compruébalo en «Tierra visible» y «Luz solar» de esta herramienta.",
           "NASA incluyó Malapert Massif entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
-          "PGDA identifica el Sitio 23 como Malapert massif y publica su topografía LOLA a 5 m por píxel."
+          "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
         ]
       },
       "en": {
         "title": "Malapert Massif (Site 23)",
-        "body": "Malapert Massif is an Artemis III candidate region at the lunar south pole. Elevated terrain may favor communications and lighting, while nearby topography determines conditions at each point.",
+        "body": "Malapert Massif is a large mountain near the south pole, at about 0° longitude. It is thought to be a remnant of the rim of the South Pole–Aitken basin, one of the largest impact scars in the Solar System.",
+        "why": "A tall mountain can see Earth almost continuously and have good light on its rim: two key advantages for communications and power. This tool lets you check it with numbers.",
         "facts": [
+          "LROC: it is thought to be a remnant of the South Pole–Aitken basin rim, which formed more than 4 billion years ago.",
+          "NASA/LRO pages on Malapert highlight its good Earth visibility and the high illumination of its rim; check it in this tool's \"Earth visible\" and \"Sunlight\" figures.",
           "NASA included Malapert Massif among the nine revised Artemis III candidate regions in 2024.",
-          "PGDA identifies Site 23 as Malapert massif and publishes its LOLA topography at 5 m per pixel."
+          "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
         ]
       }
     },
     "sources": [
+      "https://lroc.im-ldi.com/posts/1294",
       "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
       "https://pgda.gsfc.nasa.gov/products/78",
-      "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
       "https://doi.org/10.1016/j.pss.2020.105119"
     ]
   }

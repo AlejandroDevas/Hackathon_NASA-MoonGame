@@ -8,24 +8,31 @@
   "sign": {
     "es": {
       "title": "Borde de Nobile 1 (Sitio 06)",
-      "body": "Nobile Rim 1 es una región candidata del polo sur lunar. Su relieve y orientación hacen que las ventanas de luz y la visibilidad de la Tierra dependan del punto exacto del terreno.",
+      "body": "Región del borde del cráter Nobile, un cráter de unos 79 km de diámetro cerca del polo sur. Su relieve y su orientación hacen que la luz y la visibilidad de la Tierra dependan mucho del punto exacto.",
+      "why": "Nobile Rim 1 está entre las nueve regiones que NASA revisó en 2024 para Artemis III: es un ejemplo de zona donde la luz y la comunicación hay que comprobarlas punto por punto.",
       "facts": [
-        "El producto de PGDA identifica el Sitio 06 como Nobile rim 1 y ofrece un DEM de elevación LOLA a 5 m por píxel.",
-        "La cuadrícula está en el marco lunar MOON_ME de DE421 y usa estereográfica polar con coordenadas en metros."
+        "El cráter Nobile mide unos 79 km y lleva el nombre del explorador y aviador italiano Umberto Nobile (nombre aprobado por la IAU en 1994; USGS Gazetteer).",
+        "NASA incluyó Nobile Rim 1 entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
+        "La cuadrícula del mapa está en el marco lunar MOON_ME de DE421 y usa proyección estereográfica polar con coordenadas en metros.",
+        "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
       ]
     },
     "en": {
       "title": "Nobile Rim 1 (Site 06)",
-      "body": "Nobile Rim 1 is a candidate lunar south pole region. Its relief and orientation mean that lighting windows and Earth visibility depend on the exact point on the terrain.",
+      "body": "A region on the rim of Nobile crater, about 79 km across, near the south pole. Its relief and orientation make light and Earth visibility depend strongly on the exact spot.",
+      "why": "Nobile Rim 1 is among the nine regions NASA reviewed in 2024 for Artemis III: a place where light and communications must be checked spot by spot.",
       "facts": [
-        "PGDA identifies Site 06 as Nobile rim 1 and provides a 5 m per pixel LOLA elevation DEM.",
-        "The grid uses the lunar MOON_ME frame of DE421 and polar stereographic coordinates in metres."
+        "Nobile crater is about 79 km across and is named for the Italian explorer and aviator Umberto Nobile (name approved by the IAU in 1994; USGS Gazetteer).",
+        "NASA included Nobile Rim 1 among the nine revised Artemis III candidate regions in 2024.",
+        "The map grid uses the DE421 lunar MOON_ME frame and a polar stereographic projection with coordinates in metres.",
+        "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
       ]
     }
   },
   "sources": [
+    "https://planetarynames.wr.usgs.gov/Feature/4321",
+    "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
     "https://pgda.gsfc.nasa.gov/products/78",
-    "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
     "https://doi.org/10.1016/j.pss.2020.105119"
   ],
   "ephemeris": {
@@ -42,7 +49,7 @@
     "file": "terrain.bin",
     "rows": 1001,
     "cols": 1001,
-    "pixel_m": 5.0,
+    "pixel_m": 5,
     "min_m": 4909.8271484375,
     "max_m": 6435.630859375,
     "observer_rc": [
@@ -55,18 +62,18 @@
     "sources": [
       {
         "file": "Site06_final_adj_5mpp_surf.tif",
-        "pixel_m": 5.0,
+        "pixel_m": 5,
         "requested_range_m": [
           0,
-          10000.0
+          10000
         ]
       },
       {
         "file": "LDEM_80S_80MPP_ADJ.TIF",
-        "pixel_m": 80.0,
+        "pixel_m": 80,
         "requested_range_m": [
-          7500.0,
-          300000.0
+          7500,
+          300000
         ]
       }
     ]

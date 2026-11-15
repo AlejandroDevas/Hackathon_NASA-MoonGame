@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { loadSite, parseEphemeris } from '../src/data/siteData.js';
+import { ensureTerrain, loadSite, parseEphemeris } from '../src/data/siteData.js';
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
 
@@ -40,6 +40,33 @@ describe('loadSite', () => {
     expect(site.horizon[90]).toBe(2);
     expect(site.terrain.rows).toBe(101);
     expect(site.terrain.cols).toBe(101);
+  });
+
+  test('terrain: false loads the light data only, and ensureTerrain fetches the height map once', async () => {
+    const requested = [];
+    const base = globalThis.fetch;
+    vi.stubGlobal('fetch', (url) => {
+      requested.push(url);
+      return base(url);
+    });
+    const site = await loadSite('/fixtures', 'tiny-site', { terrain: false });
+    expect(site.eph.count).toBe(48);
+    expect(site.terrain).toBeNull();
+    expect(requested.some((u) => u.endsWith('terrain.bin'))).toBe(false);
+
+    const [a, b] = await Promise.all([ensureTerrain(site), ensureTerrain(site)]);
+    expect(a.rows).toBe(101);
+    expect(b).toBe(a);
+    expect(site.terrain).toBe(a);
+    expect(await ensureTerrain(site)).toBe(a);
+    expect(requested.filter((u) => u.endsWith('terrain.bin'))).toHaveLength(1);
+  });
+
+  test('ensureTerrain resolves to null for a site without terrain and retries after a failed fetch', async () => {
+    expect(await ensureTerrain({ info: {}, terrain: null })).toBeNull();
+    const site = { info: { terrain: { file: 'terrain.bin', rows: 101, cols: 101, min_m: 0, max_m: 1, pixel_m: 5, observer_rc: [50, 50], north_bearing_deg: 0 } }, dir: '/fixtures/nowhere', terrain: null, terrainPromise: null };
+    await expect(ensureTerrain(site)).rejects.toThrow('terrain.bin');
+    expect(site.terrainPromise).toBeNull();
   });
 
   test('a missing site throws an error naming the URL', async () => {

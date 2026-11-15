@@ -8,26 +8,32 @@
   "sign": {
     "es": {
       "title": "Cresta de conexión (Sitio 01)",
-      "body": "Una de las zonas del polo sur lunar estudiadas con topografía láser LOLA de 5 m por píxel. Aquí el Sol nunca se aleja mucho del horizonte, así que el relieve decide qué puntos reciben luz casi continua y cuáles se quedan en sombra.",
+      "body": "Es la cresta que une los bordes de los cráteres Shackleton y de Gerlache. Su altura la mantiene al sol buena parte del tiempo, pero ningún punto está siempre iluminado: el relieve decide cuánto.",
+      "why": "Para una misión con paneles solares es una de las zonas más prometedoras: ventanas largas de luz, y cráteres en sombra permanente (posible hielo de agua) a poca distancia.",
       "facts": [
+        "LROC: las partes altas de la cresta pueden estar iluminadas hasta ~90 % del tiempo, pero ningún punto lo está siempre (LROC, «Islands in the Dark»).",
+        "Un estudio de NASA sobre actividades extravehiculares de Artemis III cita ~56 % de iluminación anual en el punto estudiado; las cifras difieren porque miden puntos y métodos distintos (NTRS 20210026296).",
         "Entre el 1 de enero de 2024 y el 1 de enero de 2026, el Sitio 1 fue el de mayor superficie con iluminación media superior al 70 % a 1 m sobre el suelo (Barker et al. 2021).",
-        "A 5 m sobre el suelo, el Sitio 1 tiene periodos de iluminación continua más largos que los demás sitios estudiados.",
-        "Cerca del 90 % de los píxeles del mapa están interpolados; el error de altura típico es de 0,30 a 0,50 m (RMS)."
+        "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
       ]
     },
     "en": {
       "title": "Connecting Ridge (Site 01)",
-      "body": "One of the lunar south pole regions mapped with 5 m/pixel LOLA laser topography. Here the Sun never strays far from the horizon, so terrain decides which spots get near-continuous light and which stay in shadow.",
+      "body": "This is the ridge joining the rims of Shackleton and de Gerlache craters. Its height keeps it in sunlight much of the time, but no point is always lit: terrain decides how much.",
+      "why": "For a solar-powered mission it is one of the most promising places: long lighting windows, with permanently shadowed craters (possible water ice) nearby.",
       "facts": [
+        "LROC: the higher parts of the ridge can be lit up to ~90% of the time, but no point is permanently lit (LROC, \"Islands in the Dark\").",
+        "A NASA study of Artemis III spacewalk capability cites ~56% annual illumination at the studied spot; figures differ because they measure different points and methods (NTRS 20210026296).",
         "Between 1 Jan 2024 and 1 Jan 2026, Site 1 had the largest area with average illumination above 70% at 1 m above the surface (Barker et al. 2021).",
-        "At 5 m above the surface, Site 1 has longer continuous illumination periods than the other sites studied.",
-        "About 90% of the map's pixels are interpolated; typical height error is 0.30 to 0.50 m (RMS)."
+        "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
       ]
     }
   },
   "sources": [
+    "https://lroc.im-ldi.com/images/1105",
+    "https://ntrs.nasa.gov/api/citations/20210026296/downloads/Scoville%20Final%20presentation%20-%20compressed.pptx.pdf",
+    "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
     "https://pgda.gsfc.nasa.gov/products/78",
-    "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
     "https://doi.org/10.1016/j.pss.2020.105119"
   ],
   "ephemeris": {
@@ -44,7 +50,7 @@
     "file": "terrain.bin",
     "rows": 1001,
     "cols": 1001,
-    "pixel_m": 5.0,
+    "pixel_m": 5,
     "min_m": 1106.4078369140625,
     "max_m": 1959.4962158203125,
     "observer_rc": [
@@ -57,18 +63,18 @@
     "sources": [
       {
         "file": "Site01_final_adj_5mpp_surf.tif",
-        "pixel_m": 5.0,
+        "pixel_m": 5,
         "requested_range_m": [
           0,
-          8000.0
+          8000
         ]
       },
       {
         "file": "LDEM_80S_80MPP_ADJ.TIF",
-        "pixel_m": 80.0,
+        "pixel_m": 80,
         "requested_range_m": [
-          6000.0,
-          300000.0
+          6000,
+          300000
         ]
       }
     ]

@@ -7,7 +7,7 @@ import '@fontsource/barlow-condensed/latin-600.css';
 import '@fontsource/barlow-condensed/latin-700.css';
 import '@fontsource/ibm-plex-mono/latin-400.css';
 import '@fontsource/ibm-plex-mono/latin-500.css';
-import { loadSite } from './data/siteData.js';
+import { ensureTerrain, loadSite } from './data/siteData.js';
 import { t } from './i18n.js';
 import { DEFAULT_THRESHOLDS } from './metrics/scenario.js';
 import { clampTime } from './panel/controls.js';
@@ -28,10 +28,13 @@ async function main() {
     const response = await fetch(`${SITES_URL}/index.json`);
     if (!response.ok) throw new Error(`${SITES_URL}/index.json (HTTP ${response.status})`);
     const siteList = await response.json();
-    const loaded = await Promise.all(siteList.map((entry) => loadSite(SITES_URL, entry.id)));
+    // Light data (ephemeris + horizon, ~0.7 MB each) for every site, so the panel and the
+    // analysis can compare them; the 2 MB terrain of a site is fetched when it is first shown.
+    const loaded = await Promise.all(siteList.map((entry) => loadSite(SITES_URL, entry.id, { terrain: false })));
     const sites = new Map(siteList.map((entry, i) => [entry.id, loaded[i]]));
 
     const first = siteList[0].id;
+    await ensureTerrain(sites.get(first));
     const { timeMs } = clampTime(sites.get(first).eph, Date.UTC(2027, 0, 1));
     const store = createStore({
       scenarios: { A: { siteId: first, timeMs }, B: null },

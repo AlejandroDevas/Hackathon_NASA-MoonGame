@@ -4,8 +4,12 @@ import { createRobotMesh, loadNasaRover } from '../src/scene/robotMesh.js';
 
 // The real loader needs a browser (fetch + decoding); a fake one returns a model we control.
 let loadAsync;
+let dracoLoader;
 vi.mock('three/addons/loaders/GLTFLoader.js', () => ({
   GLTFLoader: class {
+    setDRACOLoader(loader) {
+      dracoLoader = loader;
+    }
     loadAsync(url) {
       return loadAsync(url);
     }
@@ -29,6 +33,7 @@ function attachedRobot() {
 
 beforeEach(() => {
   loadAsync = vi.fn();
+  dracoLoader = null;
 });
 afterEach(() => vi.restoreAllMocks());
 
@@ -86,5 +91,14 @@ describe('loadNasaRover', () => {
 
     expect(robot.children.length).toBeGreaterThan(1); // still the simple rover
     expect(dispose).toHaveBeenCalled();
+  });
+
+  test('hands the glTF loader a Draco decoder (the NASA file is Draco-compressed) from a local path', async () => {
+    const { scene } = fakeModel();
+    loadAsync.mockResolvedValue({ scene });
+    await loadNasaRover(attachedRobot(), '/models/rover.glb', '/draco/');
+    expect(dracoLoader).not.toBeNull();
+    expect(dracoLoader.decoderPaths.js).toBe('/draco/draco_wasm_wrapper.js');
+    expect(dracoLoader.decoderPaths.wasm).toBe('/draco/draco_decoder.wasm');
   });
 });

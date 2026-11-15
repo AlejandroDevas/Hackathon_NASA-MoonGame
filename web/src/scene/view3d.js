@@ -1,7 +1,12 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { ensureTerrain } from '../data/siteData.js';
 import { getLocale, t } from '../i18n.js';
+import { horizonAt } from '../metrics/visibility.js';
+import { siteOverview } from '../metrics/overview.js';
 import { createInput } from './input.js';
+import { buildPoiMarkers, createPoiTags } from './poiTags.js';
+import { findPois } from './pois.js';
 import { createRobotMesh, loadNasaRover } from './robotMesh.js';
 import { createSignPanel } from './signPanel.js';
 import { MAX_SLOPE_DEG, createRobot, followCamera, nextSignOpen, stepRobot } from './robot.js';
@@ -75,7 +80,12 @@ export function mountScene(container, store, sites, audioCue = null) {
   const sign = createSignPanel();
   const routeEl = el('div', 'scene-route');
   routeEl.hidden = true;
-  hud.append(help, blockedEl, routeEl, sign.el);
+  const skyEl = el('div', 'scene-sky');
+  const skySun = el('div', 'scene-sky-row scene-sky-sun');
+  const skyEarth = el('div', 'scene-sky-row scene-sky-earth');
+  skyEl.append(skySun, skyEarth);
+  hud.append(help, blockedEl, routeEl, skyEl, sign.el);
+  const tags = createPoiTags(hud);
   container.append(hud);
 
   const camera = new THREE.PerspectiveCamera(60, 1, 0.5, 200_000);
@@ -83,6 +93,9 @@ export function mountScene(container, store, sites, audioCue = null) {
   const robotMesh = createRobotMesh();
 
   const plans = new Map(); // site id -> planStart result, computed once per site (takes ~1 s)
+  const poiCache = new Map(); // site id -> landmarks of the terrain
+  let pois = [];
+  let loadingId = null; // site whose terrain is being fetched
   let slopeLimitDeg = MAX_SLOPE_DEG;
   let siteId = null;
   let site = null;
@@ -111,6 +124,9 @@ export function mountScene(container, store, sites, audioCue = null) {
     world = createWorld(site);
     world.setShadowLift(Boolean(store.get().shadowLift));
     world.scene.add(robotMesh);
+    if (!poiCache.has(id)) poiCache.set(id, findPois(site.terrain));
+    pois = poiCache.get(id);
+    world.scene.add(buildPoiMarkers(pois, groundAt));
     if (!plans.has(id)) plans.set(id, planStart(site.terrain, { x: 0, z: 0 }, START_DISTANCE_M));
     const plan = plans.get(id);
     slopeLimitDeg = plan.limitDeg;
@@ -122,9 +138,32 @@ export function mountScene(container, store, sites, audioCue = null) {
     applySky();
   }
 
+  const groundAt = (x, z) => heightAt(site.terrain, x, z);
+  const poiBase = (poi) => groundAt(poi.x, poi.z);
+
   function applySky() {
     lastSky = skyAt(site, store.get().scenarios.A.timeMs);
     world.updateSky(lastSky);
+    renderSkyReadout();
+  }
+
+  /** Sun and Earth azimuth/elevation against the horizon of the site centre, in words. */
+  function renderSkyReadout() {
+    const bodies = site.info.bodies;
+    const row = (node, key, body, radiusDeg) => {
+      const horizon = horizonAt(site.horizon, body.azDeg);
+      const visible = body.elDeg + radiusDeg > horizon;
+      node.classList.toggle('hidden-body', !visible);
+      node.textContent = t('sky.row', {
+        name: t(key),
+        az: Math.round(body.azDeg),
+        el: body.elDeg.toFixed(1),
+        horizon: horizon.toFixed(1),
+        state: t(visible ? 'sky.visible' : 'sky.hidden'),
+      });
+    };
+    row(skySun, 'sky.sun', lastSky.sun, bodies.sun_radius_deg);
+    row(skyEarth, 'sky.earth', lastSky.earth, bodies.earth_radius_deg);
   }
 
   function applyTexts() {
@@ -134,7 +173,9 @@ export function mountScene(container, store, sites, audioCue = null) {
     }`;
     shownBlockReason = null; // the warning text is rebuilt on the next frame in the new language
     routeEl.textContent = t('scene.noRoute');
-    sign.setInfo(site.info, getLocale());
+    sign.setInfo(site.info, getLocale(), siteOverview(site));
+    tags.setPois(pois, poiBase);
+    if (lastSky) renderSkyReadout();
   }
 
   /** Follow camera (default) or a free orbit around the rover. */
@@ -159,6 +200,25 @@ export function mountScene(container, store, sites, audioCue = null) {
       renderer.domElement.style.touchAction = 'auto';
     }
     applyTexts();
+  }
+
+  /** The terrain of a site is fetched the first time it is chosen; show it once it arrives, if still wanted. */
+  function showWhenLoaded(target, id) {
+    if (loadingId === id) return;
+    loadingId = id;
+    help.textContent = t('scene.loading');
+    ensureTerrain(target).then(
+      () => {
+        loadingId = null;
+        if (store.get().scenarios.A.siteId === id && id !== siteId) loadSiteScene(id);
+        else applyTexts();
+      },
+      (error) => {
+        loadingId = null;
+        console.warn(`Terrain of ${id} could not be loaded.`, error);
+        applyTexts();
+      },
+    );
   }
 
   function resize() {
@@ -213,13 +273,16 @@ export function mountScene(container, store, sites, audioCue = null) {
       }
     }
     blockedEl.hidden = !robot.blocked;
+    tags.update(camera, container.clientWidth, container.clientHeight, robot, poiBase);
     renderer.render(world.scene, camera);
   }
 
   const unsubscribe = store.subscribe((state) => {
     const nextId = state.scenarios.A.siteId;
-    if (nextId !== siteId && sites.get(nextId)?.terrain) loadSiteScene(nextId);
-    else if (sites.get(nextId)?.terrain) applySky();
+    const next = sites.get(nextId);
+    if (nextId !== siteId && next?.terrain) loadSiteScene(nextId);
+    else if (nextId !== siteId && next?.info?.terrain) showWhenLoaded(next, nextId);
+    else if (next?.terrain) applySky();
     world.setShadowLift(Boolean(state.shadowLift));
     if (state.viewMode !== viewMode) setViewMode(state.viewMode);
     if (state.locale !== locale) {

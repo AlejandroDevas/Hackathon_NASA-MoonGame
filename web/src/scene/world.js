@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { directionFromAzEl } from './sky.js';
 import { gridToScene, heightAt } from './terrainData.js';
+import { createRegolithTexture } from './regolith.js';
 import { buildTerrainGeometry } from './terrainMesh.js';
 
 const RAD = Math.PI / 180;
@@ -96,10 +97,20 @@ export function createWorld(site) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000000);
 
+  // Procedural regolith grain (not imagery): colour variation plus a bump map that the grazing sunlight picks out.
+  const regolith = createRegolithTexture();
   const terrainMesh = new THREE.Mesh(
     // Use every 5 m LOLA sample rather than thinning the scene to 10 m.
     buildTerrainGeometry(site.terrain, 1),
-    new THREE.MeshStandardMaterial({ vertexColors: true, color: 0x96938b, roughness: 0.96, metalness: 0 }),
+    new THREE.MeshStandardMaterial({
+      vertexColors: true,
+      color: 0xaaa79e,
+      map: regolith,
+      bumpMap: regolith,
+      bumpScale: 2.2,
+      roughness: 0.96,
+      metalness: 0,
+    }),
   );
   terrainMesh.name = 'terrain';
   terrainMesh.castShadow = true;
@@ -159,7 +170,10 @@ export function createWorld(site) {
     scene.traverse((object) => {
       object.geometry?.dispose();
       const materials = Array.isArray(object.material) ? object.material : [object.material];
-      for (const material of materials) material?.dispose();
+      for (const material of materials) {
+        material?.map?.dispose();
+        material?.dispose();
+      }
     });
     sun.shadow.map?.dispose();
   }

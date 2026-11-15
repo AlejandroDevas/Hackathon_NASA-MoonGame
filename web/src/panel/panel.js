@@ -1,5 +1,6 @@
 import { setLocale, t } from '../i18n.js';
 import { evaluateScenario, viability } from '../metrics/scenario.js';
+import { createAnalysis } from './analysis.js';
 import { renderDiff } from './compare.js';
 import { clampTime, renderControls } from './controls.js';
 import { createPlayer } from './player.js';
@@ -36,6 +37,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
   let soundButton = null;
   let shadowButton = null;
   let viewButton = null;
+  const analysis = createAnalysis(store, siteList, sites);
 
   function createView(slot, section) {
     const controlsEl = el('div');
@@ -161,6 +163,10 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
     viewButton.dataset.testid = 'view-toggle';
     viewButton.addEventListener('click', () => store.set({ viewMode: store.get().viewMode === 'free' ? 'follow' : 'free' }));
 
+    const analysisButton = el('button', '', t('analysis.open'));
+    analysisButton.dataset.testid = 'analysis-open';
+    analysisButton.addEventListener('click', () => analysis.open());
+
     const compare = el('button', '', store.get().scenarios.B ? t('app.compareOff') : t('app.compare'));
     compare.dataset.testid = 'compare-toggle';
     compare.addEventListener('click', () => {
@@ -168,7 +174,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
       store.set({ scenarios: { A: scenarios.A, B: scenarios.B ? null : { ...scenarios.A } } });
     });
 
-    tools.append(locale, speed, playButton, soundButton, shadowButton, viewButton, compare);
+    tools.append(locale, speed, playButton, soundButton, shadowButton, viewButton, analysisButton, compare);
     header.append(tools);
     return header;
   }

@@ -11,7 +11,7 @@ data-pipeline/ (Python, se ejecuta una vez)  ->  web/public/sites/<id>/  ->  web
   DEM LOLA + Skyfield/SPICE                        ephemeris.bin · horizon.json · info.json
 ```
 
-No hay servidor: todo es estático. Las fuentes (Barlow, Barlow Condensed e IBM Plex Mono, licencia OFL) van incluidas en la aplicación, así que la página no hace peticiones a terceros y funciona sin conexión; una prueba lo vigila.
+No hay servidor: todo es estático. Al arrancar se descargan solo las efemérides y el horizonte de los cinco sitios (~0,7 MB cada uno); el terreno de 2 MB de cada sitio se pide la primera vez que se elige. Las fuentes (Barlow, Barlow Condensed e IBM Plex Mono, licencia OFL) van incluidas en la aplicación, así que la página no hace peticiones a terceros y funciona sin conexión; una prueba lo vigila.
 
 ## Escena 3D
 
@@ -20,10 +20,22 @@ Encima del panel hay una vista 3D del sitio seleccionado en el escenario A: el t
 - **Controles:** W/↑ avanzar, S/↓ retroceder, A/D o ←/→ girar, Shift turbo. Las teclas se ignoran mientras escribes en un campo del panel.
 - **Sonido (opcional):** apagado por defecto. El botón "Activar sonido" del panel crea el audio solo cuando lo pulsas (los navegadores no permiten sonar antes) y reproduce un pitido de dos notas cuando se abre el cartel. No hay sonido ambiente ni de motor a propósito: en la Luna no hay atmósfera y el sonido no viaja, así que sería físicamente falso. Si el navegador no soporta Web Audio, el botón queda apagado y no pasa nada más.
 - **Avisos del robot:** distinguen "pendiente de más de N°" de "límite del terreno cartografiado" (borde del mapa o alturas sin datos).
-- **Modelo del rover:** NASA/JPL-Caltech, Perseverance Rover GLB; se usa como modelo visual de rover de seis ruedas, no como vehículo lunar exacto. Fuente, crédito y atribución: `web/public/models/README.md`.
+- **Modelo del rover:** NASA/JPL-Caltech, Perseverance Rover GLB; se usa como modelo visual de rover de seis ruedas, no como vehículo lunar exacto. El GLB va comprimido con Draco, así que el decodificador (de three.js) se sirve en local desde `web/public/draco/`. Fuente, crédito y atribución: `web/public/models/README.md`.
+- **Señales en el mapa:** cada sitio tiene tres balizas con etiqueta: el cartel del sitio (centro), el punto más alto y el punto más bajo del mapa. Salen de la altura real del recorte LOLA y muestran altitud y distancia al robot en vivo. Un panel arriba a la izquierda dice dónde están el Sol y la Tierra (acimut, elevación, horizonte en esa dirección y si quedan sobre o bajo el horizonte).
+- **Cartel del sitio:** además del texto, explica por qué importa el lugar, muestra datos calculados con los datos de 2026–2030 (% de luz solar, luz continua más larga, noche más larga, % de Tierra visible, mayor hueco sin Tierra) y enlaza las fuentes NASA.
+- **Terreno:** la malla es la altura LOLA real. El color y el grano son **procedurales, no imágenes de satélite**: un regolito sintético que se repite cada 32 m (relieve fino con cráteres pequeños, usado también como mapa de relieve para que la luz rasante lo marque), un moteado suave y un tono algo más claro en las pendientes fuertes.
 - **Accesibilidad:** el cartel cerrado no se expone a lectores de pantalla ni al foco, el lienzo 3D tiene etiqueta, `<html lang>` sigue al idioma de la interfaz y las teclas con Ctrl/Alt/Meta no se capturan.
 - **Límite de pendiente por sitio:** cada sitio tiene su propio límite, el más bajo de 15°, 20°… 45° con el que la meta sigue siendo alcanzable desde ~400 m: hoy 15° en el Site 01, Haworth y Malapert, 20° en Nobile Rim 1 y 35° en el borde de Shackleton (una pared de cráter). El robot no entra en terreno más empinado (se detiene y avisa) y la ayuda de la escena muestra el límite.
 - Sin WebGL, el panel sigue funcionando y la escena muestra un aviso.
+
+## Ventana de Análisis
+
+El botón **Análisis** abre una ventana ampliada (se cierra con Esc) con su propio sitio, fecha de inicio y duración de estancia (3 días, 6,5 días —la estancia planificada de Artemis III— o 14 días):
+
+- **Mejores ventanas de aterrizaje:** las 5 fechas de inicio con más Sol (a igualdad, más Tierra) en todo el rango 2026–2030, sin solaparse, con su veredicto. «Ver en la escena» lleva el escenario A a esa fecha.
+- **Calendario de luz de 30 días:** un día por fila y una hora UTC por columna, para el Sol y para la Tierra.
+- **Cielo visto desde el sitio:** recorrido del Sol y la Tierra durante 30 días contra la silueta del horizonte del terreno; los puntos tenues están tapados por el relieve.
+- **Comparación de los 5 sitios** con la misma fecha y ventana, y descarga en CSV.
 
 ## Uso
 
@@ -67,4 +79,6 @@ Los kernels SPICE (`de421.bsp`, `moon_pa_de421_1900-2050.bpc`, `moon_080317.tf`,
 - **Escena 3D:** las sombras cubren todo el recorte de 2,5 km (el marco se calcula con sus esquinas); más allá hay una silueta oscura sin iluminar calculada con el horizonte del observador en el centro del sitio, así que desde otro punto es solo aproximada. La Tierra es una esfera sin textura y el rover no tiene físicas (sigue la altura del mapa). La escena muestra solo el escenario A.
 - **Horizonte del robot frente al del panel:** las métricas del panel son para el centro del sitio; desde otro punto del terreno el Sol puede quedar tapado aunque el panel diga que es visible.
 - **Límite de pendiente:** se calcula al cargar cada sitio (~1 s la primera vez) con una búsqueda de ruta que exige 2° menos que el límite del robot y comprueba la pendiente cada 2,5 m a lo largo de cada tramo; si ni 45° sirve, la escena lo avisa y muestra el cartel desde el punto central. Que exista ruta no garantiza que sea fácil, y el DEM está interpolado en un ~90 %.
+- **Textos de los sitios:** las cifras de cada cartel (tamaños de cráteres, iluminación, edades) vienen de páginas de NASA/USGS/LROC y de artículos citados en el propio cartel; algunas (el 90 % de luz de la cresta, el 56 % anual de un punto estudiado) son de puntos y métodos distintos y no son comparables entre sí. El estado de Artemis III cambia: los textos hablan de «las nueve regiones revisadas en 2024» y conviene volver a comprobarlo en NASA antes de presentarlo.
+- **Textura:** no hay imágenes LROC aplicadas al terreno todavía; el grano es sintético. Usar el mosaico LROC NAC/WAC como albedo requiere descargar y remuestrear datos de varios GB en el pipeline.
 - **Rendimiento:** el 3D usa la malla de terreno a 5 m, mapa de sombras de 4096 px y el modelo NASA GLB; con renderizado por software (sin GPU) puede ir a pocos fotogramas por segundo, y el movimiento del rover se ralentiza en vez de saltar.
