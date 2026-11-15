@@ -9,8 +9,15 @@ import { formatMoment, yearMarks } from '../src/ui/playbar.js';
 import { HOUR, T0, loadTinySite } from './helpers.js';
 
 const site = loadTinySite();
-const sites = new Map([['tiny-site', site]]);
-const siteList = [{ id: 'tiny-site', name: 'Tiny' }];
+const other = { ...site, info: { ...site.info, id: 'other' } };
+const sites = new Map([
+  ['tiny-site', site],
+  ['other', other],
+]);
+const siteList = [
+  { id: 'tiny-site', name: 'Tiny' },
+  { id: 'other', name: 'Other' },
+];
 const LAST = T0 + 47 * HOUR;
 
 function setup({ scenarios, extra = {} } = {}) {
@@ -53,6 +60,7 @@ describe('top bar', () => {
     const children = [...bar.children].map((c) => c.className);
     expect(children[0]).toContain('topbar-brand');
     expect(children[1]).toContain('topbar-locale');
+    expect(children[2]).toContain('topbar-site');
     expect(bar.querySelector('h1').textContent).toBe(es['app.title']);
     expect(bar.querySelector('.topbar-kicker').textContent).toBe(es['app.kicker']);
     expect(q('locale').tagName).toBe('SELECT');
@@ -122,6 +130,84 @@ describe('top bar', () => {
     expect(q('menu-toggle').textContent).toContain('Menu');
     expect(q('play-toggle').getAttribute('aria-label')).toBe('Play');
     expect(q('panel-toggle').textContent).toContain('Planner');
+  });
+});
+
+describe('site selector in the top bar', () => {
+  test('lists the sites by name, with the site of scenario A selected', () => {
+    setup();
+    const select = q('site-top');
+    expect(select.tagName).toBe('SELECT');
+    expect([...select.options].map((o) => [o.value, o.textContent])).toEqual([
+      ['tiny-site', 'Tiny'],
+      ['other', 'Other'],
+    ]);
+    expect(select.value).toBe('tiny-site');
+  });
+
+  test('sits to the right of the language selector and has an accessible name', () => {
+    setup();
+    const names = [...document.querySelector('.topbar').children].map((c) => c.className);
+    expect(names.findIndex((n) => n.includes('topbar-site'))).toBe(names.findIndex((n) => n.includes('topbar-locale')) + 1);
+    expect(q('site-top').getAttribute('aria-label')).toBe(es['ctl.site']);
+    q('locale').value = 'en';
+    q('locale').dispatchEvent(new Event('change', { bubbles: true }));
+    expect(q('site-top').getAttribute('aria-label')).toBe('Site');
+  });
+
+  test('choosing a site changes the site of scenario A and leaves B alone', () => {
+    const { store } = setup({
+      scenarios: { A: { siteId: 'tiny-site', timeMs: T0 + 5 * HOUR }, B: { siteId: 'tiny-site', timeMs: T0 + 9 * HOUR } },
+    });
+    q('site-top').value = 'other';
+    q('site-top').dispatchEvent(new Event('change', { bubbles: true }));
+    expect(store.get().scenarios.A).toEqual({ siteId: 'other', timeMs: T0 + 5 * HOUR });
+    expect(store.get().scenarios.B).toEqual({ siteId: 'tiny-site', timeMs: T0 + 9 * HOUR });
+  });
+
+  test('stays in step with the site selector of the planner, both ways', () => {
+    setup();
+    q('site-top').value = 'other';
+    q('site-top').dispatchEvent(new Event('change', { bubbles: true }));
+    expect(q('site-A').value).toBe('other');
+    q('site-A').value = 'tiny-site';
+    q('site-A').dispatchEvent(new Event('change', { bubbles: true }));
+    expect(q('site-top').value).toBe('tiny-site');
+  });
+
+  test('picking the site that is already shown changes nothing', () => {
+    const { store } = setup();
+    const listener = vi.fn();
+    store.subscribe(listener);
+    q('site-top').dispatchEvent(new Event('change', { bubbles: true }));
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  test('changing the site stops a running animation, as it does from the planner', () => {
+    const { store } = setup();
+    q('play-toggle').click();
+    expect(store.get().playing).toBe(true);
+    q('site-top').value = 'other';
+    q('site-top').dispatchEvent(new Event('change', { bubbles: true }));
+    expect(store.get().playing).toBe(false);
+  });
+
+  test('plays the interface click like the other selects', () => {
+    const played = [];
+    const store = createStore({
+      scenarios: { A: { siteId: 'tiny-site', timeMs: T0 }, B: null },
+      windowMs: 24 * HOUR,
+      thresholds: { ...DEFAULT_THRESHOLDS },
+      playing: false,
+      locale: 'es',
+    });
+    mountInterface(document.body.appendChild(document.createElement('div')), store, siteList, sites, {
+      renderTimeline: () => ({ destroy() {}, setCursor() {} }),
+      audioCue: { setEnabled: (n) => n, play: (name) => played.push(name) },
+    });
+    q('site-top').value = 'other';
+    q('site-top').dispatchEvent(new Event('change', { bubbles: true }));
+    expect(played).toContain('click');
   });
 });
 

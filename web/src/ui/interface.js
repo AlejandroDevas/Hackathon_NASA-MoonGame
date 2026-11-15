@@ -16,7 +16,7 @@ import { createTopBar } from './topbar.js';
 export function mountInterface(root, store, siteList, sites, { renderTimeline, audioCue }) {
   const playback = createPlayback(store, sites);
   const analysis = createAnalysis(store, siteList, sites);
-  const top = createTopBar(store, { analysis, sites, audioCue });
+  const top = createTopBar(store, { analysis, sites, siteList, audioCue });
   const bottom = createPlayBar(store, sites, playback);
   document.body.append(top.el, bottom.el);
 

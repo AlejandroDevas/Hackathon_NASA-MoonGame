@@ -43,7 +43,7 @@ data-pipeline/ (Python, se ejecuta una vez)       web/public/sites/<id>/        
 
 ## Interfaz
 
-- **Barra superior:** a la izquierda el nombre de la aplicación y, a su derecha, el selector de idioma (ES/EN). A la derecha, de derecha a izquierda: **Activar sonido**, **Aclarar sombras**, **Imagen LROC** y **Vista libre** (o **Seguir al robot**), y en la esquina el **menú desplegable**. En pantallas estrechas los botones muestran solo su icono (siguen teniendo nombre para lectores de pantalla).
+- **Barra superior:** a la izquierda el nombre de la aplicación y, a su derecha, el selector de idioma (ES/EN) y el **selector de sitio** (el sitio del escenario A, el que se ve en 3D). A la derecha, de derecha a izquierda: **Activar sonido**, **Aclarar sombras**, **Imagen LROC** y **Vista libre** (o **Seguir al robot**), y en la esquina el **menú desplegable**. En pantallas estrechas los botones muestran solo su icono (siguen teniendo nombre para lectores de pantalla) y, en móvil, la barra pasa a dos filas: nombre, idioma y menú arriba; sitio y botones debajo.
 - **Menú:** **Planificador** (abre o cierra el cajón de la derecha), **Análisis** (abre la ventana de Análisis) y **Comparar** (activa o quita el escenario B; al activarlo se abre el planificador). Se maneja con el teclado: flechas, Inicio/Fin, Esc para cerrarlo.
 - **Barra inferior, como un reproductor de vídeo:**
   - **Saltos:** −1 día, −1 hora, +1 hora y +1 día, parando en los extremos de los datos.
@@ -53,7 +53,7 @@ data-pipeline/ (Python, se ejecuta una vez)       web/public/sites/<id>/        
 - **Planificador (cajón de la derecha):** oculto al abrir la página. Contiene el escenario (sitio, fecha y hora en UTC, ventana de análisis de 1 día, 7 días o 1 día lunar), el veredicto, las cuentas atrás, las métricas, la gráfica de elevación con cursor arrastrable (ratón o flechas) y, en modo Comparar, una tarjeta de diferencias respecto a A. Se cierra con su botón, con Esc (con el foco dentro) o desde el menú; cerrado, no recibe foco ni lo lee un lector de pantalla. Con Comparar se ensancha.
 - **Veredicto:** *Viable*, *Dudoso* o *No viable* según tres umbrales editables: elevación solar mínima (0° por defecto), oscuridad máxima (120 h) y hueco máximo sin Tierra (48 h). Cada estado conserva su etiqueta de texto.
 - **Cuentas atrás:** ocaso o salida del Sol y de la Tierra. Cuando faltan 30 días o más, bajo la duración aparece la fecha («≈ 7 may 2029 (UTC)»).
-- **Elegir el sitio** se hace en el planificador (el selector «Sitio» de cada escenario).
+- **Elegir el sitio:** con el selector de la barra superior (escenario A); el escenario B, en modo Comparar, tiene el suyo en el planificador. Los dos selectores de A están sincronizados.
 
 ## Escena 3D
 

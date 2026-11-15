@@ -10,7 +10,7 @@ html, body { height: 100%; overflow: hidden; }
 .icon .fill { fill: currentColor; stroke: none; }
 
 /* ---------- shared button look ---------- */
-.tb-button, .pb-button, .menu-item, .topbar-locale, .drawer-close {
+.tb-button, .pb-button, .menu-item, .topbar-locale, .topbar-site, .drawer-close {
   min-height: 36px;
   border: 1px solid var(--border);
   border-radius: 7px;
@@ -21,11 +21,11 @@ html, body { height: 100%; overflow: hidden; }
   transition: background .16s ease, border-color .16s ease, color .16s ease;
 }
 .tb-button, .pb-button, .drawer-close { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 12px; }
-.tb-button:hover, .pb-button:hover, .topbar-locale:hover, .drawer-close:hover { border-color: var(--sun); background: var(--surface-raised); }
+.tb-button:hover, .pb-button:hover, .topbar-locale:hover, .topbar-site:hover, .drawer-close:hover { border-color: var(--sun); background: var(--surface-raised); }
 .tb-button[aria-pressed='true'], .pb-button[aria-expanded='true'] { border-color: var(--sun); color: var(--sun); }
 .tb-button:disabled { opacity: .45; cursor: not-allowed; }
 .tb-button:disabled:hover { border-color: var(--border); background: var(--surface-2); }
-:is(.tb-button, .pb-button, .pb-play, .menu-item, .topbar-locale, .drawer-close, .pb-slider):focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
+:is(.tb-button, .pb-button, .pb-play, .menu-item, .topbar-locale, .topbar-site, .drawer-close, .pb-slider):focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 
 /* ---------- top bar ---------- */
 .topbar {
@@ -40,6 +40,7 @@ html, body { height: 100%; overflow: hidden; }
 .topbar-kicker { margin: 0 0 1px; overflow: hidden; color: var(--sun); font: 500 10px/1.2 var(--font-mono); letter-spacing: .12em; text-overflow: ellipsis; text-transform: uppercase; white-space: nowrap; }
 .topbar-title { margin: 0; overflow: hidden; font: 600 1.3rem/1.05 var(--font-display); letter-spacing: .01em; text-overflow: ellipsis; white-space: nowrap; }
 .topbar-locale { flex: none; padding: 0 8px; }
+.topbar-site { flex: 0 1 230px; min-width: 0; max-width: 230px; padding: 0 8px; text-overflow: ellipsis; }
 .topbar-spacer { flex: 1 1 0; min-width: 0; }
 .topbar-tools { display: flex; flex: none; align-items: center; gap: 6px; }
 .topbar-menu { position: relative; flex: none; }
@@ -129,8 +130,15 @@ html, body { height: 100%; overflow: hidden; }
 }
 
 @media (max-width: 720px) {
-  :root { --topbar-h: 50px; --playbar-h: 98px; }
-  .topbar { gap: 8px; padding: 0 10px; }
+  :root { --topbar-h: 94px; --playbar-h: 98px; }
+  /* two rows: the name, the language and the menu above; the site and the view toggles below */
+  .topbar { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; grid-template-areas: 'brand locale menu' 'site site tools'; align-content: center; gap: 8px; padding: 0 10px; }
+  .topbar-brand { grid-area: brand; }
+  .topbar-locale { grid-area: locale; }
+  .topbar-menu { grid-area: menu; }
+  .topbar-site { grid-area: site; max-width: none; width: 100%; flex: none; }
+  .topbar-tools { grid-area: tools; }
+  .topbar-spacer { display: none; }
   .topbar-kicker { display: none; }
   .topbar-title { font-size: 1.05rem; }
   .tb-menu-button .tb-label { display: none; }
@@ -152,7 +160,7 @@ html, body { height: 100%; overflow: hidden; }
 
 @media (max-width: 420px) {
   .topbar-locale { padding: 0 4px; }
-  .topbar-title { font-size: .95rem; }
+  .topbar-title { font-size: 1rem; }
   .tb-button { padding: 0 6px; }
 }
 

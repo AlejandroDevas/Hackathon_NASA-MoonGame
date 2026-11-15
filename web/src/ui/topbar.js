@@ -21,13 +21,13 @@ function toolButton(testId, iconName, onClick) {
 }
 
 /**
- * The top bar: the name of the app and the language on the left; the 3D view toggles (from right to
+ * The top bar: the name of the app, the language and the site on the left; the 3D view toggles (from right to
  * left: sound, lighten shadows, LROC image, free view) and a drop-down menu on the right. The menu
  * opens the planner panel and the Analysis window and switches Compare on and off.
  * @param {{get(): object, set(p: object): void}} store
- * @param {{analysis: {open(): void}, sites: Map<string, object>, audioCue?: {setEnabled(on: boolean): boolean}}} deps
+ * @param {{analysis: {open(): void}, sites: Map<string, object>, siteList: Array<{id: string, name: string}>, audioCue?: {setEnabled(on: boolean): boolean}}} deps
  */
-export function createTopBar(store, { analysis, sites, audioCue }) {
+export function createTopBar(store, { analysis, sites, siteList, audioCue }) {
   const header = el('header', 'topbar');
 
   const brand = el('div', 'topbar-brand');
@@ -41,6 +41,15 @@ export function createTopBar(store, { analysis, sites, audioCue }) {
   locale.addEventListener('change', () => {
     setLocale(locale.value);
     store.set({ locale: locale.value });
+  });
+
+  // the site shown in the 3D scene (scenario A's); scenario B has its own selector in the planner
+  const site = el('select', 'topbar-site');
+  site.dataset.testid = 'site-top';
+  for (const entry of siteList) site.add(new Option(entry.name, entry.id, false, entry.id === store.get().scenarios.A.siteId));
+  site.addEventListener('change', () => {
+    const { scenarios } = store.get();
+    if (site.value !== scenarios.A.siteId) store.set({ scenarios: { ...scenarios, A: { ...scenarios.A, siteId: site.value } } });
   });
 
   // left to right: free view, LROC image, lighten shadows, sound (so, from the right: sound first)
@@ -93,7 +102,7 @@ export function createTopBar(store, { analysis, sites, audioCue }) {
   menuWrap.append(menuButton, menu);
   attachMenu({ trigger: menuButton, menu });
 
-  header.append(brand, locale, el('div', 'topbar-spacer'), tools, menuWrap);
+  header.append(brand, locale, site, el('div', 'topbar-spacer'), tools, menuWrap);
 
   /** Text, state and availability of every control for the current state. */
   function refresh(state) {
@@ -102,6 +111,9 @@ export function createTopBar(store, { analysis, sites, audioCue }) {
     title.textContent = t('app.title');
     locale.setAttribute('aria-label', t('ctl.language'));
     if (locale.value !== state.locale) locale.value = state.locale;
+    site.setAttribute('aria-label', t('ctl.site'));
+    site.title = t('ctl.site');
+    if (site.value !== state.scenarios.A.siteId) site.value = state.scenarios.A.siteId;
 
     const setToggle = ({ button, label }, text, pressed, ariaLabel = text) => {
       label.textContent = text;
