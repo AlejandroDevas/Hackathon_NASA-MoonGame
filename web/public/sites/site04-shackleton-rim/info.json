@@ -12,10 +12,10 @@
       "why": "Es el contraste más extremo del polo sur: el frío eterno del fondo, donde puede haber hielo, a pocos kilómetros de bordes con mucha luz y buena línea de vista.",
       "facts": [
         "Shackleton mide unos 21 km de diámetro y más de 4 km de profundidad (NASA).",
-        "El altímetro láser LOLA de LRO lo muestra como un cráter antiguo (más de 3.000 millones de años) y muy bien conservado: sus paredes interiores están menos erosionadas que el suelo y el borde (Zuber et al. 2012, NTRS 20120013758).",
+        "Las medidas con láser de la sonda LRO (instrumento LOLA) lo muestran como un cráter muy antiguo (más de 3.000 millones de años) pero bien conservado: sus paredes interiores están menos desgastadas que el suelo y el borde (Zuber et al. 2012, NTRS 20120013758).",
         "Su suelo es más brillante que el terreno vecino; se propuso hielo superficial (~20 %) como explicación posible, pero sigue siendo una hipótesis (Zuber et al. 2012).",
         "Las listas de regiones candidatas de NASA nombran zonas cercanas, como «Connecting Ridge» y «Peak Near Shackleton»; este mapa (Sitio 04) viene de los estudios LOLA de Barker et al. 2021.",
-        "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
+        "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
       ]
     },
     "en": {
@@ -24,10 +24,10 @@
       "why": "It is the most extreme contrast at the south pole: the eternal cold of the floor, where ice may exist, a few kilometres from brightly lit rims with a good line of sight.",
       "facts": [
         "Shackleton is about 21 km in diameter and more than 4 km deep (NASA).",
-        "LRO's LOLA laser altimeter shows an ancient (over 3 billion years) and unusually well-preserved crater: its inner walls are fresher than the floor and rim (Zuber et al. 2012, NTRS 20120013758).",
+        "Laser measurements by the LRO probe (the LOLA instrument) show a very old crater (over 3 billion years) that is nevertheless well preserved: its inner walls are less worn than the floor and rim (Zuber et al. 2012, NTRS 20120013758).",
         "Its floor is brighter than the surrounding terrain; about 20% surface ice was proposed as a possible explanation, but it remains a hypothesis (Zuber et al. 2012).",
         "NASA candidate-region lists name nearby areas such as \"Connecting Ridge\" and \"Peak Near Shackleton\"; this map (Site 04) comes from the LOLA studies by Barker et al. 2021.",
-        "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
+        "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
       ]
     }
   },

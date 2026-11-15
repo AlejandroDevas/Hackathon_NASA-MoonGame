@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { formatDuration, setLocale, t } from '../src/i18n.js';
+import { formatDuration, formatDurationLong, setLocale, t } from '../src/i18n.js';
 import en from '../src/strings/en.json';
 import es from '../src/strings/es.json';
 import { createStore } from '../src/state.js';
@@ -36,6 +36,30 @@ describe('formatDuration', () => {
     [-5 * HOUR, '<1 min'],
   ])('%d ms -> %s', (ms, text) => {
     expect(formatDuration(ms)).toBe(text);
+  });
+});
+
+describe('formatDurationLong', () => {
+  afterEach(() => setLocale('es'));
+
+  test.each([
+    [(8 * 24 + 18) * HOUR, '8 días y 18 horas'],
+    [24 * HOUR, '1 día'],
+    [25 * HOUR, '1 día y 1 hora'],
+    [3 * 24 * HOUR, '3 días'],
+    [7.3 * HOUR, '7 horas y 18 minutos'],
+    [HOUR, '1 hora'],
+    [30 * 60_000, '30 minutos'],
+    [20_000, 'menos de 1 minuto'],
+  ])('%d ms -> %s (es)', (ms, text) => {
+    expect(formatDurationLong(ms)).toBe(text);
+  });
+
+  test('is written in English when the language is English', () => {
+    setLocale('en');
+    expect(formatDurationLong((8 * 24 + 18) * HOUR)).toBe('8 days and 18 hours');
+    expect(formatDurationLong(25 * HOUR)).toBe('1 day and 1 hour');
+    expect(formatDurationLong(20_000)).toBe('less than 1 minute');
   });
 });
 

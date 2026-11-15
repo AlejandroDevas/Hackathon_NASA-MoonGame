@@ -13,8 +13,8 @@
       "facts": [
         "El cráter Nobile mide unos 79 km y lleva el nombre del explorador y aviador italiano Umberto Nobile (nombre aprobado por la IAU en 1994; USGS Gazetteer).",
         "NASA incluyó Nobile Rim 1 entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
-        "La cuadrícula del mapa está en el marco lunar MOON_ME de DE421 y usa proyección estereográfica polar con coordenadas en metros.",
-        "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
+        "Las posiciones de este mapa se miden en metros desde el polo sur, con el sistema de coordenadas lunar MOON_ME.",
+        "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
       ]
     },
     "en": {
@@ -24,8 +24,8 @@
       "facts": [
         "Nobile crater is about 79 km across and is named for the Italian explorer and aviator Umberto Nobile (name approved by the IAU in 1994; USGS Gazetteer).",
         "NASA included Nobile Rim 1 among the nine revised Artemis III candidate regions in 2024.",
-        "The map grid uses the DE421 lunar MOON_ME frame and a polar stereographic projection with coordinates in metres.",
-        "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
+        "Positions on this map are measured in metres from the south pole, using the MOON_ME lunar coordinate system.",
+        "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
       ]
     }
   },

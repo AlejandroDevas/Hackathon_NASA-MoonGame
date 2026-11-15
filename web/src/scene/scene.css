@@ -55,9 +55,9 @@
 .scene-sign.open { pointer-events: auto; }
 .scene-sign h4 { margin: 0 0 4px; color: var(--sun); font-family: var(--font-mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; }
 .scene-sign-block { margin: 0 0 11px; padding-top: 9px; border-top: 1px solid var(--border); }
-.scene-sign-data { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 12px; margin: 0 0 6px; }
-.scene-sign-data dt { color: var(--muted); font-size: 11px; }
-.scene-sign-data dd { margin: 0; font-family: var(--font-mono); font-size: 13px; }
+.scene-sign-data { display: grid; gap: 10px; margin: 0 0 8px; }
+.scene-sign-data dt { color: var(--sun); font: 600 11px/1.3 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.scene-sign-data dd { margin: 2px 0 0; font-size: 13px; line-height: 1.45; }
 .scene-sign-note, .scene-sign-sources { color: var(--muted); font-size: 11px !important; }
 .scene-sign-sources a { color: var(--sun); }
 

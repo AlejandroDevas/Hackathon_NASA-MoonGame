@@ -3,6 +3,7 @@ import { mountPanel } from '../panel/panel.js';
 import { createPlayback } from './playback.js';
 import { createPlayBar } from './playbar.js';
 import { createTopBar } from './topbar.js';
+import { createTutorial } from './tutorial.js';
 
 /**
  * Mounts the whole interface around the 3D scene: the top bar (name, language, view toggles and the
@@ -16,7 +17,8 @@ import { createTopBar } from './topbar.js';
 export function mountInterface(root, store, siteList, sites, { renderTimeline, audioCue }) {
   const playback = createPlayback(store, sites);
   const analysis = createAnalysis(store, siteList, sites);
-  const top = createTopBar(store, { analysis, sites, siteList, audioCue });
+  const tutorial = createTutorial();
+  const top = createTopBar(store, { analysis, sites, siteList, audioCue, tutorial });
   const bottom = createPlayBar(store, sites, playback);
   document.body.append(top.el, bottom.el);
 
@@ -51,8 +53,10 @@ export function mountInterface(root, store, siteList, sites, { renderTimeline, a
   return {
     playback,
     analysis,
+    tutorial,
     dispose() {
       document.removeEventListener('keydown', onKey);
+      tutorial.dispose();
       analysis.dispose();
       top.el.remove();
       bottom.el.remove();

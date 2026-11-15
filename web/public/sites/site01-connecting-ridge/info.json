@@ -12,9 +12,9 @@
       "why": "Para una misión con paneles solares es una de las zonas más prometedoras: ventanas largas de luz, y cráteres en sombra permanente (posible hielo de agua) a poca distancia.",
       "facts": [
         "LROC: las partes altas de la cresta pueden estar iluminadas hasta ~90 % del tiempo, pero ningún punto lo está siempre (LROC, «Islands in the Dark»).",
-        "Un estudio de NASA sobre actividades extravehiculares de Artemis III cita ~56 % de iluminación anual en el punto estudiado; las cifras difieren porque miden puntos y métodos distintos (NTRS 20210026296).",
-        "Entre el 1 de enero de 2024 y el 1 de enero de 2026, el Sitio 1 fue el de mayor superficie con iluminación media superior al 70 % a 1 m sobre el suelo (Barker et al. 2021).",
-        "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
+        "Otro estudio de NASA, sobre las caminatas lunares de Artemis III, da ~56 % de luz al año en el punto que analizó; las cifras difieren porque miden puntos y métodos distintos (NTRS 20210026296).",
+        "Entre 2024 y 2026, el Sitio 1 fue la zona con más superficie iluminada más del 70 % del tiempo, medido a 1 m del suelo (Barker et al. 2021).",
+        "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
       ]
     },
     "en": {
@@ -23,9 +23,9 @@
       "why": "For a solar-powered mission it is one of the most promising places: long lighting windows, with permanently shadowed craters (possible water ice) nearby.",
       "facts": [
         "LROC: the higher parts of the ridge can be lit up to ~90% of the time, but no point is permanently lit (LROC, \"Islands in the Dark\").",
-        "A NASA study of Artemis III spacewalk capability cites ~56% annual illumination at the studied spot; figures differ because they measure different points and methods (NTRS 20210026296).",
-        "Between 1 Jan 2024 and 1 Jan 2026, Site 1 had the largest area with average illumination above 70% at 1 m above the surface (Barker et al. 2021).",
-        "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
+        "Another NASA study, on Artemis III moonwalks, gives ~56% sunlight over a year at the spot it analysed; the figures differ because they measure different points and methods (NTRS 20210026296).",
+        "Between 2024 and 2026, Site 1 had the largest area lit more than 70% of the time, measured 1 m above the ground (Barker et al. 2021).",
+        "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
       ]
     }
   },

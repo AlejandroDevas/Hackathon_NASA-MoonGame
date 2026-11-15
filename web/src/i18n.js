@@ -32,6 +32,27 @@ export function formatDuration(ms) {
   return `${minutes} min`;
 }
 
+const UNITS = {
+  es: { d: ['día', 'días'], h: ['hora', 'horas'], min: ['minuto', 'minutos'], and: 'y', lt: 'menos de 1 minuto' },
+  en: { d: ['day', 'days'], h: ['hour', 'hours'], min: ['minute', 'minutes'], and: 'and', lt: 'less than 1 minute' },
+};
+
+/**
+ * The same duration as `formatDuration`, written out for people: "8 días y 18 horas" / "8 days and 18 hours".
+ * Two units at most (days and hours, or hours and minutes).
+ */
+export function formatDurationLong(ms) {
+  const words = UNITS[locale] ?? UNITS.es;
+  const totalMin = Math.round(Math.max(ms, 0) / 60_000);
+  if (totalMin < 1) return words.lt;
+  const days = Math.floor(totalMin / 1440);
+  const hours = Math.floor((totalMin % 1440) / 60);
+  const minutes = totalMin % 60;
+  const unit = (n, [one, many]) => `${n} ${n === 1 ? one : many}`;
+  const [major, minor] = days >= 1 ? [unit(days, words.d), hours ? unit(hours, words.h) : null] : hours >= 1 ? [unit(hours, words.h), minutes ? unit(minutes, words.min) : null] : [unit(minutes, words.min), null];
+  return minor ? `${major} ${words.and} ${minor}` : major;
+}
+
 /** "7 may 2029" / "7 May 2029": the UTC calendar date of `ms`, in the active language. */
 export function formatDate(ms) {
   return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(ms);

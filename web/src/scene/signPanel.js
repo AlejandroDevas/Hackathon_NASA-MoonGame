@@ -1,4 +1,4 @@
-import { formatDuration, t } from '../i18n.js';
+import { formatDurationLong, t } from '../i18n.js';
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -19,22 +19,24 @@ function sourceLabel(url) {
 }
 
 function dataBlock(overview) {
-  const years = `${new Date(overview.fromMs).getUTCFullYear()}–${new Date(overview.toMs).getUTCFullYear()}`;
+  const from = new Date(overview.fromMs).getUTCFullYear();
+  const to = new Date(overview.toMs).getUTCFullYear();
   const list = el('dl', 'scene-sign-data');
+  // each figure is a short heading and one plain sentence that says what it means
   const rows = [
     ['sign.sunFraction', percent(overview.sunFraction)],
-    ['sign.longestSun', formatDuration(overview.longestSunMs)],
-    ['sign.longestDark', formatDuration(overview.longestDarkMs)],
+    ['sign.longestSun', formatDurationLong(overview.longestSunMs)],
+    ['sign.longestDark', formatDurationLong(overview.longestDarkMs)],
     ['sign.earthFraction', percent(overview.earthFraction)],
-    ['sign.longestEarthGap', formatDuration(overview.longestEarthGapMs)],
+    ['sign.longestEarthGap', formatDurationLong(overview.longestEarthGapMs)],
   ];
   for (const [key, value] of rows) {
     const row = el('div');
-    row.append(el('dt', '', t(key)), el('dd', '', value));
+    row.append(el('dt', '', t(key)), el('dd', '', t(`${key}Text`, { value })));
     list.append(row);
   }
   const wrap = el('section', 'scene-sign-block');
-  wrap.append(el('h4', '', t('sign.data', { years })), list, el('p', 'scene-sign-note', t('sign.dataNote')));
+  wrap.append(el('h4', '', t('sign.data', { from, to })), list, el('p', 'scene-sign-note', t('sign.dataNote')));
   return wrap;
 }
 

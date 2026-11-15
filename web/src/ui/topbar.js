@@ -23,11 +23,11 @@ function toolButton(testId, iconName, onClick) {
 /**
  * The top bar: the name of the app, the language and the site on the left; the 3D view toggles (from right to
  * left: sound, lighten shadows, LROC image, free view) and a drop-down menu on the right. The menu
- * opens the planner panel and the Analysis window and switches Compare on and off.
+ * opens the planner panel and the Analysis window, switches Compare on and off and starts the tutorial.
  * @param {{get(): object, set(p: object): void}} store
- * @param {{analysis: {open(): void}, sites: Map<string, object>, siteList: Array<{id: string, name: string}>, audioCue?: {setEnabled(on: boolean): boolean}}} deps
+ * @param {{analysis: {open(): void}, sites: Map<string, object>, siteList: Array<{id: string, name: string}>, audioCue?: {setEnabled(on: boolean): boolean}, tutorial?: {open(): void}}} deps
  */
-export function createTopBar(store, { analysis, sites, siteList, audioCue }) {
+export function createTopBar(store, { analysis, sites, siteList, audioCue, tutorial }) {
   const header = el('header', 'topbar');
 
   const brand = el('div', 'topbar-brand');
@@ -98,7 +98,8 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue }) {
     // comparing is done in the planner, so switching it on shows the planner
     store.set({ scenarios: { A: scenarios.A, B: turningOn ? { ...scenarios.A } : null }, ...(turningOn ? { panelOpen: true } : {}) });
   });
-  menu.append(planner.item, analysisItem.item, compare.item);
+  const tutorialItem = menuItem('tutorial-open', 'menuitem', () => tutorial?.open());
+  menu.append(planner.item, analysisItem.item, compare.item, tutorialItem.item);
   menuWrap.append(menuButton, menu);
   attachMenu({ trigger: menuButton, menu });
 
@@ -136,6 +137,7 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue }) {
     analysisItem.text.textContent = t('analysis.open');
     compare.text.textContent = state.scenarios.B ? t('app.compareOff') : t('app.compare');
     compare.item.setAttribute('aria-checked', String(Boolean(state.scenarios.B)));
+    tutorialItem.text.textContent = t('ui.menuTutorial');
   }
 
   return { el: header, refresh, menu: { button: menuButton, list: menu } };

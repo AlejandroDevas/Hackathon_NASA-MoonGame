@@ -82,7 +82,8 @@ async function main() {
     const audioCue = createAudioCue({ createMusic: createAmbientMusic, createHum: createRoverHum });
     const scene = mountScene(document.getElementById('scene'), store, sites, audioCue);
     if (import.meta.env.DEV) window.__navigator = scene.debug;
-    mountInterface(root, store, siteList, sites, { renderTimeline, audioCue });
+    const ui = mountInterface(root, store, siteList, sites, { renderTimeline, audioCue });
+    ui.tutorial.openIfFirstVisit();
   } catch (error) {
     root.textContent = t('app.loadError', { message: error.message });
   } finally {

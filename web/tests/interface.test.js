@@ -79,10 +79,10 @@ describe('top bar', () => {
     expect(bar.lastElementChild.className).toContain('topbar-menu');
   });
 
-  test('the menu offers the planner, the Analysis window and Compare, and nothing else', () => {
+  test('the menu offers the planner, the Analysis window, Compare and the tutorial, and nothing else', () => {
     setup();
     const items = [...q('menu').querySelectorAll('[role^="menuitem"]')].map((n) => n.dataset.testid);
-    expect(items).toEqual(['panel-toggle', 'analysis-open', 'compare-toggle']);
+    expect(items).toEqual(['panel-toggle', 'analysis-open', 'compare-toggle', 'tutorial-open']);
     expect(q('menu').getAttribute('role')).toBe('menu');
     expect(q('menu').hidden).toBe(true);
   });

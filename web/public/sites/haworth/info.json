@@ -11,10 +11,10 @@
       "body": "Haworth es un cráter de unos 50 km de diámetro cerca del polo sur; buena parte de su interior está en sombra permanente. La región cartografiada a 5 m cubre su entorno.",
       "why": "Los cráteres como Haworth guardan zonas que no ven el Sol desde hace miles de millones de años: son los lugares donde se busca hielo de agua para futuras misiones.",
       "facts": [
-        "Un estudio con el altímetro LOLA analizó el interior en sombra permanente de Haworth, Shoemaker y Faustini, tres cráteres anteriores al período Nectárico, es decir, muy antiguos (Tye et al. 2015, NTRS 20150006822).",
+        "Un estudio con medidas láser de LRO (LOLA) analizó el interior en sombra permanente de Haworth, Shoemaker y Faustini, tres cráteres anteriores al período Nectárico, es decir, muy antiguos (Tye et al. 2015, NTRS 20150006822).",
         "NASA incluyó Haworth entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
-        "PGDA ofrece un DEM LOLA específico de Haworth a 5 m por píxel, en el marco lunar MOON_ME de DE421.",
-        "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
+        "El archivo de datos lunares de NASA (PGDA) ofrece un mapa de alturas específico de Haworth, con un punto cada 5 m, medido con LOLA.",
+        "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
       ]
     },
     "en": {
@@ -22,10 +22,10 @@
       "body": "Haworth is a crater about 50 km across near the south pole; much of its interior is permanently shadowed. The 5 m map covers its surroundings.",
       "why": "Craters like Haworth hold areas that have not seen the Sun for billions of years: they are where water ice is sought for future missions.",
       "facts": [
-        "A study with the LOLA altimeter analysed the permanently shadowed interiors of Haworth, Shoemaker and Faustini, three pre-Nectarian (very old) craters (Tye et al. 2015, NTRS 20150006822).",
+        "A study using LRO laser measurements (LOLA) analysed the permanently shadowed interiors of Haworth, Shoemaker and Faustini, three pre-Nectarian (very old) craters (Tye et al. 2015, NTRS 20150006822).",
         "NASA included Haworth among the nine revised Artemis III candidate regions in 2024.",
-        "PGDA provides a dedicated 5 m per pixel LOLA DEM for Haworth, referenced to the lunar MOON_ME frame of DE421.",
-        "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
+        "NASA's lunar data archive (PGDA) provides a height map dedicated to Haworth, with one point every 5 m, measured with LOLA.",
+        "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
       ]
     }
   },

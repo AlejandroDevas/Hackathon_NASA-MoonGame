@@ -13,9 +13,9 @@
         "why": "Para una misión con paneles solares es una de las zonas más prometedoras: ventanas largas de luz, y cráteres en sombra permanente (posible hielo de agua) a poca distancia.",
         "facts": [
           "LROC: las partes altas de la cresta pueden estar iluminadas hasta ~90 % del tiempo, pero ningún punto lo está siempre (LROC, «Islands in the Dark»).",
-          "Un estudio de NASA sobre actividades extravehiculares de Artemis III cita ~56 % de iluminación anual en el punto estudiado; las cifras difieren porque miden puntos y métodos distintos (NTRS 20210026296).",
-          "Entre el 1 de enero de 2024 y el 1 de enero de 2026, el Sitio 1 fue el de mayor superficie con iluminación media superior al 70 % a 1 m sobre el suelo (Barker et al. 2021).",
-          "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
+          "Otro estudio de NASA, sobre las caminatas lunares de Artemis III, da ~56 % de luz al año en el punto que analizó; las cifras difieren porque miden puntos y métodos distintos (NTRS 20210026296).",
+          "Entre 2024 y 2026, el Sitio 1 fue la zona con más superficie iluminada más del 70 % del tiempo, medido a 1 m del suelo (Barker et al. 2021).",
+          "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
         ]
       },
       "en": {
@@ -24,9 +24,9 @@
         "why": "For a solar-powered mission it is one of the most promising places: long lighting windows, with permanently shadowed craters (possible water ice) nearby.",
         "facts": [
           "LROC: the higher parts of the ridge can be lit up to ~90% of the time, but no point is permanently lit (LROC, \"Islands in the Dark\").",
-          "A NASA study of Artemis III spacewalk capability cites ~56% annual illumination at the studied spot; figures differ because they measure different points and methods (NTRS 20210026296).",
-          "Between 1 Jan 2024 and 1 Jan 2026, Site 1 had the largest area with average illumination above 70% at 1 m above the surface (Barker et al. 2021).",
-          "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
+          "Another NASA study, on Artemis III moonwalks, gives ~56% sunlight over a year at the spot it analysed; the figures differ because they measure different points and methods (NTRS 20210026296).",
+          "Between 2024 and 2026, Site 1 had the largest area lit more than 70% of the time, measured 1 m above the ground (Barker et al. 2021).",
+          "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
         ]
       }
     },
@@ -53,10 +53,10 @@
         "why": "Es el contraste más extremo del polo sur: el frío eterno del fondo, donde puede haber hielo, a pocos kilómetros de bordes con mucha luz y buena línea de vista.",
         "facts": [
           "Shackleton mide unos 21 km de diámetro y más de 4 km de profundidad (NASA).",
-          "El altímetro láser LOLA de LRO lo muestra como un cráter antiguo (más de 3.000 millones de años) y muy bien conservado: sus paredes interiores están menos erosionadas que el suelo y el borde (Zuber et al. 2012, NTRS 20120013758).",
+          "Las medidas con láser de la sonda LRO (instrumento LOLA) lo muestran como un cráter muy antiguo (más de 3.000 millones de años) pero bien conservado: sus paredes interiores están menos desgastadas que el suelo y el borde (Zuber et al. 2012, NTRS 20120013758).",
           "Su suelo es más brillante que el terreno vecino; se propuso hielo superficial (~20 %) como explicación posible, pero sigue siendo una hipótesis (Zuber et al. 2012).",
           "Las listas de regiones candidatas de NASA nombran zonas cercanas, como «Connecting Ridge» y «Peak Near Shackleton»; este mapa (Sitio 04) viene de los estudios LOLA de Barker et al. 2021.",
-          "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
+          "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
         ]
       },
       "en": {
@@ -65,10 +65,10 @@
         "why": "It is the most extreme contrast at the south pole: the eternal cold of the floor, where ice may exist, a few kilometres from brightly lit rims with a good line of sight.",
         "facts": [
           "Shackleton is about 21 km in diameter and more than 4 km deep (NASA).",
-          "LRO's LOLA laser altimeter shows an ancient (over 3 billion years) and unusually well-preserved crater: its inner walls are fresher than the floor and rim (Zuber et al. 2012, NTRS 20120013758).",
+          "Laser measurements by the LRO probe (the LOLA instrument) show a very old crater (over 3 billion years) that is nevertheless well preserved: its inner walls are less worn than the floor and rim (Zuber et al. 2012, NTRS 20120013758).",
           "Its floor is brighter than the surrounding terrain; about 20% surface ice was proposed as a possible explanation, but it remains a hypothesis (Zuber et al. 2012).",
           "NASA candidate-region lists name nearby areas such as \"Connecting Ridge\" and \"Peak Near Shackleton\"; this map (Site 04) comes from the LOLA studies by Barker et al. 2021.",
-          "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
+          "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
         ]
       }
     },
@@ -95,8 +95,8 @@
         "facts": [
           "El cráter Nobile mide unos 79 km y lleva el nombre del explorador y aviador italiano Umberto Nobile (nombre aprobado por la IAU en 1994; USGS Gazetteer).",
           "NASA incluyó Nobile Rim 1 entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
-          "La cuadrícula del mapa está en el marco lunar MOON_ME de DE421 y usa proyección estereográfica polar con coordenadas en metros.",
-          "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
+          "Las posiciones de este mapa se miden en metros desde el polo sur, con el sistema de coordenadas lunar MOON_ME.",
+          "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
         ]
       },
       "en": {
@@ -106,8 +106,8 @@
         "facts": [
           "Nobile crater is about 79 km across and is named for the Italian explorer and aviator Umberto Nobile (name approved by the IAU in 1994; USGS Gazetteer).",
           "NASA included Nobile Rim 1 among the nine revised Artemis III candidate regions in 2024.",
-          "The map grid uses the DE421 lunar MOON_ME frame and a polar stereographic projection with coordinates in metres.",
-          "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
+          "Positions on this map are measured in metres from the south pole, using the MOON_ME lunar coordinate system.",
+          "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
         ]
       }
     },
@@ -131,10 +131,10 @@
         "body": "Haworth es un cráter de unos 50 km de diámetro cerca del polo sur; buena parte de su interior está en sombra permanente. La región cartografiada a 5 m cubre su entorno.",
         "why": "Los cráteres como Haworth guardan zonas que no ven el Sol desde hace miles de millones de años: son los lugares donde se busca hielo de agua para futuras misiones.",
         "facts": [
-          "Un estudio con el altímetro LOLA analizó el interior en sombra permanente de Haworth, Shoemaker y Faustini, tres cráteres anteriores al período Nectárico, es decir, muy antiguos (Tye et al. 2015, NTRS 20150006822).",
+          "Un estudio con medidas láser de LRO (LOLA) analizó el interior en sombra permanente de Haworth, Shoemaker y Faustini, tres cráteres anteriores al período Nectárico, es decir, muy antiguos (Tye et al. 2015, NTRS 20150006822).",
           "NASA incluyó Haworth entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
-          "PGDA ofrece un DEM LOLA específico de Haworth a 5 m por píxel, en el marco lunar MOON_ME de DE421.",
-          "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
+          "El archivo de datos lunares de NASA (PGDA) ofrece un mapa de alturas específico de Haworth, con un punto cada 5 m, medido con LOLA.",
+          "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
         ]
       },
       "en": {
@@ -142,10 +142,10 @@
         "body": "Haworth is a crater about 50 km across near the south pole; much of its interior is permanently shadowed. The 5 m map covers its surroundings.",
         "why": "Craters like Haworth hold areas that have not seen the Sun for billions of years: they are where water ice is sought for future missions.",
         "facts": [
-          "A study with the LOLA altimeter analysed the permanently shadowed interiors of Haworth, Shoemaker and Faustini, three pre-Nectarian (very old) craters (Tye et al. 2015, NTRS 20150006822).",
+          "A study using LRO laser measurements (LOLA) analysed the permanently shadowed interiors of Haworth, Shoemaker and Faustini, three pre-Nectarian (very old) craters (Tye et al. 2015, NTRS 20150006822).",
           "NASA included Haworth among the nine revised Artemis III candidate regions in 2024.",
-          "PGDA provides a dedicated 5 m per pixel LOLA DEM for Haworth, referenced to the lunar MOON_ME frame of DE421.",
-          "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
+          "NASA's lunar data archive (PGDA) provides a height map dedicated to Haworth, with one point every 5 m, measured with LOLA.",
+          "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
         ]
       }
     },
@@ -172,9 +172,9 @@
         "why": "Una montaña alta puede ver la Tierra de forma casi continua y tener buena luz en su borde: dos ventajas clave para comunicaciones y energía. Esta herramienta te deja comprobarlo con números.",
         "facts": [
           "LROC: se cree que es un resto del borde de la cuenca Polo Sur–Aitken, formada hace más de 4.000 millones de años.",
-          "Las páginas de NASA/LRO sobre Malapert destacan su buena visibilidad de la Tierra y la alta iluminación de su borde; compruébalo en «Tierra visible» y «Luz solar» de esta herramienta.",
+          "Las páginas de NASA/LRO sobre Malapert destacan su buena visibilidad de la Tierra y la alta iluminación de su borde; compruébalo en «Señal con la Tierra» y «Energía solar» de esta herramienta.",
           "NASA incluyó Malapert Massif entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
-          "Cerca del 90 % de los píxeles del mapa de 5 m están interpolados; el error típico de altura es de 0,30 a 0,50 m (Barker et al. 2021)."
+          "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
         ]
       },
       "en": {
@@ -183,9 +183,9 @@
         "why": "A tall mountain can see Earth almost continuously and have good light on its rim: two key advantages for communications and power. This tool lets you check it with numbers.",
         "facts": [
           "LROC: it is thought to be a remnant of the South Pole–Aitken basin rim, which formed more than 4 billion years ago.",
-          "NASA/LRO pages on Malapert highlight its good Earth visibility and the high illumination of its rim; check it in this tool's \"Earth visible\" and \"Sunlight\" figures.",
+          "NASA/LRO pages on Malapert highlight its good Earth visibility and the high illumination of its rim; check it in this tool's \"Signal with Earth\" and \"Solar energy\" figures.",
           "NASA included Malapert Massif among the nine revised Artemis III candidate regions in 2024.",
-          "About 90% of the 5 m map pixels are interpolated; typical height error is 0.30 to 0.50 m (Barker et al. 2021)."
+          "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
         ]
       }
     },

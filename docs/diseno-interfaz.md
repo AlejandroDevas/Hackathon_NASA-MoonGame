@@ -30,6 +30,8 @@ La interfaz debe ayudar a explorar el terreno lunar y, a la vez, responder rápi
 
 ## Decisiones que cambiaron
 
+- **Tutorial interactivo y lenguaje llano (2026-11-15).** La primera visita abre una ventana pequeña que explica cada control, resaltándolo sobre la página oscurecida (Anterior/Siguiente abajo a la izquierda, Saltar abajo a la derecha; también teclado y Esc). Se puede repetir desde el menú. Con el mismo fin, los «Datos de este sitio» del cartel pasaron de etiquetas técnicas a un título corto y una frase por cifra, con duraciones en días y horas completos; y las etiquetas del planificador evitan «elevación», «hueco» u «ocaso» donde basta «altura», «sin ver la Tierra» o «se pone».
+
 - **La interfaz pasó de panel fijo a escena completa con barras (2026-11-15).** Antes el planificador ocupaba un 38 % de la pantalla a la derecha; ahora la escena es lo principal y el planificador se abre a petición desde el menú. El selector de sitio se movió a la barra superior (también está en el planificador, sincronizado, y allí tiene el suyo el escenario B). En móvil la barra pasa a dos filas para que quepan nombre, idioma, sitio, botones y menú.
 
 - **La Tierra volvió a ser azul.** Primero se dibujó gris cálido siguiendo la regla de «no introducir azules decorativos»; una esfera gris se leía como otra Luna. El azul de la Tierra es el color real del planeta (imagen de NASA), no decoración, y es el único azul de la escena; la interfaz sigue sin azules.
