@@ -91,5 +91,51 @@
 
 - [ ] **Step 1:** README: sección de sonido (opcional, apagado por defecto, qué hace, por qué no hay sonido ambiente) y la lista de límites al día (cartel accesible, sombras sobre todo el terreno, pista de luz continua). La línea sobre sonido ya existente en el árbol de trabajo se conserva y se integra.
 - [ ] **Step 2:** `npm --prefix web test`, `data-pipeline/.venv/Scripts/python -m pytest data-pipeline/tests -q -W ignore` y `npm --prefix web run build`; esperado: todo PASS.
-- [ ] **Step 3: Navegador** (mostrar el panel del navegador, porque oculto pausa la animación): activar el sonido y ver que el botón cambia y no hay errores; cartel cerrado con `aria-hidden="true"` y abierto con `"false"`; cambiar a inglés y comprobar `document.documentElement.lang`; chocar contra el borde del terreno y ver el aviso de borde, y contra una pendiente y ver el de pendiente; la tarjeta muestra "Luz continua más larga"; las sombras llegan a las esquinas del terreno sin errores en consola.
+- [ ] **Step 3:** la verificación en el navegador de M4 se hace una sola vez al final, en la Task 9.
 - [ ] **Step 4:** commit `docs: M4 sound, accessibility and limits`.
+
+---
+
+## Ampliación aprobada por el equipo: visual del 3D y arrastre en la línea de tiempo
+
+> Origen: ideas tomadas de tres fragmentos de código que aportó el equipo (terreno procedural, función puntero→hora y arrastre sobre la gráfica). **No** se adopta el terreno procedural, la niebla, el Sol fijo ni Three r128 por CDN (rompen la coherencia con el DEM real o con la física lunar).
+
+**Regla de trabajo del árbol compartido.** Otra herramienta edita este mismo árbol sin confirmar (rediseño del CSS, modelo NASA del rover, README, `index.html`, y cambios en `panel.js`, `timeline.js`, `view3d.js`, `world.js`, `robotMesh.js` y las cadenas). Se edita siempre sobre el contenido actual del disco con reemplazos puntuales y **solo se confirman las líneas propias**: se guarda una copia del archivo antes de editarlo y se prepara para el commit `git merge-file -p HEAD:archivo copia-antes archivo-después` (el resultado es HEAD más solo mis cambios; si hay conflicto se para y se avisa). Antes de cada commit se revisa `git diff --cached` para comprobar que solo hay hunks propios.
+
+### Task 7: Aspecto del 3D (color por elevación, tone mapping, estrellas, ayuda de sombras, vista libre)
+
+**Files:** Modify `web/src/scene/terrainMesh.js`, `web/src/scene/world.js`, `web/src/scene/view3d.js`, `web/src/panel/panel.js`, `web/src/main.js`, `web/src/strings/es.json`, `web/src/strings/en.json`; Test `web/tests/world.test.js`, `web/tests/panelMount.test.js`
+
+**Interfaces:**
+- `terrainColor(heightM: number, minM: number, maxM: number, r: number, c: number): number` (en `terrainMesh.js`): factor de brillo `0.62 + elevNorm·0.34 + grano`, con `elevNorm = (h − minM)/(maxM − minM)` recortado a 0..1 (0,5 si `maxM === minM`) y `grano = (hash(r·0.71, c·0.71) − 0.5)·0.06` determinista; resultado siempre en `[0.5, 1]`. `buildTerrainGeometry` añade el atributo `color` (itemSize 3, `g`, `g·0.995`, `g·1.012` recortado a 1) y el material del terreno pasa a `vertexColors: true` (conservando su color base).
+- `createWorld` devuelve además `ambient: THREE.AmbientLight` y `setShadowLift(on: boolean): void` (apagado = intensidad base de la luz ambiental; encendido = 6× la base). Las estrellas pasan a 4500 con atributo `color` de brillo variable (0,45–1).
+- Estado nuevo del store: `shadowLift: boolean` (false) y `viewMode: 'follow' | 'free'` ('follow'); botones del panel `data-testid="shadow-lift-toggle"` y `data-testid="view-toggle"` con `aria-pressed`; cadenas `app.shadowLift`, `app.viewFree`, `app.viewFollow`.
+- `view3d.js`: tone mapping `ACESFilmicToneMapping` con exposición 1,15; suscripción a `shadowLift` (`world.setShadowLift`) y a `viewMode`. En vista libre se usa `OrbitControls` (`three/addons/controls/OrbitControls.js`) con `enableDamping`, `minDistance 8`, `maxDistance 6000`, `maxPolarAngle π/2 − 0.01`, objetivo = el robot (se sigue con suavizado) y la cámara nunca baja de `alturaTerreno + 2 m`; las teclas del robot siguen funcionando; al volver a "seguir" se recupera la cámara de seguimiento.
+
+- [ ] **Step 1: Tests que fallan.** `terrainColor`: sube con la altura (`terrainColor(100,0,100,5,5) > terrainColor(0,0,100,5,5)`, con la misma `r, c` para descontar el grano), es determinista (misma entrada, mismo valor), vale entre 0,5 y 1 para alturas extremas y con `minM === maxM` no es NaN. `buildTerrainGeometry`: atributo `color` con `count === position.count`, `itemSize 3`, todos los valores en `[0, 1]`. `createWorld(tinySite)`: 4500 estrellas con atributo `color`; `setShadowLift(true)` sube `ambient.intensity` por encima del valor inicial y `setShadowLift(false)` lo devuelve exactamente. `panelMount`: pulsar `shadow-lift-toggle` alterna `store.get().shadowLift` y `aria-pressed`; pulsar `view-toggle` alterna `viewMode` entre `'follow'` y `'free'` y `aria-pressed`.
+- [ ] **Step 2:** `npm --prefix web test`; esperado: FAIL.
+- [ ] **Step 3:** Implementar (el cableado de `OrbitControls` y el tone mapping no tienen test: se verifican en la Task 9).
+- [ ] **Step 4:** `npm --prefix web test` y `npm --prefix web run build`; esperado: PASS. **Step 5:** commit con solo mis hunks: `feat(web): 3D look and free view`.
+
+### Task 8: Arrastrar y usar el teclado sobre la línea de tiempo
+
+**Files:** Create `web/src/panel/scrub.js`, `web/tests/scrub.test.js`; Modify `web/src/panel/timeline.js`, `web/src/panel/panel.js`, `web/src/strings/es.json`, `web/src/strings/en.json`; Test `web/tests/panelMount.test.js`
+
+**Interfaces:**
+- `timeFromPointer(clientX: number, rect: {left: number, width: number}, fromMs: number, toMs: number): number`: `fromMs + razón·(toMs − fromMs)` con la razón recortada a 0..1 (ancho 0 → `fromMs`).
+- `scrubKeyDeltaMs(key: string, shiftKey: boolean): number | null`: ArrowLeft/ArrowRight = ∓1 h (con Shift ∓6 h), PageDown/PageUp = ∓24 h; cualquier otra tecla `null`.
+- `createScrubber({ element, getRange, getTime, onScrub, raf = requestAnimationFrame, caf = cancelAnimationFrame }): { dispose(): void }`; `getRange(): {fromMs, toMs}`; `getTime(): number`. Pone en `element` `tabindex="0"`, `role="slider"`, `aria-label = t('chart.scrub')`, `touch-action: none`. Con `pointerdown` (captura el puntero si puede), `pointermove` mientras se arrastra y `pointerup`/`pointercancel`; llama a `onScrub(ms)` **como mucho una vez por fotograma** (la última posición). El teclado llama a `onScrub(getTime() + delta)` y evita el desplazamiento de la página.
+- `renderTimeline(el, site, fromMs, toMs, cursorMs, { onScrub, getTime } = {})`: desactiva el zoom por arrastre de uPlot (`cursor.drag.x/y = false`), engancha el scrubber a `plot.over` (rango = escala x actual en ms) y lo desmonta en `destroy()`; `setCursor` actualiza `aria-valuenow`/`aria-valuetext` (hora UTC).
+- `panel.js` pasa `onScrub: (ms) => { player?.stop(); store.set(<escenario del slot con la hora recortada con clampTime>) }` y `getTime`. Clave nueva `chart.scrub` (es: "Hora del escenario: arrastra o usa las flechas"; en: "Scenario time: drag or use the arrow keys").
+
+- [ ] **Step 1: Tests que fallan.** `timeFromPointer`: en el borde izquierdo → `fromMs`, en el derecho → `toMs`, en el centro → el punto medio, a la izquierda del rectángulo → `fromMs`, a la derecha → `toMs`, `width: 0` → `fromMs`. `scrubKeyDeltaMs`: `('ArrowRight', false) = 3 600 000`, `('ArrowLeft', true) = −21 600 000`, `('PageUp', false) = 86 400 000`, `('a', false) = null`. `createScrubber` (jsdom, `getBoundingClientRect` simulado y `raf` falso): `pointerdown` en la mitad llama a `onScrub` con el punto medio tras vaciar la cola de fotogramas; varios `pointermove` seguidos en un mismo fotograma producen **una** llamada con la última posición; tras `pointerup` los `pointermove` no hacen nada; `dispose` quita los listeners; el elemento queda con `role="slider"`, `tabindex="0"` y `touch-action: none`; `ArrowRight` llama a `onScrub(getTime() + 3 600 000)`. `panelMount` (con la gráfica falsa que captura sus opciones): `onScrub(T0 + 8h)` fija la hora del escenario A; con la animación en marcha (`playing true`) `onScrub` la deja en `false`; `onScrub(Date.UTC(2031,0,1))` recorta a la última muestra (`T0 + 47h`); en modo Comparar el `onScrub` de la gráfica de B solo mueve a B.
+- [ ] **Step 2:** Esperado: FAIL. **Step 3:** Implementar. **Step 4:** `npm --prefix web test` y build; esperado: PASS. **Step 5:** commit con solo mis hunks: `feat(web): scrub the timeline by dragging or keyboard`.
+
+### Task 9: Verificación final de M4 y README
+
+**Files:** Modify `README.md` (solo mis líneas)
+
+- [ ] **Step 1:** README: documentar vista libre (controles del ratón), "Aclarar sombras" como ayuda visual que no cambia ningún cálculo, color por elevación (el brillo varía con la altura real y un grano sintético muy sutil que no toca la geometría), y el arrastre/teclado sobre la línea de tiempo; añadir en límites que el color y el grano son solo aspecto.
+- [ ] **Step 2:** `npm --prefix web test`, `data-pipeline/.venv/Scripts/python -m pytest data-pipeline/tests -q -W ignore` y `npm --prefix web run build`; esperado: todo PASS.
+- [ ] **Step 3: Navegador** (con el panel del navegador visible): activar el sonido y ver que el botón cambia sin errores; cartel cerrado `aria-hidden="true"` y abierto `"false"`; inglés → `<html lang="en">`; borde del terreno y pendiente muestran avisos distintos; la tarjeta muestra "Luz continua más larga"; el terreno se ve con variación de color y las estrellas más densas; "Aclarar sombras" aclara y al apagarlo vuelve; vista libre: girar, hacer zoom y no atravesar el suelo, y volver a "Seguir al robot"; arrastrar sobre la gráfica mueve la hora, el Sol del 3D y las tarjetas, pausa la animación y no hace zoom; las flechas ←/→ sobre la gráfica la mueven; sin errores en la consola.
+- [ ] **Step 4:** commit con solo mis hunks: `docs: M4 final README`.
