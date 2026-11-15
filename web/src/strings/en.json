@@ -73,7 +73,7 @@
   "sign.earthFraction": "Earth visible",
   "sign.longestEarthGap": "Longest gap without Earth",
   "sign.sources": "Sources",
-  "poi.goal": "Site sign",
+  "poi.goal": "Landing zone",
   "poi.high": "Highest point on the map",
   "poi.low": "Lowest point on the map",
   "poi.detail": "{elev} m altitude · {dist} m away",

@@ -5,6 +5,7 @@ import { getLocale, t } from '../i18n.js';
 import { horizonAt } from '../metrics/visibility.js';
 import { siteOverview } from '../metrics/overview.js';
 import { createInput } from './input.js';
+import { buildLander, footingAt } from './lander.js';
 import { buildPoiMarkers, createPoiTags } from './poiTags.js';
 import { findPois } from './pois.js';
 import { createRobotMesh, loadNasaRover } from './robotMesh.js';
@@ -12,6 +13,7 @@ import { createSignPanel } from './signPanel.js';
 import { MAX_SLOPE_DEG, createRobot, followCamera, nextSignOpen, stepRobot } from './robot.js';
 import { skyAt } from './sky.js';
 import { contains, heightAt, normalAt } from './terrainData.js';
+import { buildRocks, placeRocks } from './rocks.js';
 import { planStart } from './traversal.js';
 import { createWorld } from './world.js';
 
@@ -94,6 +96,7 @@ export function mountScene(container, store, sites, audioCue = null) {
 
   const plans = new Map(); // site id -> planStart result, computed once per site (takes ~1 s)
   const poiCache = new Map(); // site id -> landmarks of the terrain
+  const rockCache = new Map(); // site id -> boulder placements (positions only; meshes are rebuilt per world)
   let pois = [];
   let loadingId = null; // site whose terrain is being fetched
   let slopeLimitDeg = MAX_SLOPE_DEG;
@@ -129,6 +132,7 @@ export function mountScene(container, store, sites, audioCue = null) {
     world.scene.add(buildPoiMarkers(pois, groundAt));
     if (!plans.has(id)) plans.set(id, planStart(site.terrain, { x: 0, z: 0 }, START_DISTANCE_M));
     const plan = plans.get(id);
+    addDecor(id);
     slopeLimitDeg = plan.limitDeg;
     setRobot(plan.x, plan.z, plan.headingDeg);
     routeEl.hidden = plan.reachable;
@@ -140,6 +144,31 @@ export function mountScene(container, store, sites, audioCue = null) {
 
   const groundAt = (x, z) => heightAt(site.terrain, x, z);
   const poiBase = (poi) => groundAt(poi.x, poi.z);
+
+  /** Boulders over the terrain (denser around the landing zone and the robot's start) and the lander on the site point. */
+  function addDecor(id) {
+    const plan = plans.get(id) ?? { x: 0, z: 0 };
+    if (!rockCache.has(id)) {
+      rockCache.set(
+        id,
+        placeRocks(site.terrain, {
+          patches: [
+            { x: 0, z: 0, radiusM: 110, count: 260 },
+            { x: plan.x, z: plan.z, radiusM: 80, count: 260 },
+          ],
+          keepClear: [
+            { x: 0, z: 0, radiusM: 7 },
+            { x: plan.x, z: plan.z, radiusM: 4 },
+          ],
+        }),
+      );
+    }
+    world.scene.add(buildRocks(rockCache.get(id)));
+    const { base, feet } = footingAt(site.terrain, 0, 0);
+    const lander = buildLander(feet);
+    lander.position.set(0, base, 0);
+    world.scene.add(lander);
+  }
 
   function applySky() {
     lastSky = skyAt(site, store.get().scenarios.A.timeMs);

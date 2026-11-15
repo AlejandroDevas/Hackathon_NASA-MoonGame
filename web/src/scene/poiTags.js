@@ -4,6 +4,8 @@ import { relativeTo } from './pois.js';
 
 /** Height (m) of the beacon pole above the ground; the tag hangs at its tip. */
 export const BEACON_HEIGHT_M = 40;
+/** Height (m) above the ground where a landmark's label hangs: just over the lander, or the tip of a beacon. */
+export const tagHeightM = (poi) => (poi.id === 'goal' ? 11 : BEACON_HEIGHT_M + 4);
 const BEACON_COLORS = { goal: 0xd4ad5b, high: 0xe5e0d5, low: 0x8a877e };
 
 function el(tag, className, text) {
@@ -23,6 +25,7 @@ export function buildPoiMarkers(pois, heightAt) {
   const group = new THREE.Group();
   group.name = 'pois';
   for (const poi of pois) {
+    if (poi.id === 'goal') continue; // the lander itself marks the landing zone
     const color = BEACON_COLORS[poi.id] ?? 0xffffff;
     const base = heightAt(poi.x, poi.z);
     const pole = new THREE.Mesh(
@@ -84,7 +87,7 @@ export function createPoiTags(hud) {
   function update(camera, width, height, robot, baseHeight) {
     for (const tag of tags) {
       const { poi } = tag;
-      projected.set(poi.x, baseHeight(poi) + BEACON_HEIGHT_M + 4, poi.z).project(camera);
+      projected.set(poi.x, baseHeight(poi) + tagHeightM(poi), poi.z).project(camera);
       const onScreen = projected.z < 1 && Math.abs(projected.x) < 1.05 && Math.abs(projected.y) < 1.05;
       tag.root.hidden = !onScreen;
       if (!onScreen) continue;

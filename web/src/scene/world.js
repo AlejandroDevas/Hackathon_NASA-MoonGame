@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { directionFromAzEl } from './sky.js';
 import { gridToScene, heightAt } from './terrainData.js';
+import { createGlowTexture } from './glow.js';
 import { createRegolithTexture } from './regolith.js';
 import { buildTerrainGeometry } from './terrainMesh.js';
 
@@ -12,6 +13,7 @@ const RING_RADIUS_M = 6_000;
 const SUN_RADIUS_DEG = 0.2666;
 const EARTH_RADIUS_DEG = 0.95;
 const STAR_COUNT = 4500;
+const GLOW_RADIUS_DEG = 5;
 /** The shadow-lift aid multiplies the (almost black) ambient light by this much; a visual aid only. */
 const SHADOW_LIFT_FACTOR = 40;
 
@@ -148,6 +150,20 @@ export function createWorld(site) {
   sunDisc.name = 'sun-disc';
   scene.add(sunDisc);
 
+  // halo around the Sun: additive, hidden behind the terrain like the disc itself
+  const sunGlow = new THREE.Sprite(
+    new THREE.SpriteMaterial({
+      map: createGlowTexture(),
+      transparent: true,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      opacity: 0.55,
+    }),
+  );
+  sunGlow.name = 'sun-glow';
+  sunGlow.scale.setScalar(2 * BODY_DISTANCE_M * Math.tan(GLOW_RADIUS_DEG * RAD));
+  scene.add(sunGlow);
+
   const earth = new THREE.Mesh(
     new THREE.SphereGeometry(BODY_DISTANCE_M * Math.tan(EARTH_RADIUS_DEG * RAD), 32, 32),
     new THREE.MeshStandardMaterial({ color: 0x3a6fb0, roughness: 1, metalness: 0 }),
@@ -161,6 +177,7 @@ export function createWorld(site) {
     const s = directionFromAzEl(sky.sun.azDeg, sky.sun.elDeg);
     sun.position.set(s.x, s.y, s.z).multiplyScalar(lightDistance);
     sunDisc.position.set(s.x, s.y, s.z).multiplyScalar(BODY_DISTANCE_M);
+    sunGlow.position.copy(sunDisc.position);
     const e = directionFromAzEl(sky.earth.azDeg, sky.earth.elDeg);
     earth.position.set(e.x, e.y, e.z).multiplyScalar(BODY_DISTANCE_M);
   }
@@ -183,5 +200,5 @@ export function createWorld(site) {
     ambient.intensity = on ? ambientBase * SHADOW_LIFT_FACTOR : ambientBase;
   }
 
-  return { scene, sun, sunDisc, earth, terrainMesh, ambient, updateSky, setShadowLift, eyeY, dispose };
+  return { scene, sun, sunDisc, sunGlow, earth, terrainMesh, ambient, updateSky, setShadowLift, eyeY, dispose };
 }
