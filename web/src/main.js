@@ -1,3 +1,12 @@
+// Fonts are bundled with the app (no request to Google): Latin subset, only the weights used
+import '@fontsource/barlow/latin-400.css';
+import '@fontsource/barlow/latin-500.css';
+import '@fontsource/barlow/latin-600.css';
+import '@fontsource/barlow-condensed/latin-500.css';
+import '@fontsource/barlow-condensed/latin-600.css';
+import '@fontsource/barlow-condensed/latin-700.css';
+import '@fontsource/ibm-plex-mono/latin-400.css';
+import '@fontsource/ibm-plex-mono/latin-500.css';
 import { loadSite } from './data/siteData.js';
 import { t } from './i18n.js';
 import { DEFAULT_THRESHOLDS } from './metrics/scenario.js';

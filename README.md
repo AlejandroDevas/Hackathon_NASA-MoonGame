@@ -11,7 +11,7 @@ data-pipeline/ (Python, se ejecuta una vez)  ->  web/public/sites/<id>/  ->  web
   DEM LOLA + Skyfield/SPICE                        ephemeris.bin · horizon.json · info.json
 ```
 
-No hay servidor: todo es estático.
+No hay servidor: todo es estático. Las fuentes (Barlow, Barlow Condensed e IBM Plex Mono, licencia OFL) van incluidas en la aplicación, así que la página no hace peticiones a terceros y funciona sin conexión; una prueba lo vigila.
 
 ## Escena 3D
 
