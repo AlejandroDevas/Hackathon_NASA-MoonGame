@@ -207,6 +207,18 @@ En orden alfabético por apellido:
 
 En la página, los nombres aparecen discretos al final del planificador (menú → Planificador) y en la etiqueta `author` del HTML. Salen de un único archivo, `web/src/team.js`.
 
+## Uso de inteligencia artificial
+
+El proyecto se hizo con ayuda de herramientas de IA, y se declaran aquí. El equipo decidió el rumbo, revisó y aceptó los cambios. La IA no es una fuente de datos: las cifras salen de las fuentes de NASA, USGS y LROC citadas y de las efemérides de Skyfield, validadas contra JPL Horizons.
+
+| Herramienta | Para qué se usó | Dónde se nota |
+|---|---|---|
+| **Claude** (Claude Code, de Anthropic; modelo Claude Sonnet 5.5) | **Codificación:** el pipeline de datos (horizonte, efemérides, terreno), el panel, la escena 3D, la ventana de Análisis, la interfaz tipo reproductor, el rendimiento del 3D, el tutorial, el sonido, la integración y la traducción al inglés del juego, y las pruebas automáticas. **Investigación:** fuentes de NASA, USGS y LROC para los carteles de los sitios, la elección de modelos 3D y texturas con licencia de NASA, las opciones de audio con sus licencias, y la revisión y redacción de este README y de las notas de diseño. | La mayoría de los commits (68 de 78 al 15 de noviembre de 2026) llevan la línea `Co-Authored-By: Claude`. Los diseños y planes están en `docs/superpowers/`, y las notas de audio en `docs/investigacion-audio.md` |
+| **Cursor** | **Codificación:** la interfaz y el rendimiento. | Las reglas de dirección visual `.cursor/rules/ui-design.mdc` y el commit «Actualiza interfaz y rendimiento». Esas reglas describen el diseño anterior (panel fijo a la derecha); la interfaz actual está en `docs/diseno-interfaz.md` |
+| **Gemini** (Google) | **Investigación** y documentos del proyecto. | No deja marcas en el historial: esta fila se basa en lo que declaró el equipo |
+
+No se usó ChatGPT ni otras herramientas de IA. Estas herramientas se usaron para construir el proyecto, no forman parte de él: la aplicación no contiene ningún modelo de IA ni llama a ningún servicio de IA, y funciona sin conexión.
+
 ## Límites conocidos (léelos antes de usar los números)
 
 - **El punto de observación es el centro del DEM de cada región, no una posición de aterrizaje concreta.** Las coordenadas salen de la extensión del GeoTIFF (ver `coordinates_source` en `data-pipeline/config/sites.json`). Un punto concreto del borde puede ver la Tierra o el Sol muy distinto: en Shackleton, por ejemplo, la próxima salida de la Tierra puede estar a más de dos años por la pared del cráter al sur.
