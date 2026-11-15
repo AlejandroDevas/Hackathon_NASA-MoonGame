@@ -1,4 +1,4 @@
-# Reglas de diseño — Inside Moon 153
+# Reglas de diseño — Moon Insight 153
 
 ## Propósito
 

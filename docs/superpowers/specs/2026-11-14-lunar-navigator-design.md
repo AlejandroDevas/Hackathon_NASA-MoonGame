@@ -1,4 +1,4 @@
-# Inside Moon 153 (navegador de sitios de aterrizaje lunar) — Diseño
+# Moon Insight 153 (navegador de sitios de aterrizaje lunar) — Diseño
 
 Fecha: 2026-11-14 · Estado: **implementado (M0–M4 y extras); ver §10 y el [README](../../../README.md)**. Este documento conserva el diseño original; lo que cambió después está en §10.
 Reto: NASA Space Apps 2026, "CLPS Lunar Mission Browser" (enunciado oficial pegado por el equipo).

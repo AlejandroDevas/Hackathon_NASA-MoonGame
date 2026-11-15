@@ -135,7 +135,7 @@ describe('top bar', () => {
     q('locale').value = 'en';
     q('locale').dispatchEvent(new Event('change', { bubbles: true }));
     expect(document.documentElement.lang).toBe('en');
-    expect(document.querySelector('.topbar h1').textContent).toBe('Inside Moon 153');
+    expect(document.querySelector('.topbar h1').textContent).toBe('Moon Insight 153');
     expect(q('menu-toggle').textContent).toContain('Menu');
     expect(q('play-toggle').getAttribute('aria-label')).toBe('Play');
     expect(q('panel-toggle').textContent).toContain('Planner');

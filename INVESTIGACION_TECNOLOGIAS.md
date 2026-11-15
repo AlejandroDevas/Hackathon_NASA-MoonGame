@@ -1,4 +1,4 @@
-# Inside Moon 153 — Investigación de tecnologías
+# Moon Insight 153 — Investigación de tecnologías
 
 > NASA Space Apps Challenge 2026 · Reto "CLPS Lunar Mission Browser"
 > Objetivo: una plataforma web que ayuda a elegir un sitio y una fecha de aterrizaje en el polo sur lunar, y un juego 3D en el que el jugador conduce un rover por cada sitio. Muestra las posiciones del Sol y la Tierra respecto al horizonte real del terreno.

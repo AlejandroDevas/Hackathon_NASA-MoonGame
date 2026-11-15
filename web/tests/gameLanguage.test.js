@@ -119,7 +119,7 @@ describe('the game in English', () => {
     const en = new Set(visibleText(load('?lang=en')));
     const same = es.filter((text) => en.has(text));
     // proper names and key hints written the same in both languages
-    const allowed = new Set(['Inside Moon 153', 'Radio [C]', 'Rover [R]', 'Visible', 'Lat', 'Lon', 'NASA', 'CLPS', 'Artemis', 'CLPS (Commercial Lunar Payload Services)', '15 Oct 2026']);
+    const allowed = new Set(['Moon Insight 153', 'Radio [C]', 'Rover [R]', 'Visible', 'Lat', 'Lon', 'NASA', 'CLPS', 'Artemis', 'CLPS (Commercial Lunar Payload Services)', '15 Oct 2026']);
     const missing = same.filter((text) => !allowed.has(text) && !/^[\d\W]+$/u.test(text) && !/^\[[A-Z]\]$/.test(text));
     expect(missing).toEqual([]);
   });
