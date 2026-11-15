@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from 'vitest';
 import { directionFromAzEl } from '../src/scene/sky.js';
 import { gridToScene } from '../src/scene/terrainData.js';
-import { buildTerrainGeometry } from '../src/scene/terrainMesh.js';
+import { buildTerrainGeometry, terrainColor } from '../src/scene/terrainMesh.js';
 import { createWorld, horizonRingProfile, shadowFrustumHalfSize } from '../src/scene/world.js';
 import { loadTinySite, loadTinyTerrain, makeTerrain } from './helpers.js';
 
@@ -119,3 +119,58 @@ describe('shadowFrustumHalfSize', () => {
     expect([camera.left, camera.right, camera.top, camera.bottom]).toEqual([-500, 500, 500, -500]);
   });
 });
+
+describe('terrainColor', () => {
+  test('is brighter higher up (same cell, so the grain cancels)', () => {
+    expect(terrainColor(100, 0, 100, 5, 5)).toBeGreaterThan(terrainColor(0, 0, 100, 5, 5));
+  });
+
+  test('is deterministic', () => {
+    expect(terrainColor(40, 0, 100, 12, 33)).toBe(terrainColor(40, 0, 100, 12, 33));
+  });
+
+  test('stays between 0.5 and 1 even for absurd heights', () => {
+    for (const h of [-1e6, -5, 0, 50, 100, 1e6]) {
+      const g = terrainColor(h, 0, 100, 7, 9);
+      expect(g).toBeGreaterThanOrEqual(0.5);
+      expect(g).toBeLessThanOrEqual(1);
+    }
+  });
+
+  test('flat terrain (min === max) is not NaN', () => {
+    expect(Number.isFinite(terrainColor(10, 10, 10, 1, 1))).toBe(true);
+  });
+
+  test('the terrain geometry carries one colour per vertex in [0, 1]', () => {
+    const g = buildTerrainGeometry(tiny, 2);
+    const colors = g.attributes.color;
+    expect(colors.itemSize).toBe(3);
+    expect(colors.count).toBe(g.attributes.position.count);
+    for (let i = 0; i < colors.array.length; i++) {
+      expect(colors.array[i]).toBeGreaterThanOrEqual(0);
+      expect(colors.array[i]).toBeLessThanOrEqual(1);
+    }
+  });
+});
+
+describe('world look and shadow lift', () => {
+  const world = createWorld(loadTinySite());
+
+  test('4500 stars with varying brightness', () => {
+    const stars = world.scene.children.find((c) => c.name === 'stars');
+    expect(stars.geometry.attributes.position.count).toBe(4500);
+    const colors = stars.geometry.attributes.color;
+    expect(colors.count).toBe(4500);
+    const values = new Set(Array.from(colors.array.slice(0, 300)).map((v) => v.toFixed(3)));
+    expect(values.size).toBeGreaterThan(20);
+  });
+
+  test('setShadowLift brightens the ambient light and turning it off restores it exactly', () => {
+    const base = world.ambient.intensity;
+    world.setShadowLift(true);
+    expect(world.ambient.intensity).toBeGreaterThan(base);
+    world.setShadowLift(false);
+    expect(world.ambient.intensity).toBe(base);
+  });
+});
+

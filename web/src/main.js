@@ -30,6 +30,8 @@ async function main() {
       thresholds: { ...DEFAULT_THRESHOLDS },
       playing: false,
       soundEnabled: false,
+      shadowLift: false,
+      viewMode: 'follow',
       locale: 'es',
     });
     const audioCue = createAudioCue();

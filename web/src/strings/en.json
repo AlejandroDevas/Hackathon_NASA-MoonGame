@@ -57,5 +57,9 @@
   "scene.slopeLimit": "Slope limit at this site: {limit}°",
   "scene.label": "3D view of the site with the rover",
   "scene.blockedEdge": "Edge of the mapped terrain: the rover cannot go further.",
-  "card.longestSun": "Longest continuous sunlight"
+  "card.longestSun": "Longest continuous sunlight",
+  "app.shadowLift": "Lighten shadows",
+  "app.viewFree": "Free view",
+  "app.viewFollow": "Follow rover",
+  "scene.helpFree": "Drag to orbit · wheel to zoom"
 }

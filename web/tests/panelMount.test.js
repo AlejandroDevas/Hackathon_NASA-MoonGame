@@ -23,6 +23,8 @@ function setup(audioCue) {
     thresholds: { ...DEFAULT_THRESHOLDS },
     playing: false,
     soundEnabled: false,
+    shadowLift: false,
+    viewMode: 'follow',
     locale: 'es',
   });
   const timelines = { created: 0, destroyed: 0, cursors: [] };
@@ -145,6 +147,28 @@ describe('sound toggle', () => {
     expect(q(root, 'sound-toggle').getAttribute('aria-pressed')).toBe('true');
     q(root, 'sound-toggle').click();
     expect(store.get().soundEnabled).toBe(false);
+  });
+});
+
+describe('3D view toggles', () => {
+  test('"lighten shadows" toggles the store flag and aria-pressed', () => {
+    const { root, store } = setup();
+    expect(q(root, 'shadow-lift-toggle').getAttribute('aria-pressed')).toBe('false');
+    q(root, 'shadow-lift-toggle').click();
+    expect(store.get().shadowLift).toBe(true);
+    expect(q(root, 'shadow-lift-toggle').getAttribute('aria-pressed')).toBe('true');
+    q(root, 'shadow-lift-toggle').click();
+    expect(store.get().shadowLift).toBe(false);
+  });
+
+  test('the view button switches between follow and free view', () => {
+    const { root, store } = setup();
+    expect(q(root, 'view-toggle').getAttribute('aria-pressed')).toBe('false');
+    q(root, 'view-toggle').click();
+    expect(store.get().viewMode).toBe('free');
+    expect(q(root, 'view-toggle').getAttribute('aria-pressed')).toBe('true');
+    q(root, 'view-toggle').click();
+    expect(store.get().viewMode).toBe('follow');
   });
 });
 

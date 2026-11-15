@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getLocale, t } from '../i18n.js';
 import { createInput } from './input.js';
 import { createRobotMesh } from './robotMesh.js';
@@ -60,6 +61,8 @@ export function mountScene(container, store, sites, audioCue = null) {
   }
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
 
   container.replaceChildren();
   container.classList.add('scene-root');
@@ -91,6 +94,8 @@ export function mountScene(container, store, sites, audioCue = null) {
   let frameHandle = null;
   let lastTime = null;
   let locale = null;
+  let controls = null; // OrbitControls, created the first time the free view is used
+  let viewMode = store.get().viewMode === 'free' ? 'free' : 'follow';
 
   function setRobot(x, z, headingDeg) {
     robot = createRobot(site.terrain, x, z, headingDeg);
@@ -104,6 +109,7 @@ export function mountScene(container, store, sites, audioCue = null) {
     siteId = id;
     site = sites.get(id);
     world = createWorld(site);
+    world.setShadowLift(Boolean(store.get().shadowLift));
     world.scene.add(robotMesh);
     if (!plans.has(id)) plans.set(id, planStart(site.terrain, { x: 0, z: 0 }, START_DISTANCE_M));
     const plan = plans.get(id);
@@ -123,10 +129,36 @@ export function mountScene(container, store, sites, audioCue = null) {
 
   function applyTexts() {
     renderer.domElement.setAttribute('aria-label', t('scene.label'));
-    help.textContent = `${t('scene.help')} · ${t('scene.slopeLimit', { limit: slopeLimitDeg })}`;
+    help.textContent = `${t('scene.help')} · ${t('scene.slopeLimit', { limit: slopeLimitDeg })}${
+      viewMode === 'free' ? ` · ${t('scene.helpFree')}` : ''
+    }`;
     shownBlockReason = null; // the warning text is rebuilt on the next frame in the new language
     routeEl.textContent = t('scene.noRoute');
     sign.setInfo(site.info, getLocale());
+  }
+
+  /** Follow camera (default) or a free orbit around the rover. */
+  function setViewMode(next) {
+    viewMode = next === 'free' ? 'free' : 'follow';
+    if (viewMode === 'free') {
+      if (!controls) {
+        controls = new OrbitControls(camera, renderer.domElement);
+        Object.assign(controls, {
+          enableDamping: true,
+          dampingFactor: 0.06,
+          minDistance: 8,
+          maxDistance: 6000,
+          maxPolarAngle: Math.PI / 2 - 0.01,
+        });
+      }
+      controls.target.set(robot.x, robot.y + 1.5, robot.z);
+      controls.enabled = true;
+      renderer.domElement.style.touchAction = 'none';
+    } else {
+      if (controls) controls.enabled = false;
+      renderer.domElement.style.touchAction = 'auto';
+    }
+    applyTexts();
   }
 
   function resize() {
@@ -153,13 +185,21 @@ export function mountScene(container, store, sites, audioCue = null) {
     robot = stepRobot(robot, input.read(), site.terrain, dt, slopeLimitDeg);
     placeRobotMesh();
 
-    const pose = followCamera(robot);
     const k = 1 - Math.exp(-6 * dt);
-    camera.position.lerp(new THREE.Vector3(pose.position.x, pose.position.y, pose.position.z), k);
-    if (contains(site.terrain, camera.position.x, camera.position.z)) {
-      camera.position.y = Math.max(camera.position.y, heightAt(site.terrain, camera.position.x, camera.position.z) + 1.5);
+    if (viewMode === 'free' && controls) {
+      controls.target.lerp(new THREE.Vector3(robot.x, robot.y + 1.5, robot.z), k);
+      controls.update();
+      if (contains(site.terrain, camera.position.x, camera.position.z)) {
+        camera.position.y = Math.max(camera.position.y, heightAt(site.terrain, camera.position.x, camera.position.z) + 2);
+      }
+    } else {
+      const pose = followCamera(robot);
+      camera.position.lerp(new THREE.Vector3(pose.position.x, pose.position.y, pose.position.z), k);
+      if (contains(site.terrain, camera.position.x, camera.position.z)) {
+        camera.position.y = Math.max(camera.position.y, heightAt(site.terrain, camera.position.x, camera.position.z) + 1.5);
+      }
+      camera.lookAt(pose.target.x, pose.target.y, pose.target.z);
     }
-    camera.lookAt(pose.target.x, pose.target.y, pose.target.z);
 
     const wasOpen = signOpen;
     signOpen = nextSignOpen(signOpen, Math.hypot(robot.x, robot.z));
@@ -180,6 +220,8 @@ export function mountScene(container, store, sites, audioCue = null) {
     const nextId = state.scenarios.A.siteId;
     if (nextId !== siteId && sites.get(nextId)?.terrain) loadSiteScene(nextId);
     else if (sites.get(nextId)?.terrain) applySky();
+    world.setShadowLift(Boolean(state.shadowLift));
+    if (state.viewMode !== viewMode) setViewMode(state.viewMode);
     if (state.locale !== locale) {
       locale = state.locale;
       applyTexts();
@@ -190,7 +232,7 @@ export function mountScene(container, store, sites, audioCue = null) {
   observer.observe(container);
   loadSiteScene(store.get().scenarios.A.siteId);
   locale = store.get().locale;
-  applyTexts();
+  setViewMode(viewMode);
   resize();
   frameHandle = requestAnimationFrame(frame);
 
@@ -201,6 +243,7 @@ export function mountScene(container, store, sites, audioCue = null) {
       observer.disconnect();
       input.dispose();
       audioCue?.dispose();
+      controls?.dispose();
       world.dispose();
       robotMesh.traverse((object) => {
         object.geometry?.dispose();

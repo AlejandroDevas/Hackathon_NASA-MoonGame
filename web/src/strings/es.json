@@ -57,5 +57,9 @@
   "scene.slopeLimit": "Límite de pendiente de este sitio: {limit}°",
   "scene.label": "Vista 3D del sitio con el robot",
   "scene.blockedEdge": "Límite del terreno cartografiado: el robot no puede seguir.",
-  "card.longestSun": "Luz continua más larga"
+  "card.longestSun": "Luz continua más larga",
+  "app.shadowLift": "Aclarar sombras",
+  "app.viewFree": "Vista libre",
+  "app.viewFollow": "Seguir al robot",
+  "scene.helpFree": "Arrastra para girar · rueda para acercar"
 }

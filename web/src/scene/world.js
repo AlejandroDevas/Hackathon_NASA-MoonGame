@@ -10,7 +10,9 @@ const STAR_DISTANCE_M = 90_000;
 const RING_RADIUS_M = 6_000;
 const SUN_RADIUS_DEG = 0.2666;
 const EARTH_RADIUS_DEG = 0.95;
-const STAR_COUNT = 1500;
+const STAR_COUNT = 4500;
+/** The shadow-lift aid multiplies the (almost black) ambient light by this much; a visual aid only. */
+const SHADOW_LIFT_FACTOR = 80;
 
 /**
  * Half-size (m) of the square shadow camera so it covers the whole terrain: the
@@ -64,17 +66,21 @@ function buildStars() {
     return seed / 2 ** 32;
   };
   const positions = new Float32Array(STAR_COUNT * 3);
+  const colors = new Float32Array(STAR_COUNT * 3);
   for (let i = 0; i < STAR_COUNT; i++) {
     const y = random() * 2 - 1;
     const phi = random() * Math.PI * 2;
     const ring = Math.sqrt(1 - y * y);
     positions.set([ring * Math.cos(phi) * STAR_DISTANCE_M, y * STAR_DISTANCE_M, ring * Math.sin(phi) * STAR_DISTANCE_M], i * 3);
+    const brightness = 0.45 + random() * 0.55;
+    colors.set([brightness, brightness, Math.min(1, brightness * 1.03)], i * 3);
   }
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   const stars = new THREE.Points(
     geometry,
-    new THREE.PointsMaterial({ color: 0xffffff, size: 1.6, sizeAttenuation: false }),
+    new THREE.PointsMaterial({ color: 0xffffff, size: 1.6, sizeAttenuation: false, vertexColors: true }),
   );
   stars.name = 'stars';
   return stars;
@@ -92,7 +98,7 @@ export function createWorld(site) {
 
   const terrainMesh = new THREE.Mesh(
     buildTerrainGeometry(site.terrain, 2),
-    new THREE.MeshStandardMaterial({ color: 0x8c8a86, roughness: 1, metalness: 0 }),
+    new THREE.MeshStandardMaterial({ vertexColors: true, color: 0x8c8a86, roughness: 1, metalness: 0 }),
   );
   terrainMesh.name = 'terrain';
   terrainMesh.castShadow = true;
@@ -102,7 +108,9 @@ export function createWorld(site) {
   const eyeY = heightAt(site.terrain, 0, 0) + 2;
   scene.add(buildHorizonRing(site.horizon, eyeY));
   scene.add(buildStars());
-  scene.add(new THREE.AmbientLight(0x101216, 1));
+  const ambient = new THREE.AmbientLight(0x101216, 1);
+  const ambientBase = ambient.intensity;
+  scene.add(ambient);
 
   const sun = new THREE.DirectionalLight(0xffffff, 3);
   sun.castShadow = true;
@@ -155,5 +163,10 @@ export function createWorld(site) {
     sun.shadow.map?.dispose();
   }
 
-  return { scene, sun, sunDisc, earth, terrainMesh, updateSky, eyeY, dispose };
+  /** Visual aid only: lighten the shadows without touching any calculation. */
+  function setShadowLift(on) {
+    ambient.intensity = on ? ambientBase * SHADOW_LIFT_FACTOR : ambientBase;
+  }
+
+  return { scene, sun, sunDisc, earth, terrainMesh, ambient, updateSky, setShadowLift, eyeY, dispose };
 }

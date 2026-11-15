@@ -34,6 +34,8 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
   let views = {};
   let playButton = null;
   let soundButton = null;
+  let shadowButton = null;
+  let viewButton = null;
 
   function createView(slot, section) {
     const controlsEl = el('div');
@@ -139,6 +141,14 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
       store.set({ soundEnabled: active });
     });
 
+    shadowButton = el('button');
+    shadowButton.dataset.testid = 'shadow-lift-toggle';
+    shadowButton.addEventListener('click', () => store.set({ shadowLift: !store.get().shadowLift }));
+
+    viewButton = el('button');
+    viewButton.dataset.testid = 'view-toggle';
+    viewButton.addEventListener('click', () => store.set({ viewMode: store.get().viewMode === 'free' ? 'follow' : 'free' }));
+
     const compare = el('button', '', store.get().scenarios.B ? t('app.compareOff') : t('app.compare'));
     compare.dataset.testid = 'compare-toggle';
     compare.addEventListener('click', () => {
@@ -146,7 +156,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
       store.set({ scenarios: { A: scenarios.A, B: scenarios.B ? null : { ...scenarios.A } } });
     });
 
-    tools.append(locale, speed, playButton, soundButton, compare);
+    tools.append(locale, speed, playButton, soundButton, shadowButton, viewButton, compare);
     header.append(tools);
     return header;
   }
@@ -179,6 +189,10 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
     soundButton.textContent = state.soundEnabled ? t('app.soundOff') : t('app.soundOn');
     soundButton.setAttribute('aria-pressed', String(state.soundEnabled));
     soundButton.setAttribute('aria-label', state.soundEnabled ? t('app.soundOff') : t('app.soundOn'));
+    shadowButton.textContent = t('app.shadowLift');
+    shadowButton.setAttribute('aria-pressed', String(Boolean(state.shadowLift)));
+    viewButton.textContent = state.viewMode === 'free' ? t('app.viewFollow') : t('app.viewFree');
+    viewButton.setAttribute('aria-pressed', String(state.viewMode === 'free'));
     const metricsA = views.A.update(state);
     if (views.B && metricsA) views.B.update(state, metricsA);
   }
