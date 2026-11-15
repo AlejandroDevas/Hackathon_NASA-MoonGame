@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:lan": "vite --host",
     "build": "vite build",
+    "preview:lan": "vite preview --host --port 3000",
     "test": "vitest run",
     "plan-starts": "node scripts/plan-starts.mjs",
     "build-game": "node scripts/build-game-assets.mjs"

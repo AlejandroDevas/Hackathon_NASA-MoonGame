@@ -144,6 +144,27 @@ npm --prefix web run build    # versión estática en web/dist
 npm --prefix web run plan-starts   # recalcula web/public/sites/*/start.json (hay que repetirlo si cambia un terrain.bin)
 ```
 
+### Verlo desde otro dispositivo (red local)
+
+Sirve para enseñar el proyecto en un móvil, una tableta u otro equipo conectado al **mismo Wi-Fi o red** que tu ordenador. No hace falta internet ni cuenta de nadie: el tráfico no sale de tu red.
+
+1. **Arranca el servidor para la red** (elige una):
+
+   ```bash
+   npm --prefix web run build && npm --prefix web run preview:lan   # versión compilada, puerto 3000 (la recomendada para enseñarlo)
+   npm --prefix web run dev:lan                                      # modo desarrollo con recarga automática, puerto 5173
+   npx --yes serve web/dist                                          # alternativa si ya compilaste (puerto 3000)
+   ```
+
+   Los tres escuchan en todas las interfaces de red del equipo. La versión compilada hay que **volver a compilarla** (`npm --prefix web run build`) cada vez que cambie el código; el modo desarrollo no.
+
+2. **Averigua la dirección IP de tu ordenador en esa red.** En Windows, `ipconfig` (o en PowerShell `Get-NetIPAddress -AddressFamily IPv4`) y busca el adaptador **Wi-Fi** o **Ethernet**, normalmente con una dirección como `192.168.x.x`, `10.x.x.x` o `172.16.x.x`. **Ignora los adaptadores virtuales**: `vEthernet (WSL…)`, `Hyper-V`, VPN o Docker (por ejemplo `172.22.x.x`) solo se alcanzan desde el propio ordenador, aunque el servidor las imprima en su línea «Network».
+3. **Abre en el otro dispositivo** `http://<esa IP>:3000` (o `:5173` con `dev:lan`), por ejemplo `http://192.168.1.20:3000`. El juego está en `http://<esa IP>:3000/juego/`. El navegador marcará «No es seguro» porque es `http` y no `https`: es normal en una red propia.
+4. **Si no abre**, casi siempre es el cortafuegos de Windows: la primera vez pide permiso para Node.js, y hay que **permitir las redes privadas** (en una red marcada como «Pública», que es lo habitual en el Wi-Fi de casa si no se cambió, Windows bloquea las conexiones entrantes; se puede pasar la red a «Privada» en Configuración › Red e Internet, o permitir `node.exe` en el cortafuegos). Comprueba también que los dos dispositivos están en la misma red, y no en una red de «invitados» con aislamiento entre clientes (algunos routers y redes de universidad lo hacen).
+5. **Para parar**, pulsa Ctrl+C en la terminal.
+
+Todo funciona por `http` en red local, también el sonido, el tutorial y el juego: no hay peticiones a terceros. No expongas el puerto a internet (no lo abras en el router): es un servidor de pruebas.
+
 Pipeline de datos (necesita Python 3.11):
 
 ```bash
