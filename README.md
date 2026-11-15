@@ -1,6 +1,6 @@
 # Lunar Landing Site Navigator
 
-Herramienta web para evaluar rápido un sitio y una fecha de aterrizaje en el polo sur lunar: posición del Sol y de la Tierra respecto al **horizonte real del terreno**, tiempo hasta el ocaso solar y terrestre, % de luz, ventanas de visibilidad de la Tierra y un semáforo de viabilidad con umbrales editables. Permite comparar dos escenarios (sitio + fecha) lado a lado y animar el paso del tiempo.
+Herramienta web para evaluar rápido un sitio y una fecha de aterrizaje en el polo sur lunar: posición del Sol y de la Tierra respecto al **horizonte real del terreno**, tiempo hasta el ocaso solar y terrestre, % de luz, la racha de luz continua más larga, ventanas de visibilidad de la Tierra y un semáforo de viabilidad con umbrales editables. Permite comparar dos escenarios (sitio + fecha) lado a lado y animar el paso del tiempo.
 
 Proyecto para el NASA Space Apps Challenge 2026 (reto "CLPS Lunar Mission Browser"). Incluye M0 (pipeline de datos), M1 (panel), M2 (escena 3D con el robot) y el alcance mínimo de M3: cinco regiones con datos y horizonte lejano — Connecting Ridge (Site 01), Shackleton Rim (Site 04), Nobile Rim 1 (Site 06), Haworth y Malapert Massif (Site 23).
 
@@ -18,6 +18,9 @@ No hay servidor: todo es estático.
 Encima del panel hay una vista 3D del sitio seleccionado en el escenario A: el terreno real del recorte LOLA (5 km), un Sol con sombras y una Tierra puestos según la fecha del panel (la animación del panel los mueve), estrellas y la silueta del horizonte lejano. Un robot de seis ruedas parte a ~400 m del punto del sitio y el objetivo es llegar hasta él: a menos de 25 m se abre el cartel con la explicación del lugar.
 
 - **Controles:** W/↑ avanzar, S/↓ retroceder, A/D o ←/→ girar, Shift turbo. Las teclas se ignoran mientras escribes en un campo del panel.
+- **Sonido (opcional):** apagado por defecto. El botón "Activar sonido" del panel crea el audio solo cuando lo pulsas (los navegadores no permiten sonar antes) y reproduce un pitido de dos notas cuando se abre el cartel. No hay sonido ambiente ni de motor a propósito: en la Luna no hay atmósfera y el sonido no viaja, así que sería físicamente falso. Si el navegador no soporta Web Audio, el botón queda apagado y no pasa nada más.
+- **Avisos del robot:** distinguen "pendiente de más de N°" de "límite del terreno cartografiado" (borde del mapa o alturas sin datos).
+- **Accesibilidad:** el cartel cerrado no se expone a lectores de pantalla ni al foco, el lienzo 3D tiene etiqueta, `<html lang>` sigue al idioma de la interfaz y las teclas con Ctrl/Alt/Meta no se capturan.
 - **Límite de pendiente por sitio:** cada sitio tiene su propio límite, el más bajo de 15°, 20°… 45° con el que la meta sigue siendo alcanzable desde ~400 m: hoy 15° en el Site 01, Haworth y Malapert, 20° en Nobile Rim 1 y 35° en el borde de Shackleton (una pared de cráter). El robot no entra en terreno más empinado (se detiene y avisa) y la ayuda de la escena muestra el límite.
 - Sin WebGL, el panel sigue funcionando y la escena muestra un aviso.
 
@@ -60,7 +63,7 @@ Los kernels SPICE (`de421.bsp`, `moon_pa_de421_1900-2050.bpc`, `moon_080317.tf`,
 - El semáforo compara la elevación del Sol con el horizonte *geométrico* (0° por defecto), así que un Sol visible sobre terreno bajo puede marcarse "por debajo del mínimo".
 - Datos de 2026-01-01 a 2030-12-31, paso de 1 hora. Fuera de ese rango la fecha se ajusta al límite y se avisa.
 - Hay cinco sitios con datos reales: Connecting Ridge (Site 01), Shackleton Rim (Site 04), Nobile Rim 1 (Site 06), Haworth y Malapert Massif (Site 23). Los puntos de observación son centros de regiones DEM, no coordenadas de aterrizaje.
-- **Escena 3D:** las sombras solo cubren el recorte de 2,5 km; más allá hay una silueta oscura sin iluminar calculada con el horizonte del observador en el centro del sitio, así que desde otro punto es solo aproximada. La Tierra es una esfera sin textura y el robot no tiene físicas (sigue la altura del mapa). La escena muestra solo el escenario A.
+- **Escena 3D:** las sombras cubren todo el recorte de 2,5 km (el marco se calcula con sus esquinas); más allá hay una silueta oscura sin iluminar calculada con el horizonte del observador en el centro del sitio, así que desde otro punto es solo aproximada. La Tierra es una esfera sin textura y el robot no tiene físicas (sigue la altura del mapa). La escena muestra solo el escenario A.
 - **Horizonte del robot frente al del panel:** las métricas del panel son para el centro del sitio; desde otro punto del terreno el Sol puede quedar tapado aunque el panel diga que es visible.
 - **Límite de pendiente:** se calcula al cargar cada sitio (~1 s la primera vez) con una búsqueda de ruta que exige 2° menos que el límite del robot y comprueba la pendiente cada 2,5 m a lo largo de cada tramo; si ni 45° sirve, la escena lo avisa y muestra el cartel desde el punto central. Que exista ruta no garantiza que sea fácil, y el DEM está interpolado en un ~90 %.
 - **Rendimiento:** el 3D usa mapa de sombras de 4096 px; con renderizado por software (sin GPU) puede ir a pocos fotogramas por segundo, y el movimiento del robot se ralentiza en vez de saltar.
