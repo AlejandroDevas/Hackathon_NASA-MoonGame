@@ -79,6 +79,14 @@ describe('top bar', () => {
     expect(bar.lastElementChild.className).toContain('topbar-menu');
   });
 
+  test('the volume slider sits in the top bar, just left of the sound button', () => {
+    setup();
+    const tools = [...document.querySelector('.topbar-tools').children];
+    expect(tools.indexOf(q('volume'))).toBe(tools.indexOf(q('sound-toggle')) - 1);
+    expect(q('volume').type).toBe('range');
+    expect(q('volume').getAttribute('aria-label')).toBe('Volumen');
+  });
+
   test('the menu offers the planner, the Analysis window, Compare and the tutorial, and nothing else', () => {
     setup();
     const items = [...q('menu').querySelectorAll('[role^="menuitem"]')].map((n) => n.dataset.testid);

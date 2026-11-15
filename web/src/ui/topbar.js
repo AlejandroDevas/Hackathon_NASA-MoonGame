@@ -9,6 +9,8 @@ function el(tag, className, text) {
   return node;
 }
 
+const DEFAULT_VOLUME = 0.6;
+
 /** A button with an icon and a text label (the label is hidden on narrow screens; the button keeps its accessible name). */
 function toolButton(testId, iconName, onClick) {
   const button = el('button', 'tb-button');
@@ -63,9 +65,23 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
     const active = audioCue ? audioCue.setEnabled(enabled) : enabled;
     store.set({ soundEnabled: active });
   });
+  // the master volume, just left of the sound button it belongs to
+  const volume = el('input', 'tb-volume');
+  volume.type = 'range';
+  volume.min = '0';
+  volume.max = '1';
+  volume.step = '0.05';
+  volume.value = String(store.get().volume ?? DEFAULT_VOLUME);
+  volume.dataset.testid = 'volume';
+  volume.addEventListener('input', () => {
+    const next = Number(volume.value);
+    store.set({ volume: next });
+    audioCue?.setVolume?.(next);
+  });
+
   const tools = el('div', 'topbar-tools');
   tools.setAttribute('role', 'group');
-  tools.append(view.button, lroc.button, shadow.button, sound.button);
+  tools.append(view.button, lroc.button, shadow.button, volume, sound.button);
 
   // drop-down menu
   const menuWrap = el('div', 'topbar-menu');
@@ -129,6 +145,9 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
     lroc.button.title = hasLroc ? t('app.lroc') : t('app.lrocNone');
     setToggle(shadow, t('app.shadowLift'), Boolean(state.shadowLift));
     setToggle(sound, state.soundEnabled ? t('app.soundOff') : t('app.soundOn'), Boolean(state.soundEnabled));
+    volume.setAttribute('aria-label', t('ctl.volume'));
+    volume.title = t('ctl.volume');
+    if (state.volume !== undefined && Number(volume.value) !== state.volume) volume.value = String(state.volume);
 
     menuLabel.textContent = t('ui.menu');
     menuButton.setAttribute('aria-label', t('ui.menu'));

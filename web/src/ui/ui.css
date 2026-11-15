@@ -43,6 +43,8 @@ html, body { height: 100%; overflow: hidden; }
 .topbar-site { flex: 0 1 230px; min-width: 0; max-width: 230px; padding: 0 8px; text-overflow: ellipsis; }
 .topbar-spacer { flex: 1 1 0; min-width: 0; }
 .topbar-tools { display: flex; flex: none; align-items: center; gap: 6px; }
+.tb-volume { width: 84px; min-height: 36px; margin: 0; accent-color: var(--sun); cursor: pointer; }
+.tb-volume:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
 .topbar-menu { position: relative; flex: none; }
 
 /* ---------- drop-down menus (top bar and speed) ---------- */
@@ -144,6 +146,7 @@ html, body { height: 100%; overflow: hidden; }
   .tb-menu-button .tb-label { display: none; }
   .tb-button { padding: 0 8px; }
   .topbar-tools { gap: 4px; }
+  .tb-volume { width: 56px; }
 
   .playbar { grid-template-columns: auto minmax(0, 1fr); grid-template-areas: 'seek seek' 'transport speed'; align-content: center; gap: 6px 10px; padding: 6px 12px; }
   .pb-seek { grid-area: seek; }

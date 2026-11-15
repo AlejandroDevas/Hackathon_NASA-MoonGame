@@ -74,6 +74,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
         if (slot === 'A') {
           if (lastLevel !== null && verdict.level !== lastLevel && !state.playing) audioCue?.play?.(`verdict-${verdict.level}`);
           lastLevel = verdict.level;
+          audioCue?.setSunElevation?.(metrics.sunElDeg); // the music follows the light
         }
         if (diffEl && metricsA) renderDiff(diffEl, metricsA, metrics);
 
