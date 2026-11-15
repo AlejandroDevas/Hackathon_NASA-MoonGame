@@ -5,7 +5,7 @@ import { getLocale, t } from '../i18n.js';
 import { horizonAt } from '../metrics/visibility.js';
 import { siteOverview } from '../metrics/overview.js';
 import { createInput } from './input.js';
-import { buildLander, footingAt } from './lander.js';
+import { buildLander, disposeObject, footingAt, loadApolloModule } from './lander.js';
 import { buildPoiMarkers, createPoiTags } from './poiTags.js';
 import { findPois } from './pois.js';
 import { createRobotMesh, loadNasaRover } from './robotMesh.js';
@@ -168,6 +168,21 @@ export function mountScene(container, store, sites, audioCue = null) {
     const lander = buildLander(feet);
     lander.position.set(0, base, 0);
     world.scene.add(lander);
+
+    // NASA's Apollo Lunar Module replaces the simple lander once it has loaded (if this world is still on screen)
+    const target = world;
+    const meanFoot = base + feet.reduce((sum, f) => sum + f.dy, 0) / feet.length;
+    loadApolloModule(`${import.meta.env.BASE_URL}models/apollo-lunar-module.glb`).then((model) => {
+      if (!model) return;
+      if (world !== target) {
+        disposeObject(model);
+        return;
+      }
+      target.scene.remove(lander);
+      disposeObject(lander);
+      model.position.set(0, meanFoot, 0);
+      target.scene.add(model);
+    });
   }
 
   function applySky() {

@@ -99,3 +99,63 @@ export function buildLander(feet) {
   });
   return lander;
 }
+
+/** Width (m) the NASA module is scaled to: the real Apollo Lunar Module measured about 9.4 m across its footpads. */
+export const APOLLO_MODULE_WIDTH_M = 9.4;
+
+function disposeObject(root) {
+  root.traverse?.((object) => {
+    object.geometry?.dispose();
+    const materials = Array.isArray(object.material) ? object.material : [object.material];
+    for (const material of materials) {
+      for (const value of Object.values(material ?? {})) if (value?.isTexture) value.dispose();
+      material?.dispose();
+    }
+  });
+}
+
+export { disposeObject };
+
+/**
+ * Load NASA's Apollo Lunar Module (Draco-compressed GLB) and stand it on the ground: scaled
+ * to its real width, centred, with its lowest point at y = 0. Resolves to the model, or to
+ * null (with a console warning) when it cannot be loaded, so the caller keeps the simple one.
+ * @param {string} url
+ * @param {string} [decoderPath] folder with the local Draco decoder
+ */
+export async function loadApolloModule(url, decoderPath = `${import.meta.env.BASE_URL}draco/`) {
+  let draco = null;
+  try {
+    const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+    const { DRACOLoader } = await import('three/addons/loaders/DRACOLoader.js');
+    const loader = new GLTFLoader();
+    draco = new DRACOLoader();
+    draco.setDecoderPath(decoderPath);
+    loader.setDRACOLoader(draco);
+    const gltf = await loader.loadAsync(url);
+    const model = gltf.scene;
+    model.updateMatrixWorld(true);
+    const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
+    model.scale.setScalar(APOLLO_MODULE_WIDTH_M / Math.max(size.x, size.z));
+    model.position.set(0, 0, 0);
+    model.updateMatrixWorld(true);
+    const placed = new THREE.Box3().setFromObject(model);
+    const centre = placed.getCenter(new THREE.Vector3());
+    model.position.set(-centre.x, -placed.min.y, -centre.z);
+    model.traverse((object) => {
+      if (object.isMesh) {
+        object.castShadow = true;
+        object.receiveShadow = true;
+      }
+    });
+    const wrapper = new THREE.Group();
+    wrapper.name = 'nasa-apollo-lunar-module';
+    wrapper.add(model);
+    return wrapper;
+  } catch (error) {
+    console.warn('NASA lunar module model could not be loaded; keeping the simple lander.', error);
+    return null;
+  } finally {
+    draco?.dispose();
+  }
+}
