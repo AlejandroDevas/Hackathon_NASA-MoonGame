@@ -1,5 +1,6 @@
 import uPlot from 'uplot';
 import 'uplot/dist/uPlot.min.css';
+import { createScrubber } from './scrub.js';
 import { timelineData } from './timelineData.js';
 import { utcTzDate } from './utcAxis.js';
 import { t } from '../i18n.js';
@@ -8,10 +9,12 @@ const SUN = '#ffc857';
 const EARTH = '#5aa9ff';
 
 /**
- * Draw the chart into `el` with a vertical cursor at `cursorMs`.
+ * Draw the chart into `el` with a vertical cursor at `cursorMs`. With `onScrub`, dragging on the
+ * plot (or the arrow keys, using `getTime`) asks to move the time; uPlot's own drag-zoom is off.
+ * @param {{onScrub?: (ms: number) => void, getTime?: () => number}} [scrub]
  * @returns {{destroy(): void, setCursor(ms: number): void}}
  */
-export function renderTimeline(el, site, fromMs, toMs, cursorMs) {
+export function renderTimeline(el, site, fromMs, toMs, cursorMs, { onScrub, getTime } = {}) {
   let cursor = cursorMs;
   const axis = { stroke: '#98a2b8', grid: { stroke: '#2a3242', width: 1 }, ticks: { stroke: '#2a3242' } };
   const plot = new uPlot(
@@ -19,6 +22,7 @@ export function renderTimeline(el, site, fromMs, toMs, cursorMs) {
       width: Math.max(el.clientWidth, 240),
       height: 220,
       legend: { show: true },
+      cursor: { drag: { x: false, y: false } }, // dragging scrubs the time instead of zooming
       scales: { x: { time: true } },
       tzDate: utcTzDate,
       axes: [{ ...axis, label: t('chart.utc') }, { ...axis, label: t('chart.elevation') }],
@@ -49,6 +53,20 @@ export function renderTimeline(el, site, fromMs, toMs, cursorMs) {
     timelineData(site, fromMs, toMs),
     el,
   );
+  const rangeMs = () => ({ fromMs: plot.scales.x.min * 1000, toMs: plot.scales.x.max * 1000 });
+  const describeTime = (ms) => {
+    plot.over.setAttribute('aria-valuenow', String(Math.round(ms / 1000)));
+    plot.over.setAttribute('aria-valuetext', `${new Date(ms).toISOString().slice(0, 16).replace('T', ' ')} UTC`);
+  };
+  const scrubber = onScrub
+    ? createScrubber({ element: plot.over, getRange: rangeMs, getTime: getTime ?? (() => cursor), onScrub })
+    : null;
+  if (scrubber) {
+    const { fromMs: min, toMs: max } = rangeMs();
+    plot.over.setAttribute('aria-valuemin', String(Math.round(min / 1000)));
+    plot.over.setAttribute('aria-valuemax', String(Math.round(max / 1000)));
+    describeTime(cursor);
+  }
   let lastWidth = el.clientWidth;
   const observer = typeof ResizeObserver === 'function'
     ? new ResizeObserver(([entry]) => {
@@ -62,10 +80,12 @@ export function renderTimeline(el, site, fromMs, toMs, cursorMs) {
   return {
     destroy() {
       observer?.disconnect();
+      scrubber?.dispose();
       plot.destroy();
     },
     setCursor(ms) {
       cursor = ms;
+      if (scrubber) describeTime(ms);
       plot.redraw(false);
     },
   };

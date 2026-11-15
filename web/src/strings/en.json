@@ -61,5 +61,6 @@
   "app.shadowLift": "Lighten shadows",
   "app.viewFree": "Free view",
   "app.viewFollow": "Follow rover",
-  "scene.helpFree": "Drag to orbit · wheel to zoom"
+  "scene.helpFree": "Drag to orbit · wheel to zoom",
+  "chart.scrub": "Scenario time: drag or use the arrow keys"
 }

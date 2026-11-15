@@ -83,7 +83,17 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
           timeline?.destroy();
           chartEl.replaceChildren();
           plotted = { siteId: scenario.siteId, windowMs: state.windowMs, fromMs: timeMs };
-          timeline = renderTimeline(chartEl, site, timeMs, timeMs + state.windowMs, timeMs);
+          timeline = renderTimeline(chartEl, site, timeMs, timeMs + state.windowMs, timeMs, {
+            getTime: () => store.get().scenarios[slot]?.timeMs ?? timeMs,
+            onScrub: (ms) => {
+              player?.stop(); // dragging takes over from the animation
+              const { scenarios } = store.get();
+              const scenario = scenarios[slot];
+              if (!scenario) return;
+              const clamped = clampTime(sites.get(scenario.siteId).eph, ms).timeMs;
+              store.set({ scenarios: { ...scenarios, [slot]: { ...scenario, timeMs: clamped } } });
+            },
+          });
         } else {
           timeline.setCursor(timeMs);
         }

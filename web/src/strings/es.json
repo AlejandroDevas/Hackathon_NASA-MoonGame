@@ -61,5 +61,6 @@
   "app.shadowLift": "Aclarar sombras",
   "app.viewFree": "Vista libre",
   "app.viewFollow": "Seguir al robot",
-  "scene.helpFree": "Arrastra para girar · rueda para acercar"
+  "scene.helpFree": "Arrastra para girar · rueda para acercar",
+  "chart.scrub": "Hora del escenario: arrastra o usa las flechas"
 }

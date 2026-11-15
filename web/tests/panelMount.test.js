@@ -27,9 +27,10 @@ function setup(audioCue) {
     viewMode: 'follow',
     locale: 'es',
   });
-  const timelines = { created: 0, destroyed: 0, cursors: [] };
-  const renderTimeline = () => {
+  const timelines = { created: 0, destroyed: 0, cursors: [], options: [] };
+  const renderTimeline = (el, site, fromMs, toMs, cursorMs, options) => {
     timelines.created += 1;
+    timelines.options.push(options);
     return {
       destroy: () => (timelines.destroyed += 1),
       setCursor: (ms) => timelines.cursors.push(ms),
@@ -172,3 +173,42 @@ describe('3D view toggles', () => {
   });
 });
 
+describe('timeline scrubbing wired to the scenario time', () => {
+  test('onScrub sets the time of scenario A', () => {
+    const { store, timelines } = setup();
+    timelines.options.at(-1).onScrub(T0 + 8 * HOUR);
+    expect(store.get().scenarios.A.timeMs).toBe(T0 + 8 * HOUR);
+  });
+
+  test('getTime reports the current time so the keyboard can step from it', () => {
+    const { store, timelines } = setup();
+    expect(timelines.options.at(-1).getTime()).toBe(T0 + 5 * HOUR);
+    store.set({ scenarios: { A: { siteId: 'tiny-site', timeMs: T0 + 9 * HOUR }, B: null } });
+    expect(timelines.options.at(-1).getTime()).toBe(T0 + 9 * HOUR);
+  });
+
+  test('scrubbing pauses a running animation', () => {
+    const { root, store, timelines } = setup();
+    q(root, 'play-toggle').click();
+    expect(store.get().playing).toBe(true);
+    timelines.options.at(-1).onScrub(T0 + 8 * HOUR);
+    expect(store.get().playing).toBe(false);
+  });
+
+  test('a position beyond the data is clamped to the last sample', () => {
+    const { store, timelines } = setup();
+    timelines.options.at(-1).onScrub(Date.UTC(2031, 0, 1));
+    expect(store.get().scenarios.A.timeMs).toBe(T0 + 47 * HOUR);
+    timelines.options.at(-1).onScrub(Date.UTC(2020, 0, 1));
+    expect(store.get().scenarios.A.timeMs).toBe(T0);
+  });
+
+  test('in compare mode the chart of B only moves B', () => {
+    const { root, store, timelines } = setup();
+    q(root, 'compare-toggle').click(); // rebuilds: charts A then B
+    const before = store.get().scenarios.A.timeMs;
+    timelines.options.at(-1).onScrub(T0 + 20 * HOUR); // the last chart created is B's
+    expect(store.get().scenarios.B.timeMs).toBe(T0 + 20 * HOUR);
+    expect(store.get().scenarios.A.timeMs).toBe(before);
+  });
+});
