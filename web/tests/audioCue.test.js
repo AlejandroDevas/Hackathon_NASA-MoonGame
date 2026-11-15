@@ -8,6 +8,10 @@ class FakeAudioContext {
     this.state = 'suspended';
     this.currentTime = 0;
     this.oscillators = [];
+    this.noiseSources = [];
+    this.filters = [];
+    this.buffersCreated = 0;
+    this.sampleRate = 8000;
     this.closeCalls = 0;
     this.destination = {};
     FakeAudioContext.instances.push(this);
@@ -28,6 +32,29 @@ class FakeAudioContext {
     };
     this.oscillators.push(oscillator);
     return oscillator;
+  }
+
+  createBuffer(channels, length, sampleRate) {
+    this.buffersCreated += 1;
+    const data = new Float32Array(length);
+    return { length, sampleRate, getChannelData: () => data };
+  }
+
+  createBufferSource() {
+    const source = {
+      buffer: null,
+      connect() {},
+      start: (when) => (source.startAt = when),
+      stop: (when) => (source.stopAt = when),
+    };
+    this.noiseSources.push(source);
+    return source;
+  }
+
+  createBiquadFilter() {
+    const filter = { type: '', frequency: { setValueAtTime() {} }, Q: { setValueAtTime() {} }, connect() {} };
+    this.filters.push(filter);
+    return filter;
   }
 
   createGain() {
@@ -152,5 +179,62 @@ describe('named cues', () => {
     cue.play('click');
     cue.play('verdict-green');
     expect(FakeAudioContext.instances[0].oscillators).toHaveLength(0);
+  });
+});
+
+describe('radio cue (Quindar tones and static)', () => {
+  const play = (name = 'radio') => {
+    const cue = createAudioCue({ AudioContextClass: FakeAudioContext });
+    cue.setEnabled(true);
+    cue.play(name);
+    return { cue, context: FakeAudioContext.instances[0] };
+  };
+
+  test('opens with the 2525 Hz intro tone and closes with the 2475 Hz outro tone', () => {
+    const { context } = play();
+    expect(context.oscillators.map((o) => o.frequencyHz)).toEqual([2525, 2475]);
+  });
+
+  test('a burst of static sits between the two tones', () => {
+    const { context } = play();
+    expect(context.noiseSources).toHaveLength(1);
+    expect(context.noiseSources[0].startAt).toBeCloseTo(0.25);
+    expect(context.noiseSources[0].stopAt).toBeCloseTo(0.85);
+  });
+
+  test('the static is band-limited like a radio channel', () => {
+    const { context } = play();
+    expect(context.filters.map((f) => f.type)).toEqual(['bandpass']);
+  });
+
+  test('the noise buffer holds real noise, not silence', () => {
+    const { context } = play();
+    const data = context.noiseSources[0].buffer.getChannelData(0);
+    expect(data.some((v) => v !== 0)).toBe(true);
+    expect(Math.max(...data)).toBeLessThanOrEqual(1);
+    expect(Math.min(...data)).toBeGreaterThanOrEqual(-1);
+  });
+
+  test('the noise buffer is built once and reused by later plays', () => {
+    const { cue, context } = play();
+    cue.play('radio');
+    expect(context.noiseSources).toHaveLength(2);
+    expect(context.buffersCreated).toBe(1);
+  });
+
+  test('tone-only cues make no noise', () => {
+    const { context } = play('click');
+    expect(context.noiseSources).toHaveLength(0);
+    expect(context.filters).toHaveLength(0);
+  });
+
+  test('is silent while sound is off', () => {
+    const cue = createAudioCue({ AudioContextClass: FakeAudioContext });
+    cue.setEnabled(true);
+    cue.setEnabled(false);
+    cue.play('radio');
+    const context = FakeAudioContext.instances[0];
+    expect(context.oscillators).toHaveLength(0);
+    expect(context.noiseSources).toHaveLength(0);
   });
 });

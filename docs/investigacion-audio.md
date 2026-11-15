@@ -1,6 +1,6 @@
 # Investigación de audio: música y efectos de sonido
 
-Fecha: 2026-11-15. Estado: investigación, no hay nada implementado todavía.
+Fecha: 2026-11-15. Estado: fases 1 (clic y veredictos) y 2 (llamada de radio Quindar con estática) implementadas; el resto es propuesta.
 
 ## 1. Restricciones del proyecto que condicionan la elección
 
@@ -106,7 +106,7 @@ Encaja mejor con el proyecto: cero archivos, cero licencias, cero peso, y reacci
 | Archive.org (colecciones Apollo) | Verificar por archivo | Mucho audio de Apollo; comprobar derechos de cada archivo. |
 | [Pixabay Sound Effects](https://pixabay.com/service/faq/) | Pixabay Content License | Biblioteca grande y gratuita; licencia propia, no CC0. |
 
-Sobre los **Quindar tones** (los pitidos de la radio Apollo): son dos tonos puros de ~250 ms (el primero de 2525 Hz al abrir el canal y el segundo de 2475 Hz al cerrarlo). Aunque hay grabaciones de la NASA, la forma más segura es **generarlos con un oscilador** (un `OscillatorNode` sinusoidal de 250 ms). Es sencillo, pesa cero y evita dudas de derechos. Los valores de frecuencia son los habituales en las fuentes sobre el tema; conviene confirmarlos contra la [documentación del Apollo Lunar Surface Journal](https://www.nasa.gov/wp-content/uploads/static/history/alsj/quindar.html) antes de citarlos en el README.
+Sobre los **Quindar tones** (los pitidos de la radio Apollo): son dos tonos puros de ~250 ms (el primero de 2525 Hz al abrir el canal y el segundo de 2475 Hz al cerrarlo; las frecuencias están confirmadas en [Wikipedia](https://en.wikipedia.org/wiki/Quindar_tones), y el Apollo Lunar Surface Journal da 2474 Hz para la segunda). Aunque hay grabaciones de la NASA, la forma más segura es **generarlos con un oscilador** (un `OscillatorNode` sinusoidal de 250 ms). Es sencillo, pesa cero y evita dudas de derechos. Los valores de frecuencia son los habituales en las fuentes sobre el tema; conviene confirmarlos contra la [documentación del Apollo Lunar Surface Journal](https://www.nasa.gov/wp-content/uploads/static/history/alsj/quindar.html) antes de citarlos en el README.
 
 ### 4.3 Generar los efectos nosotros
 

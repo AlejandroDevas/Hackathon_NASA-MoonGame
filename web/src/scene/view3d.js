@@ -335,7 +335,7 @@ export function mountScene(container, store, sites, audioCue = null) {
 
     const wasOpen = signOpen;
     signOpen = nextSignOpen(signOpen, Math.hypot(robot.x, robot.z));
-    if (signOpen && !wasOpen) audioCue?.play();
+    if (signOpen && !wasOpen) audioCue?.play('radio'); // the rover reports in from the lander
     sign.setOpen(signOpen);
     if (robot.blockedBy !== shownBlockReason) {
       shownBlockReason = robot.blockedBy;
