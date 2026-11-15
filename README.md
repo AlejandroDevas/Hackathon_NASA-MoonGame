@@ -15,21 +15,15 @@ No hay servidor: todo es estático.
 
 ## Escena 3D
 
-Encima del panel hay una vista 3D del sitio seleccionado en el escenario A: el terreno real del recorte LOLA (5 km), un Sol con sombras y una Tierra puestos según la fecha del panel (la animación del panel los mueve), estrellas y la silueta del horizonte lejano. Un robot de seis ruedas parte a ~400 m del punto del sitio y el objetivo es llegar hasta él: a menos de 25 m se abre el cartel con la explicación del lugar.
+Encima del panel hay una vista 3D del sitio seleccionado en el escenario A: el terreno real del recorte LOLA (5 km, malla a 5 m por vértice), un Sol con sombras y una Tierra puestos según la fecha del panel (la animación del panel los mueve), estrellas y la silueta del horizonte lejano. El rover NASA Perseverance (modelo GLB local, escala de escena ajustada) parte a ~400 m del punto del sitio y el objetivo es llegar hasta él: a menos de 25 m se abre el cartel con la explicación del lugar.
 
 - **Controles:** W/↑ avanzar, S/↓ retroceder, A/D o ←/→ girar, Shift turbo. Las teclas se ignoran mientras escribes en un campo del panel.
 - **Sonido (opcional):** apagado por defecto. El botón "Activar sonido" del panel crea el audio solo cuando lo pulsas (los navegadores no permiten sonar antes) y reproduce un pitido de dos notas cuando se abre el cartel. No hay sonido ambiente ni de motor a propósito: en la Luna no hay atmósfera y el sonido no viaja, así que sería físicamente falso. Si el navegador no soporta Web Audio, el botón queda apagado y no pasa nada más.
 - **Avisos del robot:** distinguen "pendiente de más de N°" de "límite del terreno cartografiado" (borde del mapa o alturas sin datos).
+- **Modelo del rover:** NASA/JPL-Caltech, Perseverance Rover GLB; se usa como modelo visual de rover de seis ruedas, no como vehículo lunar exacto. Fuente, crédito y atribución: `web/public/models/README.md`.
 - **Accesibilidad:** el cartel cerrado no se expone a lectores de pantalla ni al foco, el lienzo 3D tiene etiqueta, `<html lang>` sigue al idioma de la interfaz y las teclas con Ctrl/Alt/Meta no se capturan.
-- **Vista libre:** el botón "Vista libre" cambia la cámara que sigue al rover por una órbita libre (arrastra para girar, rueda para acercar; la cámara nunca baja del suelo). Las teclas del rover siguen funcionando y "Seguir al robot" vuelve a la cámara normal.
-- **Aclarar sombras (ayuda visual):** sube la luz ambiental de la escena para ver el relieve dentro de las sombras. Está apagado por defecto y no cambia ningún cálculo ni la luz del Sol.
-- **Aspecto del terreno:** el brillo varía con la altura real del DEM y lleva un grano sintético muy sutil; la geometría es siempre la del mapa LOLA.
 - **Límite de pendiente por sitio:** cada sitio tiene su propio límite, el más bajo de 15°, 20°… 45° con el que la meta sigue siendo alcanzable desde ~400 m: hoy 15° en el Site 01, Haworth y Malapert, 20° en Nobile Rim 1 y 35° en el borde de Shackleton (una pared de cráter). El robot no entra en terreno más empinado (se detiene y avisa) y la ayuda de la escena muestra el límite.
 - Sin WebGL, el panel sigue funcionando y la escena muestra un aviso.
-
-## Línea de tiempo interactiva
-
-Arrastra sobre la gráfica (o enfócala y usa ←/→ ±1 h, Shift+←/→ ±6 h, RePág/AvPág ±1 día) para cambiar la hora del escenario: las tarjetas y el Sol del 3D se actualizan al instante y la animación se pausa. El arrastre no hace zoom y funciona con el dedo en pantallas táctiles.
 
 ## Uso
 
@@ -70,8 +64,7 @@ Los kernels SPICE (`de421.bsp`, `moon_pa_de421_1900-2050.bpc`, `moon_080317.tf`,
 - El semáforo compara la elevación del Sol con el horizonte *geométrico* (0° por defecto), así que un Sol visible sobre terreno bajo puede marcarse "por debajo del mínimo".
 - Datos de 2026-01-01 a 2030-12-31, paso de 1 hora. Fuera de ese rango la fecha se ajusta al límite y se avisa.
 - Hay cinco sitios con datos reales: Connecting Ridge (Site 01), Shackleton Rim (Site 04), Nobile Rim 1 (Site 06), Haworth y Malapert Massif (Site 23). Los puntos de observación son centros de regiones DEM, no coordenadas de aterrizaje.
-- **Escena 3D:** las sombras cubren todo el recorte de 2,5 km (el marco se calcula con sus esquinas); más allá hay una silueta oscura sin iluminar calculada con el horizonte del observador en el centro del sitio, así que desde otro punto es solo aproximada. La Tierra es una esfera sin textura y el robot no tiene físicas (sigue la altura del mapa). La escena muestra solo el escenario A.
+- **Escena 3D:** las sombras cubren todo el recorte de 2,5 km (el marco se calcula con sus esquinas); más allá hay una silueta oscura sin iluminar calculada con el horizonte del observador en el centro del sitio, así que desde otro punto es solo aproximada. La Tierra es una esfera sin textura y el rover no tiene físicas (sigue la altura del mapa). La escena muestra solo el escenario A.
 - **Horizonte del robot frente al del panel:** las métricas del panel son para el centro del sitio; desde otro punto del terreno el Sol puede quedar tapado aunque el panel diga que es visible.
 - **Límite de pendiente:** se calcula al cargar cada sitio (~1 s la primera vez) con una búsqueda de ruta que exige 2° menos que el límite del robot y comprueba la pendiente cada 2,5 m a lo largo de cada tramo; si ni 45° sirve, la escena lo avisa y muestra el cartel desde el punto central. Que exista ruta no garantiza que sea fácil, y el DEM está interpolado en un ~90 %.
-- **Rendimiento:** el 3D usa mapa de sombras de 4096 px; con renderizado por software (sin GPU) puede ir a pocos fotogramas por segundo, y el movimiento del robot se ralentiza en vez de saltar.
-- **Solo aspecto:** el color y el grano del terreno, las estrellas y "Aclarar sombras" no cambian las alturas, el horizonte ni las métricas.
+- **Rendimiento:** el 3D usa la malla de terreno a 5 m, mapa de sombras de 4096 px y el modelo NASA GLB; con renderizado por software (sin GPU) puede ir a pocos fotogramas por segundo, y el movimiento del rover se ralentiza en vez de saltar.

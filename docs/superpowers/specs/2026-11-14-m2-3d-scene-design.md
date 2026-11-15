@@ -41,3 +41,10 @@ El límite fijo de 25° casi no estorbaba en 4 de los 5 sitios (0–0,6 % del te
 - Si ni 45° sirve, se mantiene el aviso "sin ruta" y el robot arranca en el cartel.
 - `findStart` devuelve también la ruta (nodos de la salida a la meta) para poder probar con un piloto automático.
 - Prueba de aceptación: un piloto automático que sigue la ruta con las reglas reales del robot llega al cartel en los 5 sitios.
+
+## Adenda — cambios del equipo posteriores a la aprobación (2026-11-14)
+
+- **Rover:** el no-objetivo "modelos 3D descargados" dejó de aplicar. El equipo añadió el GLB del rover Perseverance (NASA/JPL, 4,76 MB, en `web/public/models/` con su atribución) como modelo visual de seis ruedas. Se escala a 2,8 m y se centra *después* de escalarlo y girarlo; el rover simple sigue como respaldo si el modelo no carga.
+- **Terreno:** la malla usa las 1001×1001 muestras de 5 m del recorte (antes una de cada dos).
+- **Interfaz:** rediseño descrito en `docs/diseno-interfaz.md` (negro y carbón, acento dorado, Barlow e IBM Plex Mono). Siguiendo esa regla, la Tierra del 3D se dibuja gris cálido y no azul.
+

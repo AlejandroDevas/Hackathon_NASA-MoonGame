@@ -97,8 +97,9 @@ export function createWorld(site) {
   scene.background = new THREE.Color(0x000000);
 
   const terrainMesh = new THREE.Mesh(
-    buildTerrainGeometry(site.terrain, 2),
-    new THREE.MeshStandardMaterial({ vertexColors: true, color: 0x8c8a86, roughness: 1, metalness: 0 }),
+    // Use every 5 m LOLA sample rather than thinning the scene to 10 m.
+    buildTerrainGeometry(site.terrain, 1),
+    new THREE.MeshStandardMaterial({ vertexColors: true, color: 0x96938b, roughness: 0.96, metalness: 0 }),
   );
   terrainMesh.name = 'terrain';
   terrainMesh.castShadow = true;
@@ -108,7 +109,7 @@ export function createWorld(site) {
   const eyeY = heightAt(site.terrain, 0, 0) + 2;
   scene.add(buildHorizonRing(site.horizon, eyeY));
   scene.add(buildStars());
-  const ambient = new THREE.AmbientLight(0x101216, 1);
+  const ambient = new THREE.AmbientLight(0x161411, 1);
   const ambientBase = ambient.intensity;
   scene.add(ambient);
 
@@ -138,7 +139,7 @@ export function createWorld(site) {
 
   const earth = new THREE.Mesh(
     new THREE.SphereGeometry(BODY_DISTANCE_M * Math.tan(EARTH_RADIUS_DEG * RAD), 32, 32),
-    new THREE.MeshStandardMaterial({ color: 0x3a6fb0, roughness: 1, metalness: 0 }),
+    new THREE.MeshStandardMaterial({ color: 0xc8c2b4, roughness: 1, metalness: 0 }),
   );
   earth.name = 'earth';
   earth.castShadow = false;
