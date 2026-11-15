@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { getLocale, t } from '../i18n.js';
 import { createInput } from './input.js';
-import { createRobotMesh } from './robotMesh.js';
+import { createRobotMesh, loadNasaRover } from './robotMesh.js';
 import { createSignPanel } from './signPanel.js';
 import { MAX_SLOPE_DEG, createRobot, followCamera, nextSignOpen, stepRobot } from './robot.js';
 import { skyAt } from './sky.js';
@@ -231,6 +231,7 @@ export function mountScene(container, store, sites, audioCue = null) {
   const observer = new ResizeObserver(resize);
   observer.observe(container);
   loadSiteScene(store.get().scenarios.A.siteId);
+  loadNasaRover(robotMesh, `${import.meta.env.BASE_URL}models/perseverance-rover.glb`);
   locale = store.get().locale;
   setViewMode(viewMode);
   resize();
@@ -244,10 +245,17 @@ export function mountScene(container, store, sites, audioCue = null) {
       input.dispose();
       audioCue?.dispose();
       controls?.dispose();
+      robotMesh.removeFromParent();
       world.dispose();
       robotMesh.traverse((object) => {
         object.geometry?.dispose();
-        object.material?.dispose();
+        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        for (const material of materials) {
+          for (const value of Object.values(material ?? {})) {
+            if (value?.isTexture) value.dispose();
+          }
+          material?.dispose();
+        }
       });
       renderer.dispose();
       container.replaceChildren();

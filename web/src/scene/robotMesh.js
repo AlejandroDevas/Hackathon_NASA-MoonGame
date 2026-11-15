@@ -17,7 +17,7 @@ export function createRobotMesh() {
   const body = add(new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.45, 1.8), new THREE.MeshStandardMaterial({ color: 0xc9ccd1, roughness: 0.7 })));
   body.position.y = 0.75;
 
-  const panel = add(new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.05, 1.1), new THREE.MeshStandardMaterial({ color: 0x1c3a6b, roughness: 0.4 })));
+  const panel = add(new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.05, 1.1), new THREE.MeshStandardMaterial({ color: 0x51452e, roughness: 0.55 })));
   panel.position.set(0, 1.08, 0.1);
   panel.rotation.x = -0.12;
 
@@ -37,4 +37,64 @@ export function createRobotMesh() {
     }
   }
   return robot;
+}
+
+/** Load NASA's detailed rover model into the existing steerable wrapper. */
+export async function loadNasaRover(robot, url) {
+  try {
+    const { GLTFLoader } = await import('three/addons/loaders/GLTFLoader.js');
+    const loader = new GLTFLoader();
+    const gltf = await loader.loadAsync(url);
+    const model = gltf.scene;
+    if (!robot.parent) {
+      disposeModel(model);
+      return null;
+    }
+    model.updateMatrixWorld(true);
+    const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
+    const targetLength = 2.8;
+    model.scale.setScalar(targetLength / Math.max(size.x, size.z));
+    model.rotation.y = Math.PI;
+    // Centre it AFTER scaling and turning: rotating about the origin after centring would
+    // push a model that is not centred on its own origin away from the rover's position.
+    model.position.set(0, 0, 0);
+    model.updateMatrixWorld(true);
+    const placed = new THREE.Box3().setFromObject(model);
+    const centre = placed.getCenter(new THREE.Vector3());
+    model.position.set(-centre.x, -placed.min.y, -centre.z);
+    model.traverse((object) => {
+      if (!object.isMesh) return;
+      object.castShadow = true;
+      object.receiveShadow = true;
+      if (object.material) {
+        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        for (const material of materials) material.roughness = Math.max(material.roughness ?? 0.65, 0.6);
+      }
+    });
+
+    // Retain the simple model until the NASA asset has loaded successfully.
+    for (const child of [...robot.children]) {
+      robot.remove(child);
+      disposeModel(child);
+    }
+    model.name = 'nasa-perseverance-rover';
+    robot.add(model);
+    return model;
+  } catch (error) {
+    console.warn('NASA rover model could not be loaded; keeping the simplified rover.', error);
+    return null;
+  }
+}
+
+function disposeModel(root) {
+  root.traverse?.((object) => {
+    object.geometry?.dispose();
+    const materials = Array.isArray(object.material) ? object.material : [object.material];
+    for (const material of materials) {
+      for (const value of Object.values(material ?? {})) {
+        if (value?.isTexture) value.dispose();
+      }
+      material?.dispose();
+    }
+  });
 }
