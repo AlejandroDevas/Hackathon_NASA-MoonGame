@@ -92,34 +92,41 @@ function rockGeometry(variant) {
   return geometry;
 }
 
-/** One InstancedMesh per rock shape, so thousands of stones cost three draw calls. */
+/** Rocks at least this big (scale, roughly a radius in metres) cast shadows; smaller ones are too small for the shadow map to show. */
+export const SHADOW_MIN_SCALE = 1.0;
+
+/**
+ * Instanced meshes: one per rock shape and size class, so thousands of stones cost a handful of draw
+ * calls. Only the large class is drawn into the shadow map, which cuts the shadow pass to a small
+ * share of the rocks without changing how the scene looks.
+ */
 export function buildRocks(placements) {
   const group = new THREE.Group();
   group.name = 'rocks';
   const dummy = new THREE.Object3D();
   const color = new THREE.Color();
   for (let variant = 0; variant < VARIANTS; variant++) {
-    const mine = placements.filter((p) => p.variant === variant);
-    if (!mine.length) continue;
-    const mesh = new THREE.InstancedMesh(
-      rockGeometry(variant),
-      new THREE.MeshStandardMaterial({ color: 0x8d8a82, roughness: 1, metalness: 0, flatShading: true }),
-      mine.length,
-    );
-    mine.forEach((rock, i) => {
-      dummy.position.set(rock.x, rock.y, rock.z);
-      dummy.rotation.set(0, rock.yaw, 0);
-      dummy.scale.setScalar(rock.scale);
-      dummy.updateMatrix();
-      mesh.setMatrixAt(i, dummy.matrix);
-      mesh.setColorAt(i, color.setScalar(rock.tone));
-    });
-    mesh.instanceMatrix.needsUpdate = true;
-    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    mesh.name = `rocks-${variant}`;
-    group.add(mesh);
+    const geometry = rockGeometry(variant);
+    const material = new THREE.MeshStandardMaterial({ color: 0x8d8a82, roughness: 1, metalness: 0, flatShading: true });
+    for (const large of [false, true]) {
+      const mine = placements.filter((p) => p.variant === variant && p.scale >= SHADOW_MIN_SCALE === large);
+      if (!mine.length) continue;
+      const mesh = new THREE.InstancedMesh(geometry, material, mine.length);
+      mine.forEach((rock, i) => {
+        dummy.position.set(rock.x, rock.y, rock.z);
+        dummy.rotation.set(0, rock.yaw, 0);
+        dummy.scale.setScalar(rock.scale);
+        dummy.updateMatrix();
+        mesh.setMatrixAt(i, dummy.matrix);
+        mesh.setColorAt(i, color.setScalar(rock.tone));
+      });
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      mesh.castShadow = large;
+      mesh.receiveShadow = true;
+      mesh.name = `rocks-${variant}-${large ? 'large' : 'small'}`;
+      group.add(mesh);
+    }
   }
   return group;
 }

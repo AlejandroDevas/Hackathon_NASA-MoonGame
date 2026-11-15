@@ -90,8 +90,9 @@ describe('createWorld', () => {
 describe('world.dispose', () => {
   test('frees the geometries and materials so switching sites does not leak GPU memory', () => {
     const world = createWorld(loadTinySite());
-    const geometry = vi.spyOn(world.terrainMesh.geometry, 'dispose');
-    const material = vi.spyOn(world.terrainMesh.material, 'dispose');
+    const chunk = world.terrain.chunks[0];
+    const geometry = vi.spyOn(chunk.geometries[3], 'dispose');
+    const material = vi.spyOn(chunk.mesh.material, 'dispose');
     world.dispose();
     expect(geometry).toHaveBeenCalled();
     expect(material).toHaveBeenCalled();

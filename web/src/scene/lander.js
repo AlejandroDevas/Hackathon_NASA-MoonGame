@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { mergeByMaterial } from './mergeModel.js';
 import { heightAt } from './terrainData.js';
 
 const FOOT_RADIUS_M = 3.4;
@@ -134,6 +135,7 @@ export async function loadApolloModule(url, decoderPath = `${import.meta.env.BAS
     loader.setDRACOLoader(draco);
     const gltf = await loader.loadAsync(url);
     const model = gltf.scene;
+    mergeByMaterial(model); // 157 small meshes become a dozen draw calls
     model.updateMatrixWorld(true);
     const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
     model.scale.setScalar(APOLLO_MODULE_WIDTH_M / Math.max(size.x, size.z));

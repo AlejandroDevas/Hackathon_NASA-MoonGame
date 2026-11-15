@@ -16,17 +16,17 @@ import { MAX_SLOPE_DEG, createRobot, followCamera, nextSignOpen, stepRobot } fro
 import { skyAt } from './sky.js';
 import { contains, heightAt, normalAt } from './terrainData.js';
 import { buildRocks, placeRocks } from './rocks.js';
-import { planStart } from './traversal.js';
+import { createQualityController } from './quality.js';
+import { startFor } from './startPlan.js';
 import { createWorld } from './world.js';
 
 const MAX_FRAME_S = 0.1;
-const START_DISTANCE_M = 400;
 const UP = new THREE.Vector3(0, 1, 0);
 
 function inertHandle() {
   return {
     dispose() {},
-    debug: { robot: () => null, setRobot() {}, sky: () => null, signOpen: () => false, project: () => null, camera: () => null },
+    debug: { robot: () => null, setRobot() {}, sky: () => null, signOpen: () => false, project: () => null, camera: () => null, info: () => null, loadMs: () => null, world: () => null, lod: () => null, forceScale() {}, quality: () => null, timeRender: () => null },
   };
 }
 
@@ -63,13 +63,15 @@ export function mountScene(container, store, sites, audioCue = null) {
 
   let renderer;
   try {
-    renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
+    renderer = new THREE.WebGLRenderer({ antialias: true });
   } catch {
     showNotice(container, t('scene.noWebgl'));
     return inertHandle();
   }
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
+  // The shadow map is only redrawn when the Sun, the robot or the terrain detail changes (see `shadowDirty`).
+  renderer.shadowMap.autoUpdate = false;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.15;
 
@@ -92,7 +94,7 @@ export function mountScene(container, store, sites, audioCue = null) {
   const tags = createPoiTags(hud);
   container.append(hud);
 
-  const camera = new THREE.PerspectiveCamera(60, 1, 0.5, 200_000);
+  const camera = new THREE.PerspectiveCamera(60, 1, 0.5, 150_000);
   const input = createInput(window);
   const robotMesh = createRobotMesh();
 
@@ -113,15 +115,36 @@ export function mountScene(container, store, sites, audioCue = null) {
   let lastSky = null;
   let frameHandle = null;
   let lastTime = null;
+  let lastLoadMs = null; // how long the last site took to build (debug)
+  // Frames are only drawn when something visible changed; the shadow map only when something that casts shadows did.
+  let needsRender = true;
+  let shadowDirty = true;
+  const quality = createQualityController();
+  let qualityIgnoreUntil = 0; // frames while a site is loading say nothing about steady-state speed
+  let forcedScale = null; // debug: pin the render scale while measuring
+  let dustWasFlying = false;
+  let prevStamp = null; // timestamp of the previous frame, if it was drawn (for the frame-time samples)
+  const lastCamPos = new THREE.Vector3(1e9, 1e9, 1e9);
+  const lastCamQuat = new THREE.Quaternion();
+  const scratch = new THREE.Vector3();
   let locale = null;
   let controls = null; // OrbitControls, created the first time the free view is used
   let viewMode = store.get().viewMode === 'free' ? 'free' : 'follow';
 
+  /** Ask for a new frame, and for the shadow map to be redrawn too if `shadows` is true. */
+  function invalidate(shadows = false) {
+    needsRender = true;
+    if (shadows) shadowDirty = true;
+  }
+
   function setRobot(x, z, headingDeg) {
     robot = createRobot(site.terrain, x, z, headingDeg);
+    placeRobotMesh();
+    invalidate(true);
   }
 
   function loadSiteScene(id) {
+    const loadStart = performance.now();
     if (world) {
       world.scene.remove(robotMesh);
       world.dispose();
@@ -139,13 +162,16 @@ export function mountScene(container, store, sites, audioCue = null) {
     loadEarthImage(`${import.meta.env.BASE_URL}textures/earth.jpg`).then((texture) => {
       if (!texture) return;
       if (world !== forWorld) texture.dispose();
-      else forWorld.setEarthMap(texture);
+      else {
+        forWorld.setEarthMap(texture);
+        invalidate();
+      }
     });
     lastPos = null;
     if (!poiCache.has(id)) poiCache.set(id, findPois(site.terrain));
     pois = poiCache.get(id);
     world.scene.add(buildPoiMarkers(pois, groundAt));
-    if (!plans.has(id)) plans.set(id, planStart(site.terrain, { x: 0, z: 0 }, START_DISTANCE_M));
+    if (!plans.has(id)) plans.set(id, startFor(site));
     const plan = plans.get(id);
     addDecor(id);
     slopeLimitDeg = plan.limitDeg;
@@ -153,8 +179,13 @@ export function mountScene(container, store, sites, audioCue = null) {
     routeEl.hidden = plan.reachable;
     signOpen = false;
     camera.position.set(robot.x, robot.y + 6, robot.z + 12);
+    world.updateLod(camera.position, Infinity); // the first frame already has the detail around the robot
     applyTexts();
     applySky();
+    invalidate(true);
+    lastLoadMs = performance.now() - loadStart;
+    qualityIgnoreUntil = performance.now() + 4000;
+    prevStamp = null;
   }
 
   const groundAt = (x, z) => heightAt(site.terrain, x, z);
@@ -197,6 +228,7 @@ export function mountScene(container, store, sites, audioCue = null) {
       disposeObject(lander);
       model.position.set(0, meanFoot, 0);
       target.scene.add(model);
+      invalidate(true);
     });
   }
 
@@ -204,6 +236,7 @@ export function mountScene(container, store, sites, audioCue = null) {
     lastSky = skyAt(site, store.get().scenarios.A.timeMs);
     world.updateSky(lastSky, store.get().scenarios.A.timeMs);
     renderSkyReadout();
+    invalidate(true);
   }
 
   /** Sun and Earth azimuth/elevation against the horizon of the site centre, in words. */
@@ -283,9 +316,11 @@ export function mountScene(container, store, sites, audioCue = null) {
   function resize() {
     const width = Math.max(container.clientWidth, 1);
     const height = Math.max(container.clientHeight, 1);
+    renderer.setPixelRatio(forcedScale ?? quality.scale); // 1 = one drawn pixel per CSS pixel; lower on a machine that cannot keep up
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
+    invalidate();
   }
 
   function placeRobotMesh() {
@@ -305,7 +340,7 @@ export function mountScene(container, store, sites, audioCue = null) {
       if (moved > 0.001 && moved < 6) dust.emitFromWheels(robot, moved, dx / moved, dz / moved, moved / dt);
     }
     lastPos = { x: robot.x, z: robot.z };
-    dust.update(dt, (x, z) => heightAt(site.terrain, x, z));
+    if (dust.sim.count() > 0) dust.update(dt, groundAt);
   }
 
   function frame(timestamp) {
@@ -313,25 +348,30 @@ export function mountScene(container, store, sites, audioCue = null) {
     const dt = lastTime === null ? 0 : Math.min((timestamp - lastTime) / 1000, MAX_FRAME_S);
     lastTime = timestamp;
 
+    const { x: beforeX, z: beforeZ, headingDeg: beforeHeading } = robot;
     robot = stepRobot(robot, input.read(), site.terrain, dt, slopeLimitDeg);
-    placeRobotMesh();
+    const robotMoved = robot.x !== beforeX || robot.z !== beforeZ || robot.headingDeg !== beforeHeading;
+    if (robotMoved) placeRobotMesh();
     throwDust(dt);
 
     const k = 1 - Math.exp(-6 * dt);
     if (viewMode === 'free' && controls) {
-      controls.target.lerp(new THREE.Vector3(robot.x, robot.y + 1.5, robot.z), k);
+      scratch.set(robot.x, robot.y + 1.5, robot.z);
+      controls.target.lerp(scratch, k);
       controls.update();
       if (contains(site.terrain, camera.position.x, camera.position.z)) {
-        camera.position.y = Math.max(camera.position.y, heightAt(site.terrain, camera.position.x, camera.position.z) + 2);
+        camera.position.y = Math.max(camera.position.y, groundAt(camera.position.x, camera.position.z) + 2);
       }
     } else {
       const pose = followCamera(robot);
-      camera.position.lerp(new THREE.Vector3(pose.position.x, pose.position.y, pose.position.z), k);
+      scratch.set(pose.position.x, pose.position.y, pose.position.z);
+      camera.position.lerp(scratch, k);
       if (contains(site.terrain, camera.position.x, camera.position.z)) {
-        camera.position.y = Math.max(camera.position.y, heightAt(site.terrain, camera.position.x, camera.position.z) + 1.5);
+        camera.position.y = Math.max(camera.position.y, groundAt(camera.position.x, camera.position.z) + 1.5);
       }
       camera.lookAt(pose.target.x, pose.target.y, pose.target.z);
     }
+    if (world.updateLod(camera.position)) invalidate(true);
 
     const wasOpen = signOpen;
     signOpen = nextSignOpen(signOpen, Math.hypot(robot.x, robot.z));
@@ -345,11 +385,37 @@ export function mountScene(container, store, sites, audioCue = null) {
       }
     }
     blockedEl.hidden = !robot.blocked;
+
+    if (robotMoved) invalidate(true);
+    const cameraMoved =
+      lastCamPos.distanceToSquared(camera.position) > 1e-8 || 1 - Math.abs(lastCamQuat.dot(camera.quaternion)) > 1e-10;
+    const dustFlying = dust.sim.count() > 0;
+    const dustChanged = dustFlying || dustWasFlying; // one more frame once the last grain has landed
+    dustWasFlying = dustFlying;
+    if (!needsRender && !cameraMoved && !dustChanged) {
+      prevStamp = null; // an idle frame says nothing about how fast frames are drawn
+      return;
+    }
+
+    if (shadowDirty) {
+      renderer.shadowMap.needsUpdate = true;
+      shadowDirty = false;
+    }
+    needsRender = false;
+    lastCamPos.copy(camera.position);
+    lastCamQuat.copy(camera.quaternion);
     tags.update(camera, container.clientWidth, container.clientHeight, robot, poiBase);
     renderer.render(world.scene, camera);
+
+    if (prevStamp !== null && forcedScale === null && timestamp > qualityIgnoreUntil) {
+      const scale = quality.record(timestamp - prevStamp, timestamp);
+      if (scale !== null) resize();
+    }
+    prevStamp = timestamp;
   }
 
   const unsubscribe = store.subscribe((state) => {
+    invalidate();
     const nextId = state.scenarios.A.siteId;
     const next = sites.get(nextId);
     if (nextId !== siteId && next?.terrain) loadSiteScene(nextId);
@@ -364,6 +430,10 @@ export function mountScene(container, store, sites, audioCue = null) {
     }
   });
 
+  // After a lost WebGL context is restored nothing is on screen: draw everything again (shadow map included).
+  const onContextRestored = () => invalidate(true);
+  renderer.domElement.addEventListener('webglcontextrestored', onContextRestored);
+
   const observer = new ResizeObserver(resize);
   observer.observe(container);
   loadSiteScene(store.get().scenarios.A.siteId);
@@ -376,6 +446,7 @@ export function mountScene(container, store, sites, audioCue = null) {
   return {
     dispose() {
       cancelAnimationFrame(frameHandle);
+      renderer.domElement.removeEventListener('webglcontextrestored', onContextRestored);
       unsubscribe();
       observer.disconnect();
       input.dispose();
@@ -402,6 +473,38 @@ export function mountScene(container, store, sites, audioCue = null) {
       sky: () => lastSky,
       signOpen: () => signOpen,
       camera: () => camera.position.toArray(),
+      /** Renderer statistics of the last frame: draw calls, triangles, and what is held on the GPU. */
+      info: () => ({ ...renderer.info.render, ...renderer.info.memory }),
+      loadMs: () => lastLoadMs,
+      world: () => world,
+      lod: () => world.terrain.stats(),
+      /** Pin the render scale (null releases it) so that measurements are not changed by the adaptive controller. */
+      forceScale(scale) {
+        forcedScale = scale;
+        resize();
+      },
+      quality: () => ({ scale: quality.scale, needsRender, shadowDirty }),
+      /**
+       * Mean cost in ms of one render of the current view, forcing the GPU to finish each time so the
+       * frame-rate cap does not hide it. `shadows: false` skips the shadow-map pass, to see its share.
+       */
+      timeRender(n = 20, { shadows = true } = {}) {
+        const gl = renderer.getContext();
+        const wasAuto = renderer.shadowMap.autoUpdate;
+        renderer.shadowMap.autoUpdate = shadows;
+        renderer.shadowMap.needsUpdate = shadows;
+        renderer.render(world.scene, camera); // warm up
+        gl.finish();
+        const start = performance.now();
+        for (let i = 0; i < n; i++) {
+          if (shadows) renderer.shadowMap.needsUpdate = true;
+          renderer.render(world.scene, camera);
+          gl.finish();
+        }
+        const ms = (performance.now() - start) / n;
+        renderer.shadowMap.autoUpdate = wasAuto;
+        return +ms.toFixed(2);
+      },
       /** Normalised device coordinates of 'sun' or 'earth' (x, y in [-1, 1] when on screen; z > 1 when behind). */
       project(name) {
         const body = name === 'sun' ? world.sunDisc : world.earth;

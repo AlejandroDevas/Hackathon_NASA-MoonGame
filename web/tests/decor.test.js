@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { describe, expect, test } from 'vitest';
 import { glowPixels } from '../src/scene/glow.js';
 import { buildLander, footingAt } from '../src/scene/lander.js';
-import { buildRocks, placeRocks } from '../src/scene/rocks.js';
+import { SHADOW_MIN_SCALE, buildRocks, placeRocks } from '../src/scene/rocks.js';
 import { heightAt, slopeDegAt } from '../src/scene/terrainData.js';
 import { makeTerrain } from './helpers.js';
 
@@ -59,18 +59,22 @@ describe('placeRocks', () => {
 });
 
 describe('buildRocks', () => {
-  test('one instanced mesh per shape holding every placement, casting and receiving shadows', () => {
-    const placements = placeRocks(flat, { scatter: 90 });
+  test('instanced meshes per shape and size class holding every placement; only large rocks cast shadows', () => {
+    const placements = placeRocks(flat, { scatter: 400 });
     const group = buildRocks(placements);
     const total = group.children.reduce((sum, mesh) => sum + mesh.count, 0);
-    expect(total).toBe(90);
-    expect(group.children.length).toBeLessThanOrEqual(3);
+    expect(total).toBe(400);
+    expect(group.children.length).toBeLessThanOrEqual(6);
+    let large = 0;
     for (const mesh of group.children) {
       expect(mesh.isInstancedMesh).toBe(true);
-      expect(mesh.castShadow).toBe(true);
       expect(mesh.receiveShadow).toBe(true);
       expect(mesh.instanceColor).not.toBeNull();
+      expect(mesh.castShadow).toBe(mesh.name.endsWith('-large'));
+      if (mesh.castShadow) large += mesh.count;
     }
+    expect(large).toBe(placements.filter((p) => p.scale >= SHADOW_MIN_SCALE).length);
+    expect(large).toBeLessThan(total * 0.4); // the shadow pass draws a minority of the rocks
   });
 });
 

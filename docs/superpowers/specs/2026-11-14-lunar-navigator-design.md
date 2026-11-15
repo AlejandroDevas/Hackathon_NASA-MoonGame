@@ -125,7 +125,8 @@ Resumen de cómo quedó respecto a este diseño. El detalle vigente está en el 
 - **Tierra:** §5.4 decía «esfera con textura»; hoy usa la imagen *Blue Marble: Next Generation* de NASA (con nubes procedurales y giro según la hora y la fase de la Luna).
 - **Modelos 3D:** el rover es el GLB del Perseverance (NASA/JPL) y el módulo de aterrizaje el GLB del Apolo (NASA 3D Resources), cada uno con un modelo procedural de respaldo. Ninguno es el vehículo de CLPS ni de Artemis.
 - **Límite de pendiente:** por sitio y calculado al cargar (15° a 35°), no un 25° fijo (ver el diseño del M2).
-- **Carga:** las efemérides y el horizonte de los cinco sitios se cargan al arrancar; el terreno (y su mapa de tonos) de cada sitio solo al elegirlo.
+- **Carga:** las efemérides y el horizonte de los cinco sitios se cargan al arrancar; el terreno (con su mapa de tonos y la salida precalculada del rover, `start.json`) de cada sitio solo al elegirlo.
+- **Rendimiento:** terreno por bloques con nivel de detalle, modelos NASA fusionados por material, sombras y fotogramas solo cuando cambian algo, y resolución adaptable; ver «Rendimiento» en el README.
 - **Navegador:** el 3D usa `WebGLRenderer`; no se usa WebGPU. Las métricas se calculan con código propio sobre los datos precalculados, sin librerías de efemérides en el navegador.
 
 **Añadido después del diseño (extras de §6)**
