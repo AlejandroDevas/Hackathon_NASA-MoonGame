@@ -1,5 +1,6 @@
 {
   "app.title": "Navegador de sitios de aterrizaje lunar",
+  "app.kicker": "CLPS · polo sur lunar · 2026–2030",
   "range.warning": "La fecha está fuera de los datos; se ajustó a {limit}.",
   "card.sunEl": "Elevación del Sol",
   "card.earthEl": "Elevación de la Tierra",

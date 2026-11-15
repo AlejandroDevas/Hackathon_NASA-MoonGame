@@ -5,8 +5,8 @@ import { timelineData } from './timelineData.js';
 import { utcTzDate } from './utcAxis.js';
 import { t } from '../i18n.js';
 
-const SUN = '#ffc857';
-const EARTH = '#5aa9ff';
+const SUN = '#d4ad5b';
+const EARTH = '#e5e0d5';
 
 /**
  * Draw the chart into `el` with a vertical cursor at `cursorMs`. With `onScrub`, dragging on the
@@ -19,7 +19,7 @@ export function renderTimeline(el, site, fromMs, toMs, cursorMs, { onScrub, getT
   const data = timelineData(site, fromMs, toMs);
   const firstMs = data[0][0] * 1000;
   const lastMs = data[0][data[0].length - 1] * 1000;
-  const axis = { stroke: '#98a2b8', grid: { stroke: '#2a3242', width: 1 }, ticks: { stroke: '#2a3242' } };
+  const axis = { stroke: '#aaa69b', grid: { stroke: '#393731', width: 1 }, ticks: { stroke: '#393731' } };
   const plot = new uPlot(
     {
       width: Math.max(el.clientWidth, 240),
@@ -42,7 +42,7 @@ export function renderTimeline(el, site, fromMs, toMs, cursorMs, { onScrub, getT
             const x = u.valToPos(cursor / 1000, 'x', true);
             if (x < u.bbox.left || x > u.bbox.left + u.bbox.width) return;
             u.ctx.save();
-            u.ctx.strokeStyle = '#e8ebf2';
+            u.ctx.strokeStyle = '#f4f1e9';
             u.ctx.lineWidth = 1.5;
             u.ctx.beginPath();
             u.ctx.moveTo(x, u.bbox.top);

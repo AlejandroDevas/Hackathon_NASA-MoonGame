@@ -1,5 +1,6 @@
 {
   "app.title": "Lunar Landing Site Navigator",
+  "app.kicker": "CLPS · lunar south pole · 2026–2030",
   "range.warning": "That date is outside the data; adjusted to {limit}.",
   "card.sunEl": "Sun elevation",
   "card.earthEl": "Earth elevation",

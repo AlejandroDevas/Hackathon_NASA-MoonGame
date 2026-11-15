@@ -107,7 +107,9 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
 
   function buildHeader() {
     const header = el('header', 'app-header');
-    header.append(el('h1', '', t('app.title')));
+    const brand = el('div', 'app-brand');
+    brand.append(el('p', 'app-kicker', t('app.kicker')), el('h1', '', t('app.title')));
+    header.append(brand);
     const tools = el('div', 'header-tools');
 
     const locale = el('select');
@@ -132,7 +134,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
       }
     });
 
-    playButton = el('button');
+    playButton = el('button', 'btn-primary');
     playButton.dataset.testid = 'play-toggle';
     playButton.addEventListener('click', () => {
       if (store.get().playing) {
@@ -194,6 +196,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
       rebuild(state);
     }
     document.documentElement.lang = state.locale;
+    root.classList.toggle('compare-open', Boolean(state.scenarios.B));
     playButton.textContent = state.playing ? t('app.pause') : t('app.play');
     playButton.setAttribute('aria-pressed', String(state.playing));
     soundButton.textContent = state.soundEnabled ? t('app.soundOff') : t('app.soundOn');
