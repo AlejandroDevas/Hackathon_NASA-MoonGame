@@ -116,3 +116,41 @@ describe('createAudioCue', () => {
     expect(FakeAudioContext.instances[0].closeCalls).toBe(1);
   });
 });
+
+describe('named cues', () => {
+  const notesFor = (name) => {
+    const cue = createAudioCue({ AudioContextClass: FakeAudioContext });
+    cue.setEnabled(true);
+    cue.play(name);
+    return FakeAudioContext.instances[0].oscillators.map((o) => o.frequencyHz);
+  };
+
+  test('click is one short high tick', () => {
+    expect(notesFor('click')).toEqual([1200]);
+  });
+
+  test('a green verdict climbs through three notes', () => {
+    expect(notesFor('verdict-green')).toEqual([523.25, 659.25, 783.99]);
+  });
+
+  test('an amber verdict is two equal, neutral notes', () => {
+    expect(notesFor('verdict-amber')).toEqual([440, 440]);
+  });
+
+  test('a red verdict falls through two low notes', () => {
+    expect(notesFor('verdict-red')).toEqual([330, 247]);
+  });
+
+  test('an unknown cue name stays silent and does not throw', () => {
+    expect(notesFor('does-not-exist')).toEqual([]);
+  });
+
+  test('named cues are silent while sound is off', () => {
+    const cue = createAudioCue({ AudioContextClass: FakeAudioContext });
+    cue.setEnabled(true);
+    cue.setEnabled(false);
+    cue.play('click');
+    cue.play('verdict-green');
+    expect(FakeAudioContext.instances[0].oscillators).toHaveLength(0);
+  });
+});

@@ -212,3 +212,64 @@ describe('timeline scrubbing wired to the scenario time', () => {
     expect(store.get().scenarios.A.timeMs).toBe(before);
   });
 });
+
+describe('interface and verdict cues', () => {
+  const allFail = { minSunElDeg: 91, maxDarkH: -1, maxEarthGapH: -1 };
+  const cueSpy = () => {
+    const played = [];
+    return { played, setEnabled: (next) => next, play: (name) => played.push(name) };
+  };
+
+  test('pressing a toolbar button plays the click cue', () => {
+    const audioCue = cueSpy();
+    const { root } = setup(audioCue);
+    q(root, 'compare-toggle').click();
+    expect(audioCue.played).toContain('click');
+  });
+
+  test('changing a toolbar select plays the click cue', () => {
+    const audioCue = cueSpy();
+    const { root } = setup(audioCue);
+    const speed = q(root, 'speed');
+    speed.value = speed.options[0].value;
+    speed.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(audioCue.played).toContain('click');
+  });
+
+  test('the first render does not play a verdict cue', () => {
+    const audioCue = cueSpy();
+    setup(audioCue);
+    expect(audioCue.played.filter((n) => n.startsWith('verdict'))).toEqual([]);
+  });
+
+  test('a verdict that changes plays the cue for the new level', () => {
+    const audioCue = cueSpy();
+    const { store } = setup(audioCue);
+    store.set({ thresholds: allFail });
+    expect(audioCue.played).toContain('verdict-red');
+  });
+
+  test('an unchanged verdict stays silent', () => {
+    const audioCue = cueSpy();
+    const { store } = setup(audioCue);
+    store.set({ thresholds: allFail });
+    audioCue.played.length = 0;
+    store.set({ windowMs: 48 * HOUR });
+    expect(audioCue.played.filter((n) => n.startsWith('verdict'))).toEqual([]);
+  });
+
+  test('verdict changes stay silent while the animation plays', () => {
+    const audioCue = cueSpy();
+    const { store } = setup(audioCue);
+    store.set({ playing: true, thresholds: allFail });
+    expect(audioCue.played.filter((n) => n.startsWith('verdict'))).toEqual([]);
+  });
+
+  test('works without an audio cue', () => {
+    const { root, store } = setup();
+    expect(() => {
+      q(root, 'compare-toggle').click();
+      store.set({ thresholds: allFail });
+    }).not.toThrow();
+  });
+});

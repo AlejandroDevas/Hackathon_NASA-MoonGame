@@ -40,6 +40,14 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
   let lrocButton = null;
   const analysis = createAnalysis(store, siteList, sites);
 
+  // One delegated listener: the root survives rebuilds, so it also covers re-created controls.
+  root.addEventListener('click', (event) => {
+    if (event.target.closest?.('button')) audioCue?.play?.('click');
+  });
+  root.addEventListener('change', (event) => {
+    if (event.target.closest?.('select')) audioCue?.play?.('click');
+  });
+
   function createView(slot, section) {
     const controlsEl = el('div');
     const cardEl = el('div');
@@ -60,6 +68,8 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
       if (time && time.value !== value && document.activeElement !== time) time.value = value;
     }
 
+    let lastLevel = null; // null until the first render, so opening the page is silent
+
     return {
       /** @returns the scenario's metrics, or null if the time had to be clamped first */
       update(state, metricsA) {
@@ -73,7 +83,13 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
         syncInputs(scenario);
 
         const metrics = evaluateScenario(site, timeMs, state.windowMs);
-        renderScenarioCard(cardEl, metrics, viability(metrics, state.thresholds), site.info);
+        const verdict = viability(metrics, state.thresholds);
+        renderScenarioCard(cardEl, metrics, verdict, site.info);
+        // Only scenario A speaks, and not while the animation runs (the level can flip often then).
+        if (slot === 'A') {
+          if (lastLevel !== null && verdict.level !== lastLevel && !state.playing) audioCue?.play?.(`verdict-${verdict.level}`);
+          lastLevel = verdict.level;
+        }
         if (diffEl && metricsA) renderDiff(diffEl, metricsA, metrics);
 
         const stale =
