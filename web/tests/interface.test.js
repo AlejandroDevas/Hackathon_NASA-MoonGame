@@ -3,6 +3,7 @@ import { setLocale } from '../src/i18n.js';
 import { DEFAULT_THRESHOLDS } from '../src/metrics/scenario.js';
 import { createStore } from '../src/state.js';
 import es from '../src/strings/es.json';
+import { TEAM } from '../src/team.js';
 import { ICON_NAMES, icon } from '../src/ui/icons.js';
 import { mountInterface } from '../src/ui/interface.js';
 import { formatMoment, yearMarks } from '../src/ui/playbar.js';
@@ -126,10 +127,30 @@ describe('top bar', () => {
     q('locale').value = 'en';
     q('locale').dispatchEvent(new Event('change', { bubbles: true }));
     expect(document.documentElement.lang).toBe('en');
-    expect(document.querySelector('.topbar h1').textContent).toBe('Lunar Landing Site Navigator');
+    expect(document.querySelector('.topbar h1').textContent).toBe('Inside Moon 153');
     expect(q('menu-toggle').textContent).toContain('Menu');
     expect(q('play-toggle').getAttribute('aria-label')).toBe('Play');
     expect(q('panel-toggle').textContent).toContain('Planner');
+  });
+});
+
+describe('team credits', () => {
+  test('the planner footer names the team, in alphabetical order by surname, and follows the language', () => {
+    const { drawer } = setup();
+    const line = drawer.querySelector('.app-team');
+    expect(line.textContent).toBe(
+      'Equipo: Israel Alejandro Calvario Mena · Gerardo Andrés Galindo Aparicio · Jessica Betzania Texis Juárez',
+    );
+    expect(TEAM.map((name) => name.split(' ').slice(-2).join(' '))).toEqual(['Calvario Mena', 'Galindo Aparicio', 'Texis Juárez']);
+    q('locale').value = 'en';
+    q('locale').dispatchEvent(new Event('change', { bubbles: true }));
+    expect(drawer.querySelector('.app-team').textContent.startsWith('Team: ')).toBe(true);
+  });
+
+  test('the footer is inside the drawer, which starts closed, so the names are not prominent', () => {
+    const { drawer } = setup();
+    expect(drawer.classList.contains('open')).toBe(false);
+    expect(drawer.contains(drawer.querySelector('.app-team'))).toBe(true);
   });
 });
 

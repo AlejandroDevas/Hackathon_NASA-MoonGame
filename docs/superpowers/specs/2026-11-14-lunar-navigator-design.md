@@ -1,4 +1,4 @@
-# Lunar Landing Site Navigator — Diseño
+# Inside Moon 153 (navegador de sitios de aterrizaje lunar) — Diseño
 
 Fecha: 2026-11-14 · Estado: **implementado (M0–M4 y extras); ver §10 y el [README](../../../README.md)**. Este documento conserva el diseño original; lo que cambió después está en §10.
 Reto: NASA Space Apps 2026, "CLPS Lunar Mission Browser" (enunciado oficial pegado por el equipo).
@@ -74,6 +74,8 @@ Corre sobre `ephemeris.bin` + `horizon.json`, sin servidor.
 
 ### 5.3 Panel (HTML/CSS, encima de la escena 3D)
 
+> Diseño original. La interfaz actual (escena a pantalla completa, barra superior, reproductor inferior y planificador como cajón) está en §10 y en el [README](../../../README.md#interfaz).
+
 - Selector de sitio y de fecha/hora, con línea de tiempo y botón de animación.
 - Tarjetas de métricas con las cuentas atrás del ocaso solar y terrestre muy visibles.
 - Gráfica de elevación de Sol y Tierra contra el horizonte (uPlot).
@@ -124,7 +126,8 @@ Resumen de cómo quedó respecto a este diseño. El detalle vigente está en el 
 **Cambió respecto al diseño**
 - **Tierra:** §5.4 decía «esfera con textura»; hoy usa la imagen *Blue Marble: Next Generation* de NASA (con nubes procedurales y giro según la hora y la fase de la Luna).
 - **Modelos 3D:** el rover es el GLB del Perseverance (NASA/JPL) y el módulo de aterrizaje el GLB del Apolo (NASA 3D Resources), cada uno con un modelo procedural de respaldo. Ninguno es el vehículo de CLPS ni de Artemis.
-- **Límite de pendiente:** por sitio y calculado al cargar (15° a 35°), no un 25° fijo (ver el diseño del M2).
+- **Interfaz:** en vez de un panel fijo a la derecha, la escena 3D ocupa toda la pantalla, con una barra superior (nombre, idioma, selector de sitio, cuatro botones de la vista y un menú con Planificador, Análisis y Comparar) y un reproductor inferior (saltos, reproducir/pausa, línea de tiempo sobre todo el rango y velocidad). El panel de §5.3 pasó a ser un cajón que empieza cerrado; ver [Reglas de diseño](../../diseno-interfaz.md).
+- **Límite de pendiente:** por sitio (15° a 35°), no un 25° fijo; se precalcula con `npm run plan-starts` y se guarda en `start.json` (la app lo recalcula si falta; ver el diseño del M2).
 - **Carga:** las efemérides y el horizonte de los cinco sitios se cargan al arrancar; el terreno (con su mapa de tonos y la salida precalculada del rover, `start.json`) de cada sitio solo al elegirlo.
 - **Rendimiento:** terreno por bloques con nivel de detalle, modelos NASA fusionados por material, sombras y fotogramas solo cuando cambian algo, y resolución adaptable; ver «Rendimiento» en el README.
 - **Navegador:** el 3D usa `WebGLRenderer`; no se usa WebGPU. Las métricas se calculan con código propio sobre los datos precalculados, sin librerías de efemérides en el navegador.
@@ -141,4 +144,4 @@ Resumen de cómo quedó respecto a este diseño. El detalle vigente está en el 
 
 **Sigue siendo cierto**
 - Los puntos de observación son centros de DEM, no posiciones de aterrizaje (§3, coordenadas sin verificar contra una fuente oficial).
-- Móvil: no se rompe, pero no se optimizó.
+- Móvil: la barra superior pasa a dos filas y la inferior a dos, pero el 3D no se optimizó específicamente para móviles.

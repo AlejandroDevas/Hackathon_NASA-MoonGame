@@ -1,6 +1,7 @@
 {
-  "app.title": "Lunar Landing Site Navigator",
-  "app.kicker": "CLPS · lunar south pole · 2026–2030",
+  "app.title": "Inside Moon 153",
+  "app.kicker": "Lunar landing sites · CLPS · 2026–2030",
+  "app.team": "Team",
   "range.warning": "That date is outside the data; adjusted to {limit}.",
   "card.sunEl": "Sun elevation",
   "card.earthEl": "Earth elevation",

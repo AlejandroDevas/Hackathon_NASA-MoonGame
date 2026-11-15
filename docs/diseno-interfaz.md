@@ -1,4 +1,4 @@
-# Reglas de diseño — Lunar Landing Site Navigator
+# Reglas de diseño — Inside Moon 153
 
 ## Propósito
 

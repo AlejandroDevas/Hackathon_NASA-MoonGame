@@ -1,6 +1,6 @@
-# Lunar Landing Site Navigator
+# Inside Moon 153
 
-Herramienta web para evaluar un sitio y una fecha de aterrizaje en el polo sur lunar, y un pequeño juego 3D para recorrer esos sitios. Proyecto para el NASA Space Apps Challenge 2026 (reto "CLPS Lunar Mission Browser").
+*Navegador de sitios de aterrizaje lunar.* Herramienta web para evaluar un sitio y una fecha de aterrizaje en el polo sur lunar, y un pequeño juego 3D para recorrer esos sitios. Proyecto para el NASA Space Apps Challenge 2026 (reto "CLPS Lunar Mission Browser").
 
 Responde a la pregunta de planificación —¿qué sitio y qué fecha dan mejor luz y mejor visibilidad de la Tierra?— con la posición del Sol y de la Tierra respecto al **horizonte real del terreno**, y deja explorar el lugar en 3D con un rover.
 
@@ -164,6 +164,16 @@ NASA no respalda este proyecto. Los modelos y las imágenes de NASA se usan seg�
 
 Citar para la topografía: Barker, M. K. et al. (2021), *Improved LOLA Elevation Maps for South Pole Landing Sites: Error Estimates and Their Impact on Illumination Conditions*, Planetary and Space Science 203, 105119, [doi:10.1016/j.pss.2020.105119](https://doi.org/10.1016/j.pss.2020.105119). Las efemérides están validadas en `data-pipeline/VALIDATION.md` (elevación y acimut, dos semanas de 2026 y 2030, en el sitio real y en (0, 0)).
 
+## Equipo
+
+En orden alfabético por apellido:
+
+- Israel Alejandro Calvario Mena
+- Gerardo Andrés Galindo Aparicio
+- Jessica Betzania Texis Juárez
+
+En la página, los nombres aparecen discretos al final del planificador (menú → Planificador) y en la etiqueta `author` del HTML. Salen de un único archivo, `web/src/team.js`.
+
 ## Límites conocidos (léelos antes de usar los números)
 
 - **El punto de observación es el centro del DEM de cada región, no una posición de aterrizaje concreta.** Las coordenadas salen de la extensión del GeoTIFF (ver `coordinates_source` en `data-pipeline/config/sites.json`). Un punto concreto del borde puede ver la Tierra o el Sol muy distinto: en Shackleton, por ejemplo, la próxima salida de la Tierra puede estar a más de dos años por la pared del cráter al sur.
@@ -174,7 +184,7 @@ Citar para la topografía: Barker, M. K. et al. (2021), *Improved LOLA Elevation
 - El semáforo compara la elevación del Sol con el horizonte *geométrico* (0° por defecto), así que un Sol visible sobre terreno bajo puede marcarse "por debajo del mínimo".
 - Datos de 2026-01-01 a 2030-12-31, paso de 1 hora. Fuera de ese rango la fecha se ajusta al límite y se avisa.
 - **Escena 3D:** las sombras cubren todo el recorte (5 km de lado, 2,5 km de radio); más allá hay una silueta oscura sin iluminar calculada con el horizonte del observador en el centro del sitio, así que desde otro punto es solo aproximada. El rover no tiene físicas (sigue la altura del mapa) y las rocas y el polvo son solo visuales. La escena muestra solo el escenario A.
-- **Horizonte del robot frente al del panel:** las métricas del panel son para el centro del sitio; desde otro punto del terreno el Sol puede quedar tapado aunque el panel diga que es visible.
+- **Horizonte del robot frente al del planificador:** las métricas del planificador son para el centro del sitio; desde otro punto del terreno el Sol puede quedar tapado aunque el panel diga que es visible.
 - **Modelos y texturas:** el rover es el de Marte y el módulo es el histórico de Apolo; son referencias visuales, no los vehículos de CLPS o Artemis. El grano del suelo y las nubes son procedurales, y los continentes de la Tierra de respaldo, dibujados a mano.
 - **La Tierra:** su giro usa la fase media de la Luna y deja el eje vertical; no es una vista astronómica exacta de qué cara mira a la Luna.
 - **Límite de pendiente:** se precalcula (`start.json`, ver más abajo) con una búsqueda de ruta que exige 2° menos que el límite del robot y comprueba la pendiente cada 2,5 m a lo largo de cada tramo; si ni 45° sirve, la escena lo avisa y muestra el cartel desde el punto central. Que exista ruta no garantiza que sea fácil, y el DEM está interpolado en un ~90 %.
@@ -189,4 +199,4 @@ Citar para la topografía: Barker, M. K. et al. (2021), *Improved LOLA Elevation
 - Un modelo de rover lunar: NASA 3D Resources no ofrece un LRV en GLB, y el rover actual es el de Marte.
 - Inclinar el eje de la Tierra y usar la fase real de la Luna de las efemérides.
 - Coordenadas de aterrizaje concretas en vez del centro del DEM, y más regiones.
-- Partir el JavaScript en bloques (hoy es un solo paquete de unos 730 kB) y precargar los terrenos de los sitios que faltan.
+- Partir el JavaScript en bloques (hoy es un solo paquete de unos 755 kB, 208 kB comprimido) y precargar los terrenos de los sitios que faltan.

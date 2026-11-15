@@ -1,5 +1,6 @@
 import { t } from '../i18n.js';
 import { evaluateScenario, viability } from '../metrics/scenario.js';
+import { TEAM } from '../team.js';
 import { renderDiff } from './compare.js';
 import { clampTime, renderControls } from './controls.js';
 import { renderScenarioCard } from './scenarioCard.js';
@@ -139,7 +140,9 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
       grid.append(section);
       views[slot] = createView(slot, section);
     }
-    root.append(grid, el('footer', 'app-footer', t('app.attribution')));
+    const footer = el('footer', 'app-footer');
+    footer.append(el('p', 'app-attribution', t('app.attribution')), el('p', 'app-team', `${t('app.team')}: ${TEAM.join(' · ')}`));
+    root.append(grid, footer);
   }
 
   /** Open or close the drawer; closed, it is taken out of the tab order and hidden from screen readers. */
