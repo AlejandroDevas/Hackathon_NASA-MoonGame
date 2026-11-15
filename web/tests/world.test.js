@@ -175,9 +175,30 @@ describe('world look and shadow lift', () => {
 });
 
 describe('the Earth in the sky', () => {
-  test('is blue (the real colour of the planet, not a grey ball that reads as another Moon)', () => {
-    const { r, g, b } = createWorld(loadTinySite()).earth.material.color;
+  test('is blue overall (the real colour of the planet, not a grey ball that reads as another Moon)', () => {
+    const earth = createWorld(loadTinySite()).earth;
+    expect(earth.material.map).not.toBeNull();
+    const { data } = earth.material.map.image;
+    let r = 0;
+    let g = 0;
+    let b = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      r += data[i];
+      g += data[i + 1];
+      b += data[i + 2];
+    }
     expect(b).toBeGreaterThan(r);
     expect(b).toBeGreaterThan(g);
+  });
+
+  test('turns with the time so the sub-lunar longitude faces the observer', () => {
+    const world = createWorld(loadTinySite());
+    const sky = { sun: { azDeg: 90, elDeg: 10 }, earth: { azDeg: 180, elDeg: 5 } };
+    world.updateSky(sky); // no time: keeps its rotation
+    expect(world.earth.rotation.y).toBe(0);
+    world.updateSky(sky, Date.UTC(2027, 0, 1, 12));
+    const a = world.earth.rotation.y;
+    world.updateSky(sky, Date.UTC(2027, 0, 1, 18));
+    expect(world.earth.rotation.y).not.toBeCloseTo(a, 3);
   });
 });

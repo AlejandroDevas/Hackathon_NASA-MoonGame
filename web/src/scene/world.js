@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { directionFromAzEl } from './sky.js';
 import { gridToScene, heightAt } from './terrainData.js';
+import { earthYaw, subLunarLongitudeDeg } from './earthView.js';
+import { createEarthTexture } from './earthTexture.js';
 import { createGlowTexture } from './glow.js';
 import { createRegolithTexture } from './regolith.js';
 import { buildTerrainGeometry } from './terrainMesh.js';
@@ -165,21 +167,24 @@ export function createWorld(site) {
   scene.add(sunGlow);
 
   const earth = new THREE.Mesh(
-    new THREE.SphereGeometry(BODY_DISTANCE_M * Math.tan(EARTH_RADIUS_DEG * RAD), 32, 32),
-    new THREE.MeshStandardMaterial({ color: 0x3a6fb0, roughness: 1, metalness: 0 }),
+    new THREE.SphereGeometry(BODY_DISTANCE_M * Math.tan(EARTH_RADIUS_DEG * RAD), 48, 32),
+    // stylised oceans, continents and clouds (see earthTexture.js); the Sun's light gives the phase
+    new THREE.MeshStandardMaterial({ map: createEarthTexture(), roughness: 1, metalness: 0 }),
   );
   earth.name = 'earth';
   earth.castShadow = false;
   earth.receiveShadow = false;
   scene.add(earth);
 
-  function updateSky(sky) {
+  /** Move the Sun and Earth; `timeMs` (optional) turns the Earth so the right continents face the Moon. */
+  function updateSky(sky, timeMs = null) {
     const s = directionFromAzEl(sky.sun.azDeg, sky.sun.elDeg);
     sun.position.set(s.x, s.y, s.z).multiplyScalar(lightDistance);
     sunDisc.position.set(s.x, s.y, s.z).multiplyScalar(BODY_DISTANCE_M);
     sunGlow.position.copy(sunDisc.position);
     const e = directionFromAzEl(sky.earth.azDeg, sky.earth.elDeg);
     earth.position.set(e.x, e.y, e.z).multiplyScalar(BODY_DISTANCE_M);
+    if (timeMs !== null) earth.rotation.y = earthYaw(e, subLunarLongitudeDeg(timeMs));
   }
 
   /** Free the GPU resources of this world (call when switching to another site). */

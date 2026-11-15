@@ -5,6 +5,7 @@ import { getLocale, t } from '../i18n.js';
 import { horizonAt } from '../metrics/visibility.js';
 import { siteOverview } from '../metrics/overview.js';
 import { createInput } from './input.js';
+import { createDust } from './dust.js';
 import { buildLander, disposeObject, footingAt, loadApolloModule } from './lander.js';
 import { buildPoiMarkers, createPoiTags } from './poiTags.js';
 import { findPois } from './pois.js';
@@ -99,6 +100,8 @@ export function mountScene(container, store, sites, audioCue = null) {
   const rockCache = new Map(); // site id -> boulder placements (positions only; meshes are rebuilt per world)
   let pois = [];
   let loadingId = null; // site whose terrain is being fetched
+  let dust = null; // ballistic dust thrown up by the rover, one per world
+  let lastPos = null; // robot position in the previous frame, to know how far it drove
   let slopeLimitDeg = MAX_SLOPE_DEG;
   let siteId = null;
   let site = null;
@@ -127,6 +130,9 @@ export function mountScene(container, store, sites, audioCue = null) {
     world = createWorld(site);
     world.setShadowLift(Boolean(store.get().shadowLift));
     world.scene.add(robotMesh);
+    dust = createDust();
+    world.scene.add(dust.mesh);
+    lastPos = null;
     if (!poiCache.has(id)) poiCache.set(id, findPois(site.terrain));
     pois = poiCache.get(id);
     world.scene.add(buildPoiMarkers(pois, groundAt));
@@ -187,7 +193,7 @@ export function mountScene(container, store, sites, audioCue = null) {
 
   function applySky() {
     lastSky = skyAt(site, store.get().scenarios.A.timeMs);
-    world.updateSky(lastSky);
+    world.updateSky(lastSky, store.get().scenarios.A.timeMs);
     renderSkyReadout();
   }
 
@@ -281,6 +287,18 @@ export function mountScene(container, store, sites, audioCue = null) {
     robotMesh.quaternion.copy(tilt).multiply(yaw);
   }
 
+  /** Grains from the rear wheels while the rover drives; they fly on lunar-gravity parabolas. */
+  function throwDust(dt) {
+    if (dt > 0 && lastPos) {
+      const dx = robot.x - lastPos.x;
+      const dz = robot.z - lastPos.z;
+      const moved = Math.hypot(dx, dz);
+      if (moved > 0.001 && moved < 6) dust.emitFromWheels(robot, moved, dx / moved, dz / moved, moved / dt);
+    }
+    lastPos = { x: robot.x, z: robot.z };
+    dust.update(dt, (x, z) => heightAt(site.terrain, x, z));
+  }
+
   function frame(timestamp) {
     frameHandle = requestAnimationFrame(frame);
     const dt = lastTime === null ? 0 : Math.min((timestamp - lastTime) / 1000, MAX_FRAME_S);
@@ -288,6 +306,7 @@ export function mountScene(container, store, sites, audioCue = null) {
 
     robot = stepRobot(robot, input.read(), site.terrain, dt, slopeLimitDeg);
     placeRobotMesh();
+    throwDust(dt);
 
     const k = 1 - Math.exp(-6 * dt);
     if (viewMode === 'free' && controls) {
