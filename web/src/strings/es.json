@@ -38,7 +38,7 @@
   "app.compareOff": "Quitar comparación",
   "app.soundOn": "Activar sonido",
   "app.soundOff": "Silenciar sonido",
-  "app.attribution": "Datos: NASA LRO/LOLA (PGDA) y efemérides SPICE vía Skyfield. Barker et al. 2021. El horizonte combina el DEM local de 5 m con el DEM regional de 80 m disponible.",
+  "app.attribution": "Datos: NASA LRO/LOLA (PGDA) y efemérides SPICE vía Skyfield. Barker et al. 2021. Imágenes: LROC NAC (NASA/GSFC/Arizona State University). El horizonte combina el DEM local de 5 m con el DEM regional de 80 m disponible.",
   "app.loadError": "No se pudieron cargar los datos: {message}",
   "speed.1h": "1 h/s",
   "speed.6h": "6 h/s",
@@ -129,5 +129,7 @@
   "analysis.csv": "Descargar CSV",
   "analysis.dataNote": "Todos los números usan el horizonte del centro de cada región, no el de un punto de aterrizaje, y el Sol cuenta como visible cuando su borde superior supera el horizonte.",
   "scene.loading": "Cargando el terreno de este sitio…",
-  "card.onDate": "≈ {date} (UTC)"
+  "card.onDate": "≈ {date} (UTC)",
+  "app.lroc": "Imagen LROC",
+  "app.lrocNone": "Este sitio queda fuera del mosaico LROC (termina en 85,5° S)."
 }

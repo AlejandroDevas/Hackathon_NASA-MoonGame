@@ -130,6 +130,7 @@ export function mountScene(container, store, sites, audioCue = null) {
     site = sites.get(id);
     world = createWorld(site);
     world.setShadowLift(Boolean(store.get().shadowLift));
+    world.setLrocTexture(store.get().lrocTexture !== false);
     world.scene.add(robotMesh);
     dust = createDust();
     world.scene.add(dust.mesh);
@@ -355,6 +356,7 @@ export function mountScene(container, store, sites, audioCue = null) {
     else if (nextId !== siteId && next?.info?.terrain) showWhenLoaded(next, nextId);
     else if (next?.terrain) applySky();
     world.setShadowLift(Boolean(state.shadowLift));
+    world.setLrocTexture(state.lrocTexture !== false);
     if (state.viewMode !== viewMode) setViewMode(state.viewMode);
     if (state.locale !== locale) {
       locale = state.locale;

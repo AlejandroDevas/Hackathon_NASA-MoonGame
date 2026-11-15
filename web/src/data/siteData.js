@@ -37,6 +37,25 @@ async function fetchOk(url) {
 }
 
 /**
+ * The LROC tone map of a site (see data-pipeline/scripts/make_albedo.py): one byte per terrain
+ * cell, 100 = the same tone as the surroundings, 0 = no information. Optional: a site without
+ * one, or one that cannot be fetched, simply keeps the plain terrain colour.
+ * @returns {Promise<Uint8Array|null>}
+ */
+async function loadAlbedo(site) {
+  const meta = site.info.albedo;
+  if (!meta) return null;
+  try {
+    const buffer = await (await fetchOk(`${site.dir}/${meta.file}`)).arrayBuffer();
+    if (buffer.byteLength !== meta.rows * meta.cols) throw new Error(`${meta.file}: expected ${meta.rows * meta.cols} bytes, got ${buffer.byteLength}`);
+    return new Uint8Array(buffer);
+  } catch (error) {
+    console.warn(`LROC tone map of ${site.info.id} could not be loaded.`, error);
+    return null;
+  }
+}
+
+/**
  * Load the terrain height map of a site the first time it is needed (about 2 MB).
  * Resolves to the terrain, or null for a site without one; repeated calls share one request.
  * @returns {Promise<object|null>}
@@ -47,8 +66,10 @@ export function ensureTerrain(site) {
   if (!site.terrainPromise) {
     site.terrainPromise = fetchOk(`${site.dir}/${site.info.terrain.file}`)
       .then((response) => response.arrayBuffer())
-      .then((buffer) => {
-        site.terrain = parseTerrain(buffer, site.info.terrain);
+      .then(async (buffer) => {
+        const terrain = parseTerrain(buffer, site.info.terrain);
+        site.albedo = await loadAlbedo(site);
+        site.terrain = terrain;
         return site.terrain;
       })
       .catch((error) => {
@@ -77,6 +98,7 @@ export async function loadSite(baseUrl, id, { terrain: withTerrain = true } = {}
     horizon: Float32Array.from(horizonJson.elevation_deg),
     eph: parseEphemeris(buffer, info.ephemeris),
     terrain: null,
+    albedo: null,
     terrainPromise: null,
   };
   if (withTerrain) await ensureTerrain(site);

@@ -43,6 +43,7 @@ async function main() {
       playing: false,
       soundEnabled: false,
       shadowLift: false,
+      lrocTexture: true,
       viewMode: 'follow',
       locale: 'es',
     });

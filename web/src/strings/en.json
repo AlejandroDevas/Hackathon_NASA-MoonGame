@@ -38,7 +38,7 @@
   "app.compareOff": "Remove comparison",
   "app.soundOn": "Enable sound",
   "app.soundOff": "Mute sound",
-  "app.attribution": "Data: NASA LRO/LOLA (PGDA) and SPICE ephemerides via Skyfield. Barker et al. 2021. The horizon combines the local 5 m DEM with the available regional 80 m DEM.",
+  "app.attribution": "Data: NASA LRO/LOLA (PGDA) and SPICE ephemerides via Skyfield. Barker et al. 2021. Images: LROC NAC (NASA/GSFC/Arizona State University). The horizon combines the local 5 m DEM with the available regional 80 m DEM.",
   "app.loadError": "Could not load the data: {message}",
   "speed.1h": "1 h/s",
   "speed.6h": "6 h/s",
@@ -129,5 +129,7 @@
   "analysis.csv": "Download CSV",
   "analysis.dataNote": "All numbers use the horizon at each region's centre, not at a specific landing point, and the Sun counts as visible when its upper limb clears the horizon.",
   "scene.loading": "Loading this site's terrain…",
-  "card.onDate": "≈ {date} (UTC)"
+  "card.onDate": "≈ {date} (UTC)",
+  "app.lroc": "LROC image",
+  "app.lrocNone": "This site is outside the LROC mosaic (it ends at 85.5° S)."
 }

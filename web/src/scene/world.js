@@ -5,7 +5,7 @@ import { earthYaw, subLunarLongitudeDeg } from './earthView.js';
 import { createCloudTexture, createEarthTexture } from './earthTexture.js';
 import { createGlowTexture } from './glow.js';
 import { createRegolithTexture } from './regolith.js';
-import { buildTerrainGeometry } from './terrainMesh.js';
+import { ALBEDO_STRENGTH, applyAlbedoStrength, buildTerrainGeometry } from './terrainMesh.js';
 
 const RAD = Math.PI / 180;
 const SUN_LIGHT_DISTANCE_M = 6_000; // keeps the shadow frustum tight around the 5 km terrain
@@ -105,7 +105,7 @@ export function createWorld(site) {
   const regolith = createRegolithTexture();
   const terrainMesh = new THREE.Mesh(
     // Use every 5 m LOLA sample rather than thinning the scene to 10 m.
-    buildTerrainGeometry(site.terrain, 1),
+    buildTerrainGeometry(site.terrain, 1, site.albedo ?? null),
     new THREE.MeshStandardMaterial({
       vertexColors: true,
       color: 0xaaa79e,
@@ -216,10 +216,15 @@ export function createWorld(site) {
     sun.shadow.map?.dispose();
   }
 
+  /** Show (true) or hide the LROC tone variation on the terrain; no effect on a site without a tone map. */
+  function setLrocTexture(on) {
+    applyAlbedoStrength(terrainMesh.geometry, on ? ALBEDO_STRENGTH : 0);
+  }
+
   /** Visual aid only: lighten the shadows without touching any calculation. */
   function setShadowLift(on) {
     ambient.intensity = on ? ambientBase * SHADOW_LIFT_FACTOR : ambientBase;
   }
 
-  return { scene, sun, sunDisc, sunGlow, earth, terrainMesh, ambient, updateSky, setEarthMap, setShadowLift, eyeY, dispose };
+  return { scene, sun, sunDisc, sunGlow, earth, terrainMesh, ambient, updateSky, setEarthMap, setLrocTexture, setShadowLift, eyeY, dispose };
 }

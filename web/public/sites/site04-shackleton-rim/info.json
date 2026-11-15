@@ -35,6 +35,7 @@
     "https://ntrs.nasa.gov/citations/20120013758",
     "https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-Moon/",
     "https://pgda.gsfc.nasa.gov/products/78",
+    "https://data.lroc.im-ldi.com/lroc/view_rdr/NAC_POLE_SOUTH",
     "https://doi.org/10.1016/j.pss.2020.105119"
   ],
   "ephemeris": {
@@ -78,6 +79,18 @@
           300000
         ]
       }
+    ]
+  },
+  "albedo": {
+    "file": "albedo.bin",
+    "rows": 1001,
+    "cols": 1001,
+    "coverage": 1.0,
+    "source": "LROC NAC south-pole mosaic (Wagner et al. 2015), browse tiles, relative local tone of the sunlit parts",
+    "neutral": 100,
+    "tiles": [
+      "NAC_POLE_P892S1350",
+      "NAC_POLE_P892S2250"
     ]
   }
 }

@@ -37,6 +37,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
   let soundButton = null;
   let shadowButton = null;
   let viewButton = null;
+  let lrocButton = null;
   const analysis = createAnalysis(store, siteList, sites);
 
   function createView(slot, section) {
@@ -159,6 +160,10 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
     shadowButton.dataset.testid = 'shadow-lift-toggle';
     shadowButton.addEventListener('click', () => store.set({ shadowLift: !store.get().shadowLift }));
 
+    lrocButton = el('button');
+    lrocButton.dataset.testid = 'lroc-toggle';
+    lrocButton.addEventListener('click', () => store.set({ lrocTexture: store.get().lrocTexture === false }));
+
     viewButton = el('button');
     viewButton.dataset.testid = 'view-toggle';
     viewButton.addEventListener('click', () => store.set({ viewMode: store.get().viewMode === 'free' ? 'follow' : 'free' }));
@@ -174,7 +179,7 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
       store.set({ scenarios: { A: scenarios.A, B: scenarios.B ? null : { ...scenarios.A } } });
     });
 
-    tools.append(locale, speed, playButton, soundButton, shadowButton, viewButton, analysisButton, compare);
+    tools.append(locale, speed, playButton, soundButton, shadowButton, lrocButton, viewButton, analysisButton, compare);
     header.append(tools);
     return header;
   }
@@ -210,6 +215,11 @@ export function mountPanel(root, store, siteList, sites, { renderTimeline, audio
     soundButton.setAttribute('aria-label', state.soundEnabled ? t('app.soundOff') : t('app.soundOn'));
     shadowButton.textContent = t('app.shadowLift');
     shadowButton.setAttribute('aria-pressed', String(Boolean(state.shadowLift)));
+    const hasLroc = Boolean(sites.get(state.scenarios.A.siteId)?.info.albedo);
+    lrocButton.textContent = t('app.lroc');
+    lrocButton.disabled = !hasLroc;
+    lrocButton.title = hasLroc ? '' : t('app.lrocNone');
+    lrocButton.setAttribute('aria-pressed', String(hasLroc && state.lrocTexture !== false));
     viewButton.textContent = state.viewMode === 'free' ? t('app.viewFollow') : t('app.viewFree');
     viewButton.setAttribute('aria-pressed', String(state.viewMode === 'free'));
     const metricsA = views.A.update(state);
