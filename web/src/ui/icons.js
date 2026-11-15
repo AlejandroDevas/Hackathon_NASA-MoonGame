@@ -15,6 +15,7 @@ const PATHS = {
   shadow: '<circle cx="12" cy="12" r="4"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/>',
   image: '<rect x="4" y="5" width="16" height="14" rx="1.5"/><path d="m4 16 4.5-4.5 3.5 3.5 3-3 5 5"/><circle cx="9" cy="9.5" r="1.2"/>',
   orbit: '<circle cx="12" cy="12" r="2.5"/><path d="M4 12a8 4 0 1 0 16 0 8 4 0 1 0-16 0" transform="rotate(-25 12 12)"/>',
+  gamepad: '<path d="M7.5 8h9a4.5 4.5 0 0 1 4.4 5.4l-.7 3.2a2 2 0 0 1-3.4 1l-1.9-2.1h-4.6l-1.9 2.1a2 2 0 0 1-3.4-1l-.7-3.2A4.5 4.5 0 0 1 7.5 8z"/><path d="M8 10.5v3M6.5 12h3"/><circle cx="15.5" cy="11.2" r=".6"/><circle cx="17.5" cy="13" r=".6"/>',
   speed: '<path d="M4.5 16a8 8 0 1 1 15 0"/><path d="m12 13 4-4"/>',
 };
 

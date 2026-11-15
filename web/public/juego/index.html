@@ -1,0 +1,2441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Misión Rescate Lunar: Polo Sur (Roblox NASA Edition)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #030712;
+            font-family: 'Fredoka', sans-serif;
+            color: #f8fafc;
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Estilo de botones Roblox */
+        .roblox-btn {
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.45);
+        }
+        .roblox-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.45);
+        }
+        /* Deslizador orbital personalizado */
+        input[type=range].orbital-slider {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range].orbital-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 22px;
+            width: 22px;
+            border-radius: 50%;
+            background: #facc15;
+            border: 3px solid #0f172a;
+            cursor: pointer;
+            margin-top: -8px;
+            box-shadow: 0 0 12px rgba(250, 204, 21, 0.9);
+        }
+        input[type=range].orbital-slider::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: linear-gradient(90deg, #1e293b 0%, #eab308 50%, #38bdf8 100%);
+            border-radius: 999px;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.85; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.04); }
+        }
+        .pulse-glow {
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen relative">
+
+    <!-- CANVAS PRINCIPAL DEL JUEGO -->
+    <canvas id="gameCanvas" class="block w-full h-full"></canvas>
+
+    <!-- PANTALLA DE HISTORIA INICIAL (CINEMÁTICA NASA CLPS) -->
+    <div id="storyScreen" class="fixed inset-0 z-50 bg-slate-950/95 flex items-center justify-center p-4">
+        <div class="max-w-2xl w-full bg-slate-900 border-2 border-sky-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+            <div class="flex items-center justify-between gap-2 mb-4">
+                <a id="btnBackHomeStory" href="../index.html" class="roblox-btn px-3 py-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-600 whitespace-nowrap" title="Volver a la página principal de Inside Moon 153">
+                    ← Volver a Inside Moon 153
+                </a>
+                <span id="storyStepBadge" class="mono text-xs text-slate-400">1 / 3</span>
+            </div>
+            <div class="mb-3">
+                <span class="px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 text-xs font-bold tracking-wider uppercase border border-sky-500/30">
+                    🚀 NASA Space Apps 2026 • Polo Sur Lunar
+                </span>
+            </div>
+
+            <!-- Ilustración SVG dinámica de la escena -->
+            <div id="storyIllustration" class="w-full h-44 sm:h-52 rounded-2xl bg-slate-950 border border-slate-800 mb-5 flex items-center justify-center overflow-hidden relative">
+            </div>
+
+            <h2 id="storyTitle" class="text-2xl sm:text-3xl font-bold text-amber-400 mb-2">
+                Emergencia en el Polo Sur Lunar
+            </h2>
+            <p id="storyText" class="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
+                El módulo comercial CLPS de la NASA ha aterrizado cerca del Cráter Shackleton, una región rica en hielo de agua pero con iluminación extrema. Las montañas bloquean el Sol y la línea de visión directa con la Tierra.
+            </p>
+
+            <div class="flex items-center justify-between gap-3">
+                <button id="btnSkipStory" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm roblox-btn">
+                    Saltar Intro
+                </button>
+                <button id="btnNextStory" class="px-6 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-base roblox-btn flex items-center gap-2">
+                    <span>Siguiente</span>
+                    <span>➔</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HUD SUPERIOR (VIDAS, PUNTOS, TELEMETRÍA SOLAR/TIERRA Y BOTONES) -->
+    <div id="hudTop" class="hidden fixed top-3 left-3 right-3 z-20 flex flex-wrap items-start justify-between gap-2 pointer-events-none">
+        <!-- Izquierda: Vidas, Puntos y Botones -->
+        <div class="flex flex-wrap items-center gap-2 pointer-events-auto">
+            <!-- Vidas y Puntos -->
+            <div class="bg-slate-900/90 border border-slate-700/80 backdrop-blur-md px-3.5 py-2 rounded-2xl flex items-center gap-3 shadow-lg">
+                <div id="hudHearts" class="text-lg tracking-wider" title="Vidas restantes">❤️❤️❤️</div>
+                <div class="h-5 w-px bg-slate-700"></div>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-amber-400 text-lg">⭐</span>
+                    <div>
+                        <div class="text-[10px] uppercase text-slate-400 leading-none">Puntos NASA</div>
+                        <div id="hudPoints" class="mono font-bold text-amber-300 text-sm sm:text-base leading-tight">0</div>
+                    </div>
+                </div>
+                <div class="h-5 w-px bg-slate-700"></div>
+                <div>
+                    <div class="text-[10px] uppercase text-slate-400 leading-none">Misiones</div>
+                    <div id="hudMissionsCount" class="mono font-bold text-emerald-400 text-sm sm:text-base leading-tight">0 / 5</div>
+                </div>
+            </div>
+
+            <!-- Botón para volver a la página principal (Inside Moon 153) -->
+            <a id="btnBackHome" href="../index.html" class="roblox-btn bg-slate-800 hover:bg-slate-700 text-white font-bold px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm flex items-center gap-1.5 border border-slate-600" title="Volver a la página principal de Inside Moon 153">
+                <span>←</span>
+                <span>Inside Moon 153</span>
+            </a>
+
+            <!-- Botón Tienda Roblox -->
+            <button id="btnOpenShop" class="roblox-btn bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm flex items-center gap-1.5">
+                <span>🛒</span>
+                <span>Tienda</span>
+            </button>
+
+            <!-- Botón Comparador Sitios NASA -->
+            <button id="btnOpenPlanner" class="roblox-btn bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm flex items-center gap-1.5">
+                <span>🛰️</span>
+                <span>Sitios NASA</span>
+            </button>
+
+            <!-- Botón Radio Comunicador NASA (Se desbloquea tras recibir el radio) -->
+            <button id="btnOpenRadio" class="hidden roblox-btn bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-3.5 py-2.5 rounded-2xl text-xs sm:text-sm flex items-center gap-1.5 pulse-glow" title="Contactar tripulación por Radio NASA [C]">
+                <span>📻</span>
+                <span>Radio [C]</span>
+            </button>
+
+            <!-- Botón Audio -->
+            <button id="btnToggleAudio" class="roblox-btn bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2.5 rounded-2xl text-sm border border-slate-700" title="Activar/Silenciar Música y Sonidos">
+                🔊
+            </button>
+        </div>
+
+        <!-- Derecha: Telemetría en Tiempo Real (Sol y Tierra) -->
+        <div class="bg-slate-900/90 border border-slate-700/80 backdrop-blur-md px-3.5 py-2 rounded-2xl flex items-center gap-3 shadow-lg pointer-events-auto">
+            <div>
+                <div class="text-[10px] uppercase text-slate-400 leading-none">☀️ Elevación Solar</div>
+                <div id="hudSunAngle" class="mono font-bold text-amber-300 text-xs sm:text-sm">+10.5° (62%)</div>
+                <div id="hudSunCountdown" class="text-[10px] text-slate-400">Luz activa • 14h</div>
+            </div>
+            <div class="h-7 w-px bg-slate-700"></div>
+            <div>
+                <div class="text-[10px] uppercase text-slate-400 leading-none">🌍 Enlace Tierra</div>
+                <div id="hudEarthSignal" class="font-bold text-xs sm:text-sm text-emerald-400">🟢 Directa</div>
+                <div id="hudEarthCountdown" class="text-[10px] text-slate-400">Ventana DSN: Activa</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BANNER DE OBJETIVO ACTIVO -->
+    <div id="objectiveBanner" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-20 pointer-events-none max-w-md w-[92%]">
+        <div class="bg-slate-900/90 border border-amber-400/50 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl text-center">
+            <div class="text-[10px] uppercase tracking-wider text-amber-400 font-bold">🎯 Objetivo Actual</div>
+            <div id="objectiveText" class="text-xs sm:text-sm text-white font-medium">
+                Habla con la Comandante Sara dentro de la Nave CLPS
+            </div>
+        </div>
+    </div>
+
+    <!-- CONSOLA ORBITAL INFERIOR (LÍNEA DE TIEMPO LUNAR + MINI HORIZONTE) -->
+    <div id="orbitalConsole" class="hidden fixed bottom-3 left-3 z-20 bg-slate-900/90 border border-slate-700/80 backdrop-blur-md p-3 rounded-2xl shadow-xl w-72 sm:w-80">
+        <div class="flex items-center justify-between mb-1">
+            <span class="text-[11px] font-bold text-sky-300 uppercase tracking-wider">⏱️ Línea de Tiempo Orbital</span>
+            <span id="lunarDateLabel" class="mono text-[10px] text-amber-300">15 Oct 2026</span>
+        </div>
+        <input id="timeSlider" type="range" min="0" max="100" value="25" class="w-full orbital-slider my-1.5">
+        <div class="flex items-center justify-between gap-2 mt-1">
+            <canvas id="horizonMiniCanvas" width="140" height="44" class="rounded-lg border border-slate-800 bg-slate-950"></canvas>
+            <div class="text-[10px] text-slate-300 leading-tight flex-1">
+                <div>☀️ Sol: <span id="miniSunStatus" class="font-bold text-amber-300">Visible</span></div>
+                <div>🌍 Tierra: <span id="miniEarthStatus" class="font-bold text-sky-300">Visible</span></div>
+                <div id="weaponBadge" class="mt-0.5 text-emerald-400 font-bold">Pulso Solar [Espacio]</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MINIMAPA / RADAR TOPOGRÁFICO INFERIOR DERECHO -->
+    <div id="radarPanel" class="hidden fixed bottom-3 right-3 z-20 bg-slate-900/90 border border-slate-700/80 backdrop-blur-md p-2 rounded-2xl shadow-xl">
+        <div class="text-[9px] uppercase text-center text-slate-400 font-bold mb-1">Radar Polo Sur</div>
+        <canvas id="radarCanvas" width="120" height="120" class="rounded-xl bg-slate-950 border border-slate-800"></canvas>
+    </div>
+
+    <!-- CONTROLES TÁCTILES PARA MÓVIL / TABLET -->
+    <div id="mobileControls" class="hidden fixed bottom-36 left-3 right-3 z-20 flex justify-between items-end pointer-events-none md:hidden">
+        <!-- Cruceta de movimiento -->
+        <div class="grid grid-cols-3 gap-1.5 w-32 h-32 pointer-events-auto">
+            <div></div>
+            <button data-key="ArrowUp" class="mobile-btn bg-slate-800/85 border border-slate-600 rounded-xl flex items-center justify-center text-lg active:bg-sky-500">▲</button>
+            <div></div>
+            <button data-key="ArrowLeft" class="mobile-btn bg-slate-800/85 border border-slate-600 rounded-xl flex items-center justify-center text-lg active:bg-sky-500">◀</button>
+            <button data-key="ArrowDown" class="mobile-btn bg-slate-800/85 border border-slate-600 rounded-xl flex items-center justify-center text-lg active:bg-sky-500">▼</button>
+            <button data-key="ArrowRight" class="mobile-btn bg-slate-800/85 border border-slate-600 rounded-xl flex items-center justify-center text-lg active:bg-sky-500">▶</button>
+        </div>
+        <!-- Botones de Acción -->
+        <div id="mobileActions" class="flex flex-col gap-2 pointer-events-auto">
+            <button id="btnMobileInteract" class="bg-amber-500 text-slate-950 font-bold px-3.5 py-2.5 rounded-xl text-xs shadow-lg">Hablar / Usar [E]</button>
+            <button id="btnMobileJump" class="bg-sky-500 text-slate-950 font-bold px-3.5 py-2.5 rounded-xl text-xs shadow-lg">Saltar [Shift]</button>
+            <button id="btnMobileRover" class="bg-indigo-500 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs shadow-lg">Rover [R]</button>
+            <button id="btnMobilePulse" class="bg-rose-500 text-white font-bold px-3.5 py-2.5 rounded-xl text-xs shadow-lg">Disparar [Espacio]</button>
+        </div>
+    </div>
+
+    <!-- DIÁLOGO CINEMATOGRÁFICO A PANTALLA COMPLETA CON ASTRONAUTAS -->
+    <div id="dialogueModal" class="hidden fixed inset-0 z-40 bg-slate-950/90 backdrop-blur-md flex flex-col justify-between p-4 sm:p-6">
+        <div class="flex flex-wrap justify-between items-center gap-2 max-w-4xl w-full mx-auto">
+            <div class="flex items-center gap-2">
+                <span class="px-3 py-1 rounded-full bg-sky-500/20 border border-sky-400/40 text-sky-300 text-xs font-bold uppercase flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>📻 Canal Radio NASA • 2287.5 MHz</span>
+                </span>
+            </div>
+            <button id="btnCloseDialogueTop" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs font-bold roblox-btn">
+                Cortar Transmisión [ESC]
+            </button>
+        </div>
+
+        <!-- Selector rápido de frecuencia por Radio (cuando el jugador ya tiene el Radio NASA) -->
+        <div id="radioChannelsBar" class="hidden max-w-4xl w-full mx-auto mt-2 flex flex-wrap justify-center gap-1.5"></div>
+
+        <!-- Retrato animado en alta definición del astronauta -->
+        <div class="flex-1 flex items-center justify-center my-2">
+            <div class="relative">
+                <canvas id="portraitCanvas" width="250" height="250" class="rounded-3xl border-2 border-sky-400/60 bg-slate-900 shadow-[0_0_35px_rgba(56,189,248,0.28)]"></canvas>
+                <div class="absolute -bottom-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-slate-950 border border-emerald-400/60 text-[10px] mono text-emerald-300 font-bold whitespace-nowrap">
+                    SEÑAL ESTABLE • CLPS-DSN
+                </div>
+            </div>
+        </div>
+
+        <!-- Cuadro de texto inferior mejorado estilo Terminal de Radio NASA -->
+        <div class="max-w-4xl w-full mx-auto bg-gradient-to-b from-slate-900 to-slate-950 border-2 border-amber-400/80 rounded-3xl p-5 sm:p-6 shadow-[0_0_40px_rgba(250,204,21,0.2)]">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-xl">
+                        👩‍🚀
+                    </div>
+                    <div>
+                        <h3 id="dialogueName" class="text-lg sm:text-2xl font-bold text-amber-400 leading-tight">Comandante Sara</h3>
+                        <div id="dialogueRole" class="text-xs text-sky-300 font-semibold uppercase tracking-wide">Jefa de Operaciones Solares</div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <!-- Ecualizador visual de voz -->
+                    <div id="voiceWaveBars" class="flex items-end gap-1 h-5 px-2">
+                        <span class="w-1 bg-emerald-400 rounded-full h-2 transition-all"></span>
+                        <span class="w-1 bg-emerald-400 rounded-full h-4 transition-all"></span>
+                        <span class="w-1 bg-emerald-400 rounded-full h-3 transition-all"></span>
+                        <span class="w-1 bg-emerald-400 rounded-full h-5 transition-all"></span>
+                        <span class="w-1 bg-emerald-400 rounded-full h-2 transition-all"></span>
+                    </div>
+                    <div id="dialogueRewardBadge" class="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-xs font-bold">
+                        Recompensa: +150 Pts
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caja interior del mensaje con efecto máquina de escribir -->
+            <div class="bg-slate-950/90 border border-slate-800/90 rounded-2xl p-4 mb-4 min-h-[4.8rem] flex items-center">
+                <p id="dialogueBody" class="text-slate-100 text-sm sm:text-base leading-relaxed font-medium">
+                    ...
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <button id="btnReplayVoice" class="px-3.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-sky-300 font-semibold text-xs sm:text-sm roblox-btn flex items-center gap-1.5">
+                    <span>🔊</span>
+                    <span>Repetir Mensaje</span>
+                </button>
+                <div class="flex flex-wrap justify-end gap-3">
+                    <button id="btnCancelDialogue" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm roblox-btn">
+                        Cerrar
+                    </button>
+                    <button id="btnAcceptMission" class="px-6 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm sm:text-base roblox-btn">
+                        ¡Aceptar Misión!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE INVESTIGACIÓN CIENTÍFICA EN BALIZAS DE CAMPO -->
+    <div id="researchModal" class="hidden fixed inset-0 z-40 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="max-w-lg w-full bg-slate-900 border-2 border-sky-400/50 rounded-3xl p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-3">
+                <span class="px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 text-xs font-bold">🔬 Telemetría de Campo NASA</span>
+                <button id="btnCloseResearch" class="px-3 py-1 rounded-lg bg-slate-800 text-slate-300 text-xs font-bold">✕</button>
+            </div>
+            <h3 id="researchTitle" class="text-xl font-bold text-amber-400 mb-2">Cráter Shackleton</h3>
+            <p id="researchBody" class="text-sm text-slate-300 leading-relaxed mb-4"></p>
+            <div id="researchStats" class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs mono text-sky-300 mb-4"></div>
+            <button id="btnClaimResearch" class="w-full roblox-btn bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-sm">
+                Registrar Datos (+75 Puntos)
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL DE RESCATE / REINICIO SI SE PIERDEN LAS 3 VIDAS -->
+    <div id="gameOverModal" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="max-w-lg w-full bg-slate-900 border-2 border-rose-500/60 rounded-3xl p-6 text-center shadow-2xl">
+            <div class="text-5xl mb-2">🚨</div>
+            <span class="px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-[11px] font-bold uppercase">Protocolo de Contingencia Lunar</span>
+            <h2 class="text-2xl font-bold text-rose-400 mt-2 mb-2">¡Señal Vital Perdida en la Penumbra!</h2>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-3">
+                Al quedarte sin energía vital en las sombras heladas del Polo Sur (-230 °C), los Acechadores de la Penumbra neutralizaron tu traje. Sin embargo, antes de perder conexión, tu traje envió su última telemetría a la Red de Espacio Profundo (DSN) de la NASA.
+            </p>
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-3.5 text-left text-xs text-slate-300 mb-5">
+                <div class="font-bold text-sky-400 mb-1">🛰️ ¿Qué es el programa CLPS de la NASA?</div>
+                <p class="leading-relaxed text-slate-400">
+                    <strong class="text-slate-200">CLPS (Commercial Lunar Payload Services)</strong> es la iniciativa oficial de la NASA mediante la cual contrata a empresas estadounidenses para enviar módulos de aterrizaje robóticos e instrumentos científicos a la Luna, preparando el terreno y los recursos para los astronautas de las misiones <strong class="text-amber-300">Artemis</strong>. Gracias a la carga útil del módulo CLPS, una unidad de recuperación automática rescató tu traje.
+                </p>
+            </div>
+            <button id="btnRespawn" class="w-full roblox-btn bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-2xl text-sm sm:text-base">
+                🔄 Reactivar Misión en el Módulo CLPS (3 Vidas)
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL FINAL DE VICTORIA (RESCATE COMPLETADO + GUÍA + INFO OFICIAL CLPS NASA) -->
+    <div id="victoryModal" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="max-w-2xl w-full bg-slate-900 border-2 border-emerald-400/70 rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(52,211,153,0.25)] max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-3">
+                <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold uppercase border border-emerald-400/40">
+                    🏆 ¡Misión Rescate Lunar Completada!
+                </span>
+                <span id="victoryFinalPoints" class="mono text-sm font-bold text-amber-300">0 Pts NASA</span>
+            </div>
+
+            <h2 class="text-2xl sm:text-3xl font-bold text-amber-400 mb-2">
+                ¡Has Asegurado el Polo Sur Lunar para Artemis!
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
+                Completaste las 5 misiones críticas de la tripulación: alineaste el reflector solar en el borde del Cráter Shackleton, restableciste la ventana de comunicación directa con la Tierra, confirmaste hielo de agua en sombra permanente, recuperaste la caja negra de Surveyor-X y encendiste la Torre Relé Orbital K-1.
+            </p>
+
+            <!-- Instrucciones paso a paso de cómo se llega al final -->
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 mb-4">
+                <h3 class="text-xs font-bold uppercase text-amber-400 mb-2">📋 Ruta Oficial para Completar el Rescate Lunar:</h3>
+                <ol class="list-decimal list-inside space-y-1 text-xs text-slate-300">
+                    <li><strong class="text-white">Paso 1 (Comandante Sara):</strong> Sal de la nave <span class="mono text-sky-300">[E]</span>, sigue la luz amarilla al <em>Reflector Pico Norte</em> y obtén la <strong>Pistola Fotónica</strong>.</li>
+                    <li><strong class="text-white">Paso 2 (Ingeniero Mateo):</strong> Ve a la <em>Antena Horizonte Sur</em> y ajusta la <strong>Línea de Tiempo Orbital</strong> hasta lograr enlace 🟢 Directo con la Tierra.</li>
+                    <li><strong class="text-white">Paso 3 (Dra. Elena):</strong> Explora el <em>Cráter de Hielo PSR-4</em> para analizar el agua congelada protegida por espectros.</li>
+                    <li><strong class="text-white">Paso 4 (Especialista Lucas):</strong> Conduce el <em>Carrito Rover Lunar</em> <span class="mono text-sky-300">[R]</span> hasta la <em>Sonda Surveyor-X</em> al sureste.</li>
+                    <li><strong class="text-white">Paso 5 (Dra. Valeria):</strong> Activa la <em>Torre Relé Orbital K-1</em> en la cresta noreste para sellar las comunicaciones del Polo Sur.</li>
+                </ol>
+            </div>
+
+            <!-- Información oficial de la NASA sobre CLPS -->
+            <div class="bg-sky-950/40 border border-sky-500/40 rounded-2xl p-4 mb-5">
+                <h3 class="text-xs font-bold uppercase text-sky-300 mb-1.5">🚀 Programa CLPS de la NASA (Commercial Lunar Payload Services)</h3>
+                <p class="text-xs text-slate-300 leading-relaxed mb-2">
+                    Según la <strong>NASA</strong>, <strong>CLPS</strong> permite a la agencia espacial adquirir servicios integrados de transporte comercial desde la Tierra hasta la superficie de la Luna. Empresas aeroespaciales privadas diseñan, construyen, lanzan y operan módulos de aterrizaje robóticos que llevan cargas útiles científicas y tecnológicas de la NASA.
+                </p>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Sus objetivos principales incluyen estudiar los recursos lunares (como el hielo de agua en el Polo Sur), probar tecnologías de navegación y comunicaciones, y reducir riesgos antes de la llegada de las tripulaciones humanas del programa <strong class="text-amber-300">Artemis</strong>.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-3">
+                <button id="btnContinueExplore" class="flex-1 roblox-btn bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3 rounded-2xl text-sm">
+                    🌕 Seguir Explorando la Luna
+                </button>
+                <button id="btnRestartFullGame" class="px-5 roblox-btn bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-sm border border-slate-700">
+                    🔄 Jugar de Nuevo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE TIENDA ROBLOX Y CONSTRUCCIÓN DE BASE -->
+    <div id="shopModal" class="hidden fixed inset-0 z-40 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="max-w-3xl w-full bg-slate-900 border-2 border-emerald-400/50 rounded-3xl p-6 shadow-2xl max-h-[88vh] flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-emerald-400">🛒 Tienda de Equipo NASA & Base CLPS</h3>
+                    <p class="text-xs text-slate-400">Invierte tus Puntos NASA para mejorar tu traje, armas y base lunar</p>
+                </div>
+                <button id="btnCloseShop" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold roblox-btn">
+                    Cerrar [ESC]
+                </button>
+            </div>
+            <div id="shopItemsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-y-auto pr-1"></div>
+        </div>
+    </div>
+
+    <!-- MODAL COMPARADOR DE SITIOS LUNARES Y COORDENADAS NASA -->
+    <div id="sitePlannerModal" class="hidden fixed inset-0 z-40 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="max-w-3xl w-full bg-slate-900 border-2 border-sky-400/50 rounded-3xl p-6 shadow-2xl max-h-[88vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-xl sm:text-2xl font-bold text-sky-400">🛰️ Comparador de Sitios del Polo Sur Lunar</h3>
+                    <p class="text-xs text-slate-400">Selecciona un sitio candidato Artemis/CLPS o simula coordenadas personalizadas</p>
+                </div>
+                <button id="btnClosePlanner" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold roblox-btn">
+                    Cerrar [ESC]
+                </button>
+            </div>
+            <div id="sitesComparisonGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5"></div>
+            <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">
+                <div class="text-xs font-bold text-amber-400 uppercase mb-2">🧭 Ingresar Coordenadas Lunares Personalizadas</div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex-1 min-w-[120px]">
+                        <label class="block text-[10px] text-slate-400 mb-1">Latitud (-90° a +90°)</label>
+                        <input id="customLatInput" type="number" step="0.1" value="-89.5" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-sm mono text-white">
+                    </div>
+                    <div class="flex-1 min-w-[120px]">
+                        <label class="block text-[10px] text-slate-400 mb-1">Longitud (-180° a +180°)</label>
+                        <input id="customLonInput" type="number" step="0.1" value="0.0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-sm mono text-white">
+                    </div>
+                    <button id="btnApplyCoords" class="roblox-btn bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm mt-4 sm:mt-4">
+                        Simular Órbita
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICACIÓN TOAST FLOTANTE -->
+    <div id="toastBanner" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-2xl bg-slate-900/95 border border-sky-400/50 text-sm font-bold shadow-2xl pointer-events-none transition-opacity duration-300">
+    </div>
+
+    <script>
+        // =========================================================================
+        // 1. MOTOR DE AUDIO SINTETIZADO (WEB AUDIO API - MÚSICA, VOCES Y EFECTOS)
+        // =========================================================================
+        class SpaceAudioEngine {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+                this.bgmTimer = null;
+                this.noteIndex = 0;
+            }
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioCtx();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+                if (!this.bgmTimer && !this.muted) {
+                    this.startAmbientMusic();
+                }
+            }
+            toggleMute() {
+                this.muted = !this.muted;
+                if (this.muted && this.bgmTimer) {
+                    clearInterval(this.bgmTimer);
+                    this.bgmTimer = null;
+                } else if (!this.muted) {
+                    this.init();
+                }
+                return this.muted;
+            }
+            playTone(freq, type = 'sine', duration = 0.15, vol = 0.12, slideTo = null) {
+                if (this.muted || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, now);
+                if (slideTo) {
+                    osc.frequency.exponentialRampToValueAtTime(slideTo, now + duration);
+                }
+                gain.gain.setValueAtTime(vol, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + duration);
+            }
+            playLaser() {
+                this.playTone(920, 'sawtooth', 0.18, 0.14, 180);
+                this.playTone(1350, 'sine', 0.12, 0.08, 320);
+            }
+            playPulse() {
+                this.playTone(300, 'triangle', 0.35, 0.16, 780);
+            }
+            playJump() {
+                this.playTone(210, 'sine', 0.25, 0.12, 520);
+            }
+            playStep() {
+                this.playTone(95 + Math.random() * 25, 'triangle', 0.06, 0.04, 55);
+            }
+            playMonsterGrowl() {
+                this.playTone(115, 'sawtooth', 0.32, 0.11, 52);
+            }
+            playHurt() {
+                this.playTone(180, 'sawtooth', 0.3, 0.2, 65);
+            }
+            playMissionComplete() {
+                const notes = [523.25, 659.25, 783.99, 1046.5];
+                notes.forEach((n, idx) => {
+                    setTimeout(() => this.playTone(n, 'triangle', 0.22, 0.14), idx * 95);
+                });
+            }
+            playAstronautVoice(pitchBase = 420) {
+                if (this.muted) return;
+                this.init();
+                // Pitido clásico de inicio de transmisión espacial (Roger Beep NASA)
+                this.playTone(1320, 'sine', 0.06, 0.09);
+                setTimeout(() => this.playTone(980, 'sine', 0.05, 0.07), 65);
+            }
+            playVoiceSyllable(pitchBase = 420) {
+                if (this.muted || !this.ctx) return;
+                const f = pitchBase + (Math.random() - 0.5) * 150;
+                this.playTone(f, 'triangle', 0.055, 0.065, f * 1.06);
+            }
+            playRadioEndBeep() {
+                if (this.muted || !this.ctx) return;
+                this.playTone(1550, 'sine', 0.07, 0.08);
+            }
+            startAmbientMusic() {
+                const scale = [220, 261.63, 329.63, 392.0, 440, 329.63, 293.66, 246.94];
+                this.bgmTimer = setInterval(() => {
+                    if (this.muted || !this.ctx) return;
+                    const note = scale[this.noteIndex % scale.length];
+                    this.playTone(note, 'sine', 0.9, 0.035);
+                    if (this.noteIndex % 4 === 0) {
+                        this.playTone(note / 2, 'triangle', 1.4, 0.03);
+                    }
+                    this.noteIndex++;
+                }, 950);
+            }
+        }
+        const sfx = new SpaceAudioEngine();
+
+        // =========================================================================
+        // 2. CONFIGURACIÓN DEL CANVAS Y TEXTURAS PROCEDURALES HD DE LA LUNA
+        // =========================================================================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const miniCanvas = document.getElementById('horizonMiniCanvas');
+        const miniCtx = miniCanvas.getContext('2d');
+        const radarCanvas = document.getElementById('radarCanvas');
+        const radarCtx = radarCanvas.getContext('2d');
+        const portraitCanvas = document.getElementById('portraitCanvas');
+        const portraitCtx = portraitCanvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let regolithPattern = null;
+        function buildHDTextures() {
+            const tex = document.createElement('canvas');
+            tex.width = 256;
+            tex.height = 256;
+            const tctx = tex.getContext('2d');
+
+            tctx.fillStyle = '#334155';
+            tctx.fillRect(0, 0, 256, 256);
+
+            // Grano de regolito lunar
+            for (let i = 0; i < 2400; i++) {
+                const x = Math.random() * 256;
+                const y = Math.random() * 256;
+                const shade = Math.random() > 0.5 ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.16)';
+                tctx.fillStyle = shade;
+                tctx.fillRect(x, y, 2, 2);
+            }
+            // Micro-cráteres con borde iluminado
+            for (let i = 0; i < 18; i++) {
+                const cx = Math.random() * 256;
+                const cy = Math.random() * 256;
+                const r = 4 + Math.random() * 12;
+                tctx.fillStyle = 'rgba(15, 23, 42, 0.25)';
+                tctx.beginPath();
+                tctx.arc(cx, cy, r, 0, Math.PI * 2);
+                tctx.fill();
+
+                tctx.strokeStyle = 'rgba(226, 232, 240, 0.12)';
+                tctx.lineWidth = 1.5;
+                tctx.beginPath();
+                tctx.arc(cx, cy, r, -0.4, 2.2);
+                tctx.stroke();
+            }
+            regolithPattern = ctx.createPattern(tex, 'repeat');
+        }
+        buildHDTextures();
+
+        // =========================================================================
+        // 3. ESTADO DEL JUEGO, SITIOS NASA, MISIONES, TIENDA Y ESTRUCTURAS
+        // =========================================================================
+        const WORLD_SIZE = 2600;
+        const SHIP_BOUNDS = { x: 240, y: 150, w: 660, h: 420 };
+        const airlockInterior = { x: SHIP_BOUNDS.x + SHIP_BOUNDS.w / 2, y: SHIP_BOUNDS.y + SHIP_BOUNDS.h - 24 };
+        const landerExterior = { x: 520, y: 520 };
+
+        const game = {
+            started: false,
+            paused: false,
+            scene: 'ship', // 'ship' | 'surface'
+            points: 0,
+            lunarTime: 25,
+            sunAngleRad: 0,
+            sunElevation: 10.5,
+            earthElevation: 8.2,
+            earthVisible: true,
+            activeSiteKey: 'shackleton',
+            activeMissionId: null,
+            completedMissions: new Set(),
+            hasRadio: false,
+            hasPhotonicPistol: false,
+            hasScannerUpgrade: false,
+            hasThermalSuit: false,
+            hasSolarTowerBuilt: false,
+            hasRelayTowerBuilt: false,
+            introHelpTriggered: false,
+            crisisTimer: 0,
+            crisisMessage: ''
+        };
+
+        const player = {
+            x: SHIP_BOUNDS.x + SHIP_BOUNDS.w / 2,
+            y: SHIP_BOUNDS.y + SHIP_BOUNDS.h / 2 + 65,
+            z: 0,
+            vz: 0,
+            speed: 4.2,
+            facing: 1,
+            aimAngle: 0,
+            walkCycle: 0,
+            stepTimer: 0,
+            lives: 3,
+            maxLives: 3,
+            invulnTimer: 0,
+            pulseCooldown: 0,
+            laserCooldown: 0,
+            pulseWave: 0
+        };
+
+        const camera = { x: 0, y: 0 };
+        const keys = {};
+
+        const lunarLandingSites = {
+            shackleton: {
+                name: 'Cráter Shackleton (Borde)',
+                lat: -89.5,
+                lon: 0.0,
+                sunHours: '86% Luz Anual',
+                earthComm: 'Intermitente (14d)',
+                iceProximity: 'Muy Alta (PSR)',
+                desc: 'Pico de luz casi eterna junto a cráteres en sombra permanente con hielo de agua.'
+            },
+            malapert: {
+                name: 'Macizo Malapert',
+                lat: -86.0,
+                lon: 12.9,
+                sunHours: '78% Luz Anual',
+                earthComm: 'Excelente (Directa)',
+                iceProximity: 'Moderada',
+                desc: 'Elevación de 5 km con vista privilegiada hacia la Tierra para enlace directo DSN.'
+            },
+            connecting: {
+                name: 'Cresta de Conexión',
+                lat: -89.4,
+                lon: -137.0,
+                sunHours: '82% Luz Anual',
+                earthComm: 'Buena',
+                iceProximity: 'Alta (Artemis III)',
+                desc: 'Sitio candidato principal de Artemis III que equilibra energía solar y hielo.'
+            }
+        };
+
+        const npcs = [
+            {
+                id: 'sara',
+                missionId: 'm1_solar',
+                name: 'Comandante Sara',
+                role: 'Jefa de Operaciones Solares',
+                x: SHIP_BOUNDS.x + 150,
+                y: SHIP_BOUNDS.y + 135,
+                suitColor: '#f8fafc',
+                accentColor: '#facc15',
+                voicePitch: 510,
+                targetX: 1120,
+                targetY: 460,
+                targetLabel: 'Reflector Pico Norte',
+                rewardPoints: 150,
+                introDialogue: '¡Por fin llegas! Nuestros paneles están al 12% porque las crestas del Polo Sur tapan el Sol. Sal por la escotilla inferior, sigue la luz amarilla hasta el Reflector del Pico Norte y alinéalo. ¡Al volver te daré nuestra Pistola Fotónica NASA!',
+                activeDialogue: 'Sigue el camino de luz amarilla hasta el Reflector del Pico Norte en la superficie lunar y presiona [E] cerca de él.',
+                doneDialogue: '¡Increíble trabajo! La energía de la base ha subido. Como prometí, aquí tienes la Pistola Fotónica NASA para defenderte de los Acechadores de la Penumbra.'
+            },
+            {
+                id: 'mateo',
+                missionId: 'm2_comm',
+                name: 'Ingeniero Mateo',
+                role: 'Especialista de Comunicaciones DSN',
+                x: SHIP_BOUNDS.x + 510,
+                y: SHIP_BOUNDS.y + 135,
+                suitColor: '#e2e8f0',
+                accentColor: '#38bdf8',
+                voicePitch: 360,
+                targetX: 1680,
+                targetY: 880,
+                targetLabel: 'Antena Horizonte Sur',
+                rewardPoints: 200,
+                introDialogue: 'Perdimos enlace directo con Houston porque la Tierra bajó tras el horizonte lunar. Ve a la Antena del Horizonte Sur y usa la Línea de Tiempo Orbital inferior hasta que el indicador de Tierra marque 🟢 Directa.',
+                activeDialogue: 'Ve a la Antena del Horizonte Sur y mueve el deslizador orbital inferior hasta que la Tierra sea visible.',
+                doneDialogue: '¡Señal restablecida con la Red de Espacio Profundo (DSN)! Houston ya recibe nuestra telemetría en vivo.'
+            },
+            {
+                id: 'elena',
+                missionId: 'm3_ice',
+                name: 'Dra. Elena',
+                role: 'Geóloga Planetaria CLPS',
+                x: SHIP_BOUNDS.x + 150,
+                y: SHIP_BOUNDS.y + 290,
+                suitColor: '#f1f5f9',
+                accentColor: '#34d399',
+                voicePitch: 480,
+                targetX: 980,
+                targetY: 1480,
+                targetLabel: 'Cráter de Hielo PSR-4',
+                rewardPoints: 250,
+                introDialogue: 'Detectamos hielo de agua en el fondo de un cráter en sombra permanente (PSR-4), vital para producir oxígeno y combustible. Ve allí con precaución: los Espectros Criogénicos protegen la zona.',
+                activeDialogue: 'Dirígete al Cráter de Hielo PSR-4 siguiendo la guía dorada para extraer la muestra criogénica.',
+                doneDialogue: '¡Muestras de hielo confirmadas! Con esto podremos sostener una base permanente en el Polo Sur.'
+            },
+            {
+                id: 'lucas',
+                missionId: 'm4_wreck',
+                name: 'Especialista Lucas',
+                role: 'Ingeniero de Carga Útil',
+                x: SHIP_BOUNDS.x + 510,
+                y: SHIP_BOUNDS.y + 290,
+                suitColor: '#e2e8f0',
+                accentColor: '#fb923c',
+                voicePitch: 390,
+                targetX: 2050,
+                targetY: 1620,
+                targetLabel: 'Sonda Estrellada Surveyor-X',
+                rewardPoints: 300,
+                introDialogue: 'Una sonda precursora cayó cerca de los domos abandonados al sureste. Necesitamos recuperar su caja negra de efemérides. Puedes usar el Carrito Rover Lunar [R] estacionado afuera para llegar más rápido.',
+                activeDialogue: 'Conduce el Rover Lunar [R] hacia la Sonda Estrellada Surveyor-X al sureste y recupera su módulo de datos.',
+                doneDialogue: '¡Caja negra recuperada! Estos datos topográficos salvarán futuras misiones Artemis.'
+            },
+            {
+                id: 'valeria',
+                missionId: 'm5_beacon',
+                name: 'Dra. Valeria',
+                role: 'Directora de Rescate Artemis',
+                x: SHIP_BOUNDS.x + 330,
+                y: SHIP_BOUNDS.y + 115,
+                suitColor: '#ffffff',
+                accentColor: '#c084fc',
+                voicePitch: 530,
+                targetX: 1950,
+                targetY: 420,
+                targetLabel: 'Torre Relé Orbital K-1',
+                rewardPoints: 400,
+                introDialogue: 'Es hora de activar la Torre Relé Orbital K-1 en la cresta noreste. Con ella garantizaremos comunicación continua incluso durante los eclipses de Tierra. ¡Ten cuidado, la zona está llena de monstruos!',
+                activeDialogue: 'Llega hasta la Torre Relé Orbital K-1 al noreste y activa el transmisor principal.',
+                doneDialogue: '¡Misión Cumplida! El Polo Sur Lunar ahora es seguro para la exploración humana. ¡Eres un Héroe de la NASA!'
+            }
+        ];
+
+        // Mini sitios en el mapa (Casas/Domos, Torres, Naves Estrelladas y Guaridas)
+        const lunarStructures = [
+            { type: 'dome', name: 'Domo Hábitat Alpha', x: 860, y: 880, radius: 65 },
+            { type: 'dome', name: 'Estación Criogénica Beta', x: 1450, y: 1320, radius: 65 },
+            { type: 'tower', name: 'Torre de Relé DSN-01', x: 1320, y: 360, radius: 45 },
+            { type: 'tower', name: 'Torre Repetidora K-1', x: 1950, y: 420, radius: 45 },
+            { type: 'wreck', name: 'Módulo Estrellado Surveyor-X', x: 2050, y: 1620, radius: 75 },
+            { type: 'wreck', name: 'Cápsula Carga CLPS-02', x: 640, y: 1850, radius: 75 },
+            { type: 'lair', name: 'Guarida Cráter Oscuro', x: 1580, y: 640, radius: 70 },
+            { type: 'lair', name: 'Fosa de Penumbra Sur', x: 1220, y: 1820, radius: 70 }
+        ];
+
+        // Balizas azules de investigación científica
+        const researchNodes = [
+            {
+                id: 'rn1',
+                x: 820,
+                y: 420,
+                title: 'Sensor de Ángulo Solar Rasante',
+                body: 'En el Polo Sur de la Luna, el Sol nunca sube más de unos pocos grados sobre el horizonte, proyectando sombras alargadas.',
+                stats: 'Elevación Máxima: +1.5° a +14.0° • Cráteres en Sombra Permanente (PSR)',
+                claimed: false
+            },
+            {
+                id: 'rn2',
+                x: 1460,
+                y: 960,
+                title: 'Repetidor de Línea de Visión Terrestre',
+                body: 'Debido a la libración lunar, la Tierra sube y baja sobre el horizonte cada mes, cortando las comunicaciones directas.',
+                stats: 'Ventana DSN Directa: ~14 días terrestres por ciclo lunar',
+                claimed: false
+            },
+            {
+                id: 'rn3',
+                x: 780,
+                y: 1350,
+                title: 'Espectrómetro de Hielo de Agua',
+                body: 'Las temperaturas en los cráteres sin luz solar caen por debajo de -230 °C, atrapando hielo de agua milenario.',
+                stats: 'Temperatura: 40 K (-233 °C) • Recurso crítico ISRU',
+                claimed: false
+            }
+        ];
+
+        // Carrito Rover Lunar conducible
+        const lunarRover = {
+            x: 680,
+            y: 540,
+            angle: 0,
+            speed: 0,
+            driven: false,
+            tracks: []
+        };
+
+        // Enemigos Lunares (Acechadores de la Penumbra y Espectros Criogénicos)
+        const monsters = [
+            { id: 1, name: 'Acechador de Penumbra', type: 'shadow', x: 1080, y: 520, homeX: 1080, homeY: 520, hp: 60, maxHp: 60, speed: 2.35, color: '#a855f7', respawnTimer: 0 },
+            { id: 2, name: 'Acechador de Horizonte', type: 'shadow', x: 1620, y: 820, homeX: 1620, homeY: 820, hp: 70, maxHp: 70, speed: 2.45, color: '#ec4899', respawnTimer: 0 },
+            { id: 3, name: 'Espectro Criogénico', type: 'cryo', x: 1020, y: 1420, homeX: 1020, homeY: 1420, hp: 80, maxHp: 80, speed: 2.15, color: '#38bdf8', respawnTimer: 0 },
+            { id: 4, name: 'Guardián de Chatarra', type: 'shadow', x: 1980, y: 1560, homeX: 1980, homeY: 1560, hp: 90, maxHp: 90, speed: 2.55, color: '#f43f5e', respawnTimer: 0 },
+            { id: 5, name: 'Coloso de Regolito', type: 'boss', x: 1880, y: 480, homeX: 1880, homeY: 480, hp: 140, maxHp: 140, speed: 2.0, color: '#f97316', respawnTimer: 0 },
+            { id: 6, name: 'Acechador del Domo', type: 'shadow', x: 900, y: 920, homeX: 900, homeY: 920, hp: 65, maxHp: 65, speed: 2.3, color: '#a855f7', respawnTimer: 0 }
+        ];
+
+        const projectiles = [];
+        const floatingTexts = [];
+        const craters = [];
+        for (let i = 0; i < 42; i++) {
+            craters.push({
+                x: 150 + Math.random() * (WORLD_SIZE - 300),
+                y: 150 + Math.random() * (WORLD_SIZE - 300),
+                r: 22 + Math.random() * 58
+            });
+        }
+
+        // =========================================================================
+        // 4. HISTORIA INICIAL (3 ESCENAS) Y DIÁLOGO AUTOMÁTICO DE AUXILIO
+        // =========================================================================
+        const storySlides = [
+            {
+                title: '1. Crisis en el Polo Sur Lunar (CLPS)',
+                text: 'La misión de carga útil lunar de la NASA ha aterrizado cerca del Cráter Shackleton. Aunque hay valioso hielo de agua, las montañas polares bloquean el Sol y la comunicación directa con la Tierra.',
+                svg: `<svg viewBox="0 0 400 160" class="w-full h-full">
+                    <rect width="400" height="160" fill="#020617"/>
+                    <circle cx="330" cy="38" r="22" fill="#38bdf8" opacity="0.85"/>
+                    <polygon points="0,160 70,85 150,135 240,70 330,130 400,90 400,160" fill="#1e293b"/>
+                    <rect x="175" y="95" width="34" height="28" rx="4" fill="#f8fafc" stroke="#facc15" stroke-width="2"/>
+                    <line x1="175" y1="123" x2="165" y2="138" stroke="#94a3b8" stroke-width="3"/>
+                    <line x1="209" y1="123" x2="219" y2="138" stroke="#94a3b8" stroke-width="3"/>
+                    <text x="200" y="30" fill="#facc15" font-size="12" text-anchor="middle" font-weight="bold">⚠️ BATERÍA CRÍTICA: 12% • SIN SEÑAL DSN</text>
+                </svg>`
+            },
+            {
+                title: '2. Amenazas en la Sombra Permanente',
+                text: 'En las zonas donde nunca llega la luz solar emergen los Acechadores de la Penumbra. Deberás usar tu Consola Orbital para cambiar la fecha lunar, iluminar el terreno y usar el Carrito Rover Lunar.',
+                svg: `<svg viewBox="0 0 400 160" class="w-full h-full">
+                    <rect width="400" height="160" fill="#090d16"/>
+                    <circle cx="65" cy="42" r="24" fill="#facc15"/>
+                    <polygon points="65,42 260,160 0,160" fill="#facc15" opacity="0.14"/>
+                    <rect x="275" y="88" width="44" height="44" rx="8" fill="#581c87" stroke="#f43f5e" stroke-width="2"/>
+                    <circle cx="288" cy="104" r="4" fill="#f43f5e"/>
+                    <circle cx="306" cy="104" r="4" fill="#f43f5e"/>
+                    <text x="200" y="30" fill="#38bdf8" font-size="12" text-anchor="middle" font-weight="bold">☀️ LA LUZ SOLAR DEBILITA A LOS MONSTRUOS</text>
+                </svg>`
+            },
+            {
+                title: '3. Tu Misión de Rescate NASA',
+                text: 'Entra en la Nave CLPS, habla con los astronautas para aceptar sus tareas, sigue la luz amarilla guía en la Luna, gana puntos y mejora tu equipo en la Tienda Roblox.',
+                svg: `<svg viewBox="0 0 400 160" class="w-full h-full">
+                    <rect width="400" height="160" fill="#020617"/>
+                    <rect x="110" y="75" width="32" height="48" rx="4" fill="#f8fafc"/>
+                    <rect x="115" y="82" width="22" height="14" rx="2" fill="#facc15"/>
+                    <path d="M 155 100 L 285 100" stroke="#facc15" stroke-width="5" stroke-dasharray="10,6"/>
+                    <polygon points="300,70 315,125 285,125" fill="#facc15" opacity="0.7"/>
+                    <text x="200" y="32" fill="#34d399" font-size="12" text-anchor="middle" font-weight="bold">🎯 SIGUE LA LUZ AMARILLA GUÍA EN CADA MISIÓN</text>
+                </svg>`
+            }
+        ];
+        let currentStoryIndex = 0;
+
+        function renderStorySlide() {
+            const slide = storySlides[currentStoryIndex];
+            document.getElementById('storyStepBadge').textContent = `${currentStoryIndex + 1} / ${storySlides.length}`;
+            document.getElementById('storyTitle').textContent = slide.title;
+            document.getElementById('storyText').textContent = slide.text;
+            document.getElementById('storyIllustration').innerHTML = slide.svg;
+            document.getElementById('btnNextStory').innerHTML = currentStoryIndex === storySlides.length - 1
+                ? '<span>¡Entrar a la Nave!</span><span>🚀</span>'
+                : '<span>Siguiente</span><span>➔</span>';
+        }
+        renderStorySlide();
+
+        document.getElementById('btnNextStory').addEventListener('click', () => {
+            sfx.init();
+            sfx.playTone(520, 'sine', 0.1);
+            if (currentStoryIndex < storySlides.length - 1) {
+                currentStoryIndex++;
+                renderStorySlide();
+            } else {
+                startGame();
+            }
+        });
+        document.getElementById('btnSkipStory').addEventListener('click', () => {
+            sfx.init();
+            startGame();
+        });
+
+        function startGame() {
+            document.getElementById('storyScreen').classList.add('hidden');
+            document.getElementById('hudTop').classList.remove('hidden');
+            document.getElementById('objectiveBanner').classList.remove('hidden');
+            document.getElementById('orbitalConsole').classList.remove('hidden');
+            document.getElementById('radarPanel').classList.remove('hidden');
+            document.getElementById('mobileControls').classList.remove('hidden');
+            game.started = true;
+            updateOrbitalParameters();
+            updateHUD();
+
+            // Escena inicial: La Comandante Sara pide ayuda al personaje principal
+            setTimeout(() => {
+                if (!game.introHelpTriggered) {
+                    game.introHelpTriggered = true;
+                    openDialogueModal(npcs[0], true);
+                }
+            }, 600);
+        }
+
+        // =========================================================================
+        // 5. CONTROLES DE TECLADO, RATÓN, MÓVIL Y CONDUCCIÓN DEL ROVER
+        // =========================================================================
+        window.addEventListener('keydown', (e) => {
+            keys[e.code] = true;
+            if (!game.started) return;
+            sfx.init();
+
+            if (e.code === 'KeyE') {
+                handleInteraction();
+            } else if (e.code === 'KeyC') {
+                openRadioCommunicator();
+            } else if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+                triggerJump();
+            } else if (e.code === 'KeyR') {
+                toggleDriveRover();
+            } else if (e.code === 'Space') {
+                if (!game.paused) {
+                    e.preventDefault();
+                    fireWeaponOrPulse();
+                }
+            } else if (e.code === 'Escape') {
+                closeDialogueModal();
+                closeShopModal();
+                closeSitePlannerModal();
+                closeResearchModal();
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            keys[e.code] = false;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const worldX = (e.clientX - rect.left) + camera.x;
+            const worldY = (e.clientY - rect.top) + camera.y;
+            player.aimAngle = Math.atan2(worldY - player.y, worldX - player.x);
+            if (Math.cos(player.aimAngle) !== 0) {
+                player.facing = Math.cos(player.aimAngle) >= 0 ? 1 : -1;
+            }
+        });
+
+        canvas.addEventListener('click', (e) => {
+            if (!game.started || game.paused) return;
+            sfx.init();
+            const rect = canvas.getBoundingClientRect();
+            const worldX = (e.clientX - rect.left) + camera.x;
+            const worldY = (e.clientY - rect.top) + camera.y;
+            player.aimAngle = Math.atan2(worldY - player.y, worldX - player.x);
+
+            if (game.scene === 'ship') {
+                handleInteraction();
+            } else if (game.scene === 'surface') {
+                if (Math.hypot(player.x - landerExterior.x, player.y - landerExterior.y) < 110) {
+                    handleInteraction();
+                } else {
+                    fireWeaponOrPulse();
+                }
+            }
+        });
+
+        // Controles táctiles móviles
+        document.querySelectorAll('.mobile-btn').forEach(btn => {
+            const key = btn.dataset.key;
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                keys[key] = true;
+            }, { passive: false });
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                keys[key] = false;
+            }, { passive: false });
+            btn.addEventListener('mousedown', () => { keys[key] = true; });
+            btn.addEventListener('mouseup', () => { keys[key] = false; });
+        });
+
+        document.getElementById('btnMobileInteract').addEventListener('click', handleInteraction);
+        document.getElementById('btnMobileJump').addEventListener('click', triggerJump);
+        document.getElementById('btnMobileRover').addEventListener('click', toggleDriveRover);
+        document.getElementById('btnMobilePulse').addEventListener('click', fireWeaponOrPulse);
+
+        function triggerJump() {
+            if (!game.started || game.paused || lunarRover.driven) return;
+            if (player.z === 0) {
+                player.vz = game.scene === 'surface' ? 9.5 : 7.0; // Salto lunar de baja gravedad
+                sfx.playJump();
+            }
+        }
+
+        function toggleDriveRover() {
+            if (!game.started || game.paused || game.scene !== 'surface') return;
+            sfx.init();
+            if (lunarRover.driven) {
+                lunarRover.driven = false;
+                lunarRover.speed = 0;
+                player.x = lunarRover.x;
+                player.y = lunarRover.y + 34;
+                sfx.playTone(320, 'sine', 0.14);
+                showToast("🚶 Bajaste del Carrito Rover Lunar.", "#94a3b8");
+            } else if (Math.hypot(player.x - lunarRover.x, player.y - lunarRover.y) < 95) {
+                lunarRover.driven = true;
+                player.z = 0;
+                player.vz = 0;
+                sfx.playTone(540, 'triangle', 0.18);
+                showToast("🚙 ¡Conduciendo Rover Lunar VIPER! Usa WASD / Flechas.", "#38bdf8");
+            } else {
+                showToast("Acércate al Rover Lunar dorado para subirte con [R]", "#facc15");
+            }
+        }
+
+        // =========================================================================
+        // 6. SIMULADOR DE EFEMÉRIDES ORBITALES (SOL Y TIERRA)
+        // =========================================================================
+        const timeSlider = document.getElementById('timeSlider');
+        timeSlider.addEventListener('input', (e) => {
+            game.lunarTime = parseFloat(e.target.value);
+            updateOrbitalParameters();
+        });
+
+        function updateOrbitalParameters() {
+            const t = game.lunarTime / 100;
+            const lunarDay = Math.floor(t * 29) + 1;
+            const dayNumber = 10 + lunarDay;
+            const monthName = dayNumber <= 31 ? 'Oct' : 'Nov';
+            const displayDay = dayNumber <= 31 ? dayNumber : dayNumber - 31;
+            document.getElementById('lunarDateLabel').textContent = `${String(displayDay).padStart(2, '0')} ${monthName} 2026 • Día Lunar ${String(lunarDay).padStart(2, '0')}`;
+
+            const site = lunarLandingSites[game.activeSiteKey] || lunarLandingSites.shackleton;
+            const isPolar = Math.abs(site.lat) > 75;
+
+            game.sunAngleRad = t * Math.PI * 2;
+            if (isPolar) {
+                game.sunElevation = Math.sin(game.sunAngleRad) * 14 + 3.5;
+                game.earthElevation = Math.cos(game.sunAngleRad * 0.85) * 10 + 2.5;
+            } else {
+                game.sunElevation = Math.max(-18, Math.sin(game.sunAngleRad) * 68);
+                game.earthElevation = 58 + Math.cos(game.sunAngleRad * 0.5) * 6;
+            }
+            if (game.hasRelayTowerBuilt) {
+                game.earthVisible = true;
+            } else {
+                game.earthVisible = game.earthElevation > 0;
+            }
+
+            const solarEff = Math.max(0, Math.min(100, Math.round(((game.sunElevation + 5) / 25) * 100)));
+            const sign = game.sunElevation >= 0 ? '+' : '';
+            document.getElementById('hudSunAngle').textContent = `${sign}${game.sunElevation.toFixed(1)}° (${solarEff}%)`;
+            document.getElementById('hudSunCountdown').textContent = game.sunElevation > 0
+                ? `Luz activa • ${Math.max(1, Math.round(game.sunElevation * 1.4))}h restantes`
+                : 'Sombra polar activa';
+
+            document.getElementById('hudEarthSignal').textContent = game.earthVisible ? '🟢 Directa' : '🔴 Bloqueada';
+            document.getElementById('hudEarthSignal').className = `font-bold text-xs sm:text-sm ${game.earthVisible ? 'text-emerald-400' : 'text-rose-400'}`;
+            document.getElementById('hudEarthCountdown').textContent = game.earthVisible ? 'Ventana DSN: Activa' : 'Oculta tras horizonte';
+
+            document.getElementById('miniSunStatus').textContent = game.sunElevation > 0 ? 'Visible' : 'Oculto';
+            document.getElementById('miniEarthStatus').textContent = game.earthVisible ? 'Visible' : 'Oculta';
+
+            drawHorizonMiniChart();
+        }
+
+        function drawHorizonMiniChart() {
+            const w = miniCanvas.width;
+            const h = miniCanvas.height;
+            miniCtx.clearRect(0, 0, w, h);
+            miniCtx.fillStyle = '#020617';
+            miniCtx.fillRect(0, 0, w, h);
+
+            const sunX = (game.lunarTime / 100) * w;
+            const sunY = h * 0.65 - (game.sunElevation / 35) * (h * 0.45);
+            miniCtx.fillStyle = '#facc15';
+            miniCtx.beginPath();
+            miniCtx.arc(sunX, Math.max(6, Math.min(h - 4, sunY)), 5, 0, Math.PI * 2);
+            miniCtx.fill();
+
+            const earthX = w * 0.72;
+            const earthY = h * 0.65 - (game.earthElevation / 35) * (h * 0.45);
+            miniCtx.fillStyle = '#38bdf8';
+            miniCtx.beginPath();
+            miniCtx.arc(earthX, Math.max(6, Math.min(h - 4, earthY)), 4, 0, Math.PI * 2);
+            miniCtx.fill();
+
+            miniCtx.fillStyle = '#334155';
+            miniCtx.beginPath();
+            miniCtx.moveTo(0, h);
+            miniCtx.lineTo(0, h * 0.72);
+            miniCtx.lineTo(w * 0.25, h * 0.65);
+            miniCtx.lineTo(w * 0.55, h * 0.76);
+            miniCtx.lineTo(w * 0.75, h * 0.62);
+            miniCtx.lineTo(w, h * 0.72);
+            miniCtx.lineTo(w, h);
+            miniCtx.fill();
+        }
+
+        // =========================================================================
+        // 7. INTERACCIÓN CON ASTRONAUTAS, MISIONES, BALIZAS Y ESCOTILLA
+        // =========================================================================
+        let selectedNpc = null;
+        let selectedResearchNode = null;
+        let typewriterTimer = null;
+        let currentFullDialogueText = '';
+
+        function openRadioCommunicator() {
+            if (!game.started) return;
+            if (!game.hasRadio) {
+                showToast("Habla primero con la Comandante Sara para recibir tu Radio NASA.", "#facc15");
+                return;
+            }
+            if (game.paused && !document.getElementById('dialogueModal').classList.contains('hidden')) {
+                closeDialogueModal();
+                return;
+            }
+            const targetNpc = npcs.find(n => n.missionId === game.activeMissionId)
+                || npcs.find(n => !game.completedMissions.has(n.missionId))
+                || npcs[0];
+            openDialogueModal(targetNpc, false);
+        }
+
+        document.getElementById('btnOpenRadio').addEventListener('click', openRadioCommunicator);
+
+        function startDialogueTypewriter(text, pitchBase) {
+            if (typewriterTimer) clearInterval(typewriterTimer);
+            currentFullDialogueText = text;
+            const bodyEl = document.getElementById('dialogueBody');
+            const bars = document.querySelectorAll('#voiceWaveBars span');
+            bodyEl.textContent = '';
+            let idx = 0;
+
+            sfx.playAstronautVoice(pitchBase);
+
+            typewriterTimer = setInterval(() => {
+                if (idx < text.length) {
+                    bodyEl.textContent += text[idx];
+                    if (idx % 3 === 0 && text[idx] !== ' ') {
+                        sfx.playVoiceSyllable(pitchBase);
+                        bars.forEach(b => {
+                            b.style.height = `${4 + Math.floor(Math.random() * 16)}px`;
+                        });
+                    }
+                    idx++;
+                } else {
+                    clearInterval(typewriterTimer);
+                    typewriterTimer = null;
+                    sfx.playRadioEndBeep();
+                    bars.forEach(b => { b.style.height = '4px'; });
+                }
+            }, 24);
+        }
+
+        function switchScene(newScene) {
+            game.scene = newScene;
+            if (newScene === 'surface') {
+                player.x = landerExterior.x;
+                player.y = landerExterior.y + 85;
+                sfx.playTone(380, 'triangle', 0.25, 0.12, 540);
+                showToast("🌕 Saliste a la superficie del Polo Sur Lunar.", "#facc15");
+            } else {
+                player.x = airlockInterior.x;
+                player.y = airlockInterior.y - 45;
+                sfx.playTone(540, 'triangle', 0.25, 0.12, 380);
+                showToast("🚀 Entraste a la cabina de la Nave CLPS.", "#38bdf8");
+            }
+        }
+
+        function handleInteraction() {
+            if (!game.started || game.paused) return;
+            sfx.init();
+
+            if (game.scene === 'ship') {
+                const holoX = SHIP_BOUNDS.x + SHIP_BOUNDS.w / 2;
+                const holoY = SHIP_BOUNDS.y + SHIP_BOUNDS.h / 2 + 12;
+                if (Math.hypot(player.x - holoX, player.y - holoY) < 76) {
+                    openSitePlannerModal();
+                    return;
+                }
+                for (const npc of npcs) {
+                    if (Math.hypot(player.x - npc.x, player.y - npc.y) < 88) {
+                        openDialogueModal(npc);
+                        return;
+                    }
+                }
+                if (Math.hypot(player.x - airlockInterior.x, player.y - airlockInterior.y) < 75) {
+                    switchScene('surface');
+                    return;
+                }
+                showToast("Acércate a un Astronauta (!) o a la Escotilla inferior y presiona [E]", "#94a3b8");
+            } else {
+                // Revisar objetivo de misión activa
+                const activeNpc = npcs.find(n => n.missionId === game.activeMissionId);
+                if (activeNpc && Math.hypot(player.x - activeNpc.targetX, player.y - activeNpc.targetY) < 95) {
+                    completeMission(activeNpc);
+                    return;
+                }
+                // Revisar Balizas de Investigación Científica
+                for (const node of researchNodes) {
+                    if (Math.hypot(player.x - node.x, player.y - node.y) < 85) {
+                        inspectResearchNode(node);
+                        return;
+                    }
+                }
+                // Volver a entrar a la Nave CLPS
+                if (Math.hypot(player.x - landerExterior.x, player.y - landerExterior.y) < 110) {
+                    switchScene('ship');
+                    return;
+                }
+                showToast("Sigue la Luz Amarilla Guía hasta el objetivo o acércate a una Baliza Azul [E]", "#38bdf8");
+            }
+        }
+
+        function completeMission(npc) {
+            if (game.completedMissions.has(npc.missionId)) return;
+
+            // Validación especial para la misión 2 (Enlace Tierra Directo)
+            if (npc.missionId === 'm2_comm' && !game.earthVisible) {
+                showToast("⚠️ ¡La Tierra está oculta! Mueve la Línea de Tiempo Orbital hasta que marque 🟢 Directa.", "#f43f5e");
+                return;
+            }
+
+            game.completedMissions.add(npc.missionId);
+            game.activeMissionId = null;
+
+            const bonus = game.hasScannerUpgrade ? npc.rewardPoints * 2 : npc.rewardPoints;
+            game.points += bonus;
+            sfx.playMissionComplete();
+            addFloatingText(player.x, player.y - 40, `+${bonus} Puntos NASA!`, '#facc15');
+
+            if (npc.missionId === 'm1_solar' && !game.hasPhotonicPistol) {
+                game.hasPhotonicPistol = true;
+                document.getElementById('weaponBadge').textContent = '🔫 Pistola Fotónica [Espacio / Clic]';
+                showToast("🔫 ¡Misión cumplida! Desbloqueaste la Pistola Fotónica NASA.", "#34d399");
+            } else {
+                showToast(`🎉 ¡Tarea '${npc.targetLabel}' completada! +${bonus} Puntos.`, "#34d399");
+            }
+
+            // Asignar automáticamente la siguiente misión disponible
+            const nextNpc = npcs.find(n => !game.completedMissions.has(n.missionId));
+            if (nextNpc) {
+                const stepNum = game.completedMissions.size + 1;
+                document.getElementById('objectiveText').textContent = `Paso ${stepNum}/5 hacia el final: Vuelve a la Nave CLPS o usa Radio [C] con ${nextNpc.name}`;
+            } else {
+                document.getElementById('objectiveText').textContent = '🏆 ¡5/5 Misiones Completadas! Rescate Lunar Exitoso.';
+                setTimeout(() => {
+                    game.paused = true;
+                    document.getElementById('victoryFinalPoints').textContent = `${game.points} Puntos NASA`;
+                    document.getElementById('victoryModal').classList.remove('hidden');
+                }, 900);
+            }
+            updateHUD();
+        }
+
+        // =========================================================================
+        // 8. DIÁLOGO CINEMATOGRÁFICO CON RETRATO ANIMADO DEL ASTRONAUTA
+        // =========================================================================
+        function drawAstronautPortrait(npc) {
+            const w = portraitCanvas.width;
+            const h = portraitCanvas.height;
+            portraitCtx.clearRect(0, 0, w, h);
+
+            // Fondo cabina espacial
+            const grad = portraitCtx.createLinearGradient(0, 0, 0, h);
+            grad.addColorStop(0, '#0f172a');
+            grad.addColorStop(1, '#1e293b');
+            portraitCtx.fillStyle = grad;
+            portraitCtx.fillRect(0, 0, w, h);
+
+            // Ventana con la Tierra y estrellas
+            portraitCtx.fillStyle = '#020617';
+            portraitCtx.fillRect(24, 20, w - 48, 110);
+            portraitCtx.strokeStyle = '#38bdf8';
+            portraitCtx.lineWidth = 2;
+            portraitCtx.strokeRect(24, 20, w - 48, 110);
+
+            portraitCtx.fillStyle = '#38bdf8';
+            portraitCtx.beginPath();
+            portraitCtx.arc(195, 58, 18, 0, Math.PI * 2);
+            portraitCtx.fill();
+
+            // Cuerpo estilo Roblox del Astronauta
+            portraitCtx.fillStyle = npc.suitColor;
+            portraitCtx.beginPath();
+            portraitCtx.roundRect(75, 148, 110, 95, 16);
+            portraitCtx.fill();
+
+            // Franja de especialidad NASA
+            portraitCtx.fillStyle = npc.accentColor;
+            portraitCtx.fillRect(75, 178, 110, 16);
+
+            // Parche NASA
+            portraitCtx.fillStyle = '#1d4ed8';
+            portraitCtx.beginPath();
+            portraitCtx.arc(105, 165, 10, 0, Math.PI * 2);
+            portraitCtx.fill();
+
+            // Cabeza y Casco Espacial
+            portraitCtx.fillStyle = '#f8fafc';
+            portraitCtx.beginPath();
+            portraitCtx.roundRect(82, 62, 96, 86, 24);
+            portraitCtx.fill();
+
+            // Visor dorado reflectante
+            const visorGrad = portraitCtx.createLinearGradient(92, 75, 168, 130);
+            visorGrad.addColorStop(0, '#f59e0b');
+            visorGrad.addColorStop(0.5, '#facc15');
+            visorGrad.addColorStop(1, '#b45309');
+            portraitCtx.fillStyle = visorGrad;
+            portraitCtx.beginPath();
+            portraitCtx.roundRect(92, 76, 76, 54, 14);
+            portraitCtx.fill();
+
+            // Brillo en el visor
+            portraitCtx.fillStyle = 'rgba(255,255,255,0.45)';
+            portraitCtx.beginPath();
+            portraitCtx.ellipse(112, 90, 14, 6, -0.3, 0, Math.PI * 2);
+            portraitCtx.fill();
+        }
+
+        function openDialogueModal(npc, isEmergencyIntro = false) {
+            selectedNpc = npc;
+            game.paused = true;
+            drawAstronautPortrait(npc);
+
+            // Entregar el Radio Comunicador NASA al iniciar contacto con la tripulación
+            if (!game.hasRadio) {
+                game.hasRadio = true;
+                document.getElementById('btnOpenRadio').classList.remove('hidden');
+                showToast("📻 ¡Recibiste el Radio Comunicador NASA! Presiona [C] cuando quieras.", "#38bdf8");
+            }
+
+            // Barra de canales de radio para cambiar entre astronautas
+            const channelsBar = document.getElementById('radioChannelsBar');
+            if (game.hasRadio) {
+                channelsBar.classList.remove('hidden');
+                channelsBar.innerHTML = '';
+                npcs.forEach(member => {
+                    const btn = document.createElement('button');
+                    const isCurrent = member.id === npc.id;
+                    const done = game.completedMissions.has(member.missionId);
+                    btn.className = `px-3 py-1 rounded-xl text-xs font-bold transition roblox-btn ${
+                        isCurrent
+                            ? 'bg-amber-400 text-slate-950'
+                            : 'bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                    }`;
+                    btn.textContent = `${done ? '✓' : '📻'} ${member.name.split(' ')[1] || member.name}`;
+                    btn.addEventListener('click', () => openDialogueModal(member, false));
+                    channelsBar.appendChild(btn);
+                });
+            }
+
+            document.getElementById('dialogueName').textContent = isEmergencyIntro
+                ? `🚨 ${npc.name} (¡Pidiendo Ayuda!)`
+                : npc.name;
+            document.getElementById('dialogueRole').textContent = npc.role;
+
+            const isDone = game.completedMissions.has(npc.missionId);
+            const isActive = game.activeMissionId === npc.missionId;
+            let textToSpeak = '';
+
+            if (isDone) {
+                textToSpeak = npc.doneDialogue;
+                document.getElementById('dialogueRewardBadge').textContent = '✅ Misión Completada';
+                document.getElementById('btnAcceptMission').classList.add('hidden');
+            } else if (isActive) {
+                textToSpeak = npc.activeDialogue;
+                document.getElementById('dialogueRewardBadge').textContent = `Objetivo: ${npc.targetLabel}`;
+                document.getElementById('btnAcceptMission').classList.add('hidden');
+            } else {
+                textToSpeak = isEmergencyIntro
+                    ? `¡Cadete, qué bueno verte! Toma este Radio Comunicador NASA [C] para mantenernos en contacto. ${npc.introDialogue}`
+                    : npc.introDialogue;
+                const extra = npc.missionId === 'm1_solar' ? ' + 🔫 Pistola Fotónica' : '';
+                document.getElementById('dialogueRewardBadge').textContent = `Recompensa: +${npc.rewardPoints} Pts${extra}`;
+                document.getElementById('btnAcceptMission').classList.remove('hidden');
+            }
+
+            document.getElementById('dialogueModal').classList.remove('hidden');
+            startDialogueTypewriter(textToSpeak, npc.voicePitch);
+        }
+
+        function closeDialogueModal() {
+            if (typewriterTimer) {
+                clearInterval(typewriterTimer);
+                typewriterTimer = null;
+            }
+            document.getElementById('dialogueModal').classList.add('hidden');
+            game.paused = false;
+        }
+
+        document.getElementById('btnReplayVoice').addEventListener('click', () => {
+            if (selectedNpc && currentFullDialogueText) {
+                startDialogueTypewriter(currentFullDialogueText, selectedNpc.voicePitch);
+            }
+        });
+        document.getElementById('btnCloseDialogueTop').addEventListener('click', closeDialogueModal);
+        document.getElementById('btnCancelDialogue').addEventListener('click', closeDialogueModal);
+        document.getElementById('btnAcceptMission').addEventListener('click', () => {
+            if (!selectedNpc) return;
+            game.activeMissionId = selectedNpc.missionId;
+            document.getElementById('objectiveText').textContent = `Sal de la nave y sigue la luz amarilla hacia: ${selectedNpc.targetLabel}`;
+            sfx.playTone(620, 'triangle', 0.2, 0.14);
+            closeDialogueModal();
+            showToast(`🎯 Misión aceptada: ${selectedNpc.targetLabel}. ¡Sal por la escotilla!`, "#facc15");
+        });
+
+        // =========================================================================
+        // 9. TIENDA ROBLOX, PLANIFICADOR DE SITIOS NASA Y BALIZAS DE INVESTIGACIÓN
+        // =========================================================================
+        const shopCatalog = [
+            {
+                id: 'pistol',
+                name: '🔫 Pistola Fotónica NASA',
+                cost: 120,
+                desc: 'Dispara rayos láser solares de largo alcance contra monstruos.',
+                isOwned: () => game.hasPhotonicPistol,
+                buy: () => {
+                    game.hasPhotonicPistol = true;
+                    document.getElementById('weaponBadge').textContent = '🔫 Pistola Fotónica [Espacio / Clic]';
+                }
+            },
+            {
+                id: 'boots',
+                name: '🥾 Botas Gravitacionales Mk-II',
+                cost: 150,
+                desc: 'Aumenta permanentemente la velocidad de movimiento de tu avatar.',
+                isOwned: () => player.speed > 5.2,
+                buy: () => { player.speed = 6.0; }
+            },
+            {
+                id: 'scanner',
+                name: '📡 Escáner Orbital x2 Puntos',
+                cost: 200,
+                desc: 'Duplica los Puntos NASA ganados al completar misiones.',
+                isOwned: () => game.hasScannerUpgrade,
+                buy: () => { game.hasScannerUpgrade = true; }
+            },
+            {
+                id: 'thermal',
+                name: '🧥 Traje Térmico Artemis',
+                cost: 220,
+                desc: 'Protege contra la congelación de los Espectros Criogénicos y da +1 Vida.',
+                isOwned: () => game.hasThermalSuit,
+                buy: () => {
+                    game.hasThermalSuit = true;
+                    player.maxLives = 4;
+                    player.lives = 4;
+                }
+            },
+            {
+                id: 'solar_tower',
+                name: '☀️ Estación Solar Elevada (Base)',
+                cost: 280,
+                desc: 'Construye una cúpula de luz solar segura junto a la Nave CLPS.',
+                isOwned: () => game.hasSolarTowerBuilt,
+                buy: () => { game.hasSolarTowerBuilt = true; }
+            },
+            {
+                id: 'relay_tower',
+                name: '🛰️ Torre Repetidora DSN (Base)',
+                cost: 320,
+                desc: 'Mantiene el enlace directo con la Tierra 🟢 activo en todo momento.',
+                isOwned: () => game.hasRelayTowerBuilt,
+                buy: () => {
+                    game.hasRelayTowerBuilt = true;
+                    updateOrbitalParameters();
+                }
+            }
+        ];
+
+        function openShopModal() {
+            game.paused = true;
+            const grid = document.getElementById('shopItemsGrid');
+            grid.innerHTML = '';
+            shopCatalog.forEach(item => {
+                const owned = item.isOwned();
+                const canAfford = game.points >= item.cost;
+                const card = document.createElement('div');
+                card.className = 'bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between';
+                card.innerHTML = `
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-1">
+                            <h4 class="font-bold text-white text-sm sm:text-base">${item.name}</h4>
+                            <span class="mono text-xs font-bold px-2.5 py-0.5 rounded-full ${owned ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
+                                ${owned ? 'Equipado' : item.cost + ' Pts'}
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-400 mb-3">${item.desc}</p>
+                    </div>
+                    <button ${owned || !canAfford ? 'disabled' : ''} class="w-full py-2 rounded-xl font-bold text-xs roblox-btn ${
+                        owned ? 'bg-slate-800 text-emerald-400 cursor-default'
+                        : canAfford ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
+                        : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                    }">
+                        ${owned ? '✓ Adquirido' : canAfford ? 'Comprar Mejora' : 'Puntos Insuficientes'}
+                    </button>
+                `;
+                if (!owned && canAfford) {
+                    card.querySelector('button').addEventListener('click', () => {
+                        game.points -= item.cost;
+                        item.buy();
+                        sfx.playMissionComplete();
+                        updateHUD();
+                        openShopModal();
+                        showToast(`✅ ¡Compraste ${item.name}!`, "#34d399");
+                    });
+                }
+                grid.appendChild(card);
+            });
+            document.getElementById('shopModal').classList.remove('hidden');
+        }
+
+        function closeShopModal() {
+            document.getElementById('shopModal').classList.add('hidden');
+            game.paused = false;
+        }
+        document.getElementById('btnOpenShop').addEventListener('click', openShopModal);
+        document.getElementById('btnCloseShop').addEventListener('click', closeShopModal);
+
+        function openSitePlannerModal() {
+            game.paused = true;
+            const grid = document.getElementById('sitesComparisonGrid');
+            grid.innerHTML = '';
+            Object.entries(lunarLandingSites).forEach(([key, site]) => {
+                const isSelected = game.activeSiteKey === key;
+                const card = document.createElement('div');
+                card.className = `rounded-2xl p-4 border-2 cursor-pointer transition ${
+                    isSelected ? 'bg-sky-950/60 border-sky-400' : 'bg-slate-950 border-slate-800 hover:border-slate-600'
+                }`;
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-1">
+                        <h4 class="font-bold text-sm text-white">${site.name}</h4>
+                        ${isSelected ? '<span class="text-xs text-sky-300 font-bold">● Activo</span>' : ''}
+                    </div>
+                    <div class="mono text-[11px] text-amber-300 mb-2">Lat: ${site.lat}° | Lon: ${site.lon}°</div>
+                    <p class="text-xs text-slate-400 mb-3">${site.desc}</p>
+                    <div class="space-y-1 text-[11px]">
+                        <div>☀️ Energía: <span class="text-slate-200 font-semibold">${site.sunHours}</span></div>
+                        <div>🌍 Tierra: <span class="text-slate-200 font-semibold">${site.earthComm}</span></div>
+                        <div>❄️ Hielo: <span class="text-slate-200 font-semibold">${site.iceProximity}</span></div>
+                    </div>
+                `;
+                card.addEventListener('click', () => {
+                    game.activeSiteKey = key;
+                    updateOrbitalParameters();
+                    openSitePlannerModal();
+                    showToast(`🛰️ Sitio activo cambiado a: ${site.name}`, "#38bdf8");
+                });
+                grid.appendChild(card);
+            });
+            document.getElementById('sitePlannerModal').classList.remove('hidden');
+        }
+
+        function closeSitePlannerModal() {
+            document.getElementById('sitePlannerModal').classList.add('hidden');
+            game.paused = false;
+        }
+        document.getElementById('btnOpenPlanner').addEventListener('click', openSitePlannerModal);
+        document.getElementById('btnClosePlanner').addEventListener('click', closeSitePlannerModal);
+
+        document.getElementById('btnApplyCoords').addEventListener('click', () => {
+            const lat = parseFloat(document.getElementById('customLatInput').value) || -89.5;
+            const lon = parseFloat(document.getElementById('customLonInput').value) || 0;
+            lunarLandingSites.custom = {
+                name: 'Coordenadas Personalizadas',
+                lat: Math.max(-90, Math.min(90, lat)),
+                lon: Math.max(-180, Math.min(180, lon)),
+                sunHours: Math.abs(lat) > 75 ? 'Régimen Polar Rasante' : 'Ciclo Día/Noche 14d',
+                earthComm: 'Simulación Orbital Activa',
+                iceProximity: Math.abs(lat) > 80 ? 'Alta probabilidad PSR' : 'Baja',
+                desc: 'Ubicación lunar personalizada ingresada desde la consola de misión.'
+            };
+            game.activeSiteKey = 'custom';
+            updateOrbitalParameters();
+            closeSitePlannerModal();
+            showToast(`🧭 Simulando órbita en Lat ${lat}°, Lon ${lon}°`, "#38bdf8");
+        });
+
+        function inspectResearchNode(node) {
+            selectedResearchNode = node;
+            game.paused = true;
+            document.getElementById('researchTitle').textContent = node.title;
+            document.getElementById('researchBody').textContent = node.body;
+            document.getElementById('researchStats').textContent = node.stats;
+            const btn = document.getElementById('btnClaimResearch');
+            if (node.claimed) {
+                btn.textContent = '✓ Datos ya registrados en la base NASA';
+                btn.disabled = true;
+                btn.className = 'w-full bg-slate-800 text-slate-400 font-bold py-2.5 rounded-xl text-sm';
+            } else {
+                btn.textContent = 'Registrar Datos Científicos (+75 Puntos)';
+                btn.disabled = false;
+                btn.className = 'w-full roblox-btn bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2.5 rounded-xl text-sm';
+            }
+            document.getElementById('researchModal').classList.remove('hidden');
+        }
+
+        function closeResearchModal() {
+            document.getElementById('researchModal').classList.add('hidden');
+            game.paused = false;
+        }
+        document.getElementById('btnCloseResearch').addEventListener('click', closeResearchModal);
+        document.getElementById('btnClaimResearch').addEventListener('click', () => {
+            if (!selectedResearchNode || selectedResearchNode.claimed) return;
+            selectedResearchNode.claimed = true;
+            game.points += 75;
+            sfx.playMissionComplete();
+            addFloatingText(player.x, player.y - 35, '+75 Pts Ciencia', '#38bdf8');
+            updateHUD();
+            closeResearchModal();
+        });
+
+        document.getElementById('btnToggleAudio').addEventListener('click', (e) => {
+            const muted = sfx.toggleMute();
+            e.target.textContent = muted ? '🔇' : '🔊';
+        });
+
+        document.getElementById('btnRespawn').addEventListener('click', () => {
+            player.lives = player.maxLives;
+            player.invulnTimer = 90;
+            game.scene = 'ship';
+            player.x = SHIP_BOUNDS.x + SHIP_BOUNDS.w / 2;
+            player.y = SHIP_BOUNDS.y + SHIP_BOUNDS.h / 2 + 65;
+            document.getElementById('gameOverModal').classList.add('hidden');
+            game.paused = false;
+            updateHUD();
+            showToast("🚀 Unidad CLPS completó el rescate. ¡Continúa las 5 misiones para ganar!", "#34d399");
+        });
+
+        document.getElementById('btnContinueExplore').addEventListener('click', () => {
+            document.getElementById('victoryModal').classList.add('hidden');
+            game.paused = false;
+        });
+
+        document.getElementById('btnRestartFullGame').addEventListener('click', () => {
+            location.reload();
+        });
+
+        // =========================================================================
+        // 10. COMBATE (PISTOLA FOTÓNICA Y PULSO SOLAR) Y FÍSICA DEL JUEGO
+        // =========================================================================
+        function fireWeaponOrPulse() {
+            if (game.scene !== 'surface') return;
+            if (game.hasPhotonicPistol) {
+                if (player.laserCooldown > 0) return;
+                player.laserCooldown = 14;
+                sfx.playLaser();
+                projectiles.push({
+                    x: player.x + Math.cos(player.aimAngle) * 24,
+                    y: player.y - 12 + Math.sin(player.aimAngle) * 24,
+                    vx: Math.cos(player.aimAngle) * 13,
+                    vy: Math.sin(player.aimAngle) * 13,
+                    life: 55
+                });
+            } else {
+                if (player.pulseCooldown > 0) return;
+                player.pulseCooldown = 45;
+                player.pulseWave = 1;
+                sfx.playPulse();
+                monsters.forEach(m => {
+                    if (m.hp > 0 && Math.hypot(m.x - player.x, m.y - player.y) < 150) {
+                        damageMonster(m, 35);
+                    }
+                });
+            }
+        }
+
+        function damageMonster(m, amount) {
+            m.hp -= amount;
+            addFloatingText(m.x, m.y - 28, `-${amount}`, '#facc15');
+            if (m.hp <= 0) {
+                m.hp = 0;
+                m.respawnTimer = 600; // Reaparece después de 10 segundos
+                game.points += 50;
+                sfx.playTone(680, 'triangle', 0.25, 0.14, 920);
+                addFloatingText(m.x, m.y - 45, '+50 Pts!', '#34d399');
+                updateHUD();
+            }
+        }
+
+        function update() {
+            if (!game.started || game.paused) return;
+
+            if (player.invulnTimer > 0) player.invulnTimer--;
+            if (player.pulseCooldown > 0) player.pulseCooldown--;
+            if (player.laserCooldown > 0) player.laserCooldown--;
+            if (player.pulseWave > 0) {
+                player.pulseWave += 8;
+                if (player.pulseWave > 150) player.pulseWave = 0;
+            }
+
+            // Física de salto
+            if (player.z > 0 || player.vz !== 0) {
+                player.z += player.vz;
+                player.vz -= game.scene === 'surface' ? 0.36 : 0.48; // Baja gravedad en la Luna
+                if (player.z <= 0) {
+                    player.z = 0;
+                    player.vz = 0;
+                }
+            }
+
+            // Movimiento del Jugador o del Rover Lunar
+            let dx = 0;
+            let dy = 0;
+            if (keys['KeyW'] || keys['ArrowUp']) dy -= 1;
+            if (keys['KeyS'] || keys['ArrowDown']) dy += 1;
+            if (keys['KeyA'] || keys['ArrowLeft']) dx -= 1;
+            if (keys['KeyD'] || keys['ArrowRight']) dx += 1;
+
+            if (lunarRover.driven && game.scene === 'surface') {
+                if (dx !== 0 || dy !== 0) {
+                    const targetAngle = Math.atan2(dy, dx);
+                    lunarRover.angle = targetAngle;
+                    lunarRover.speed = Math.min(7.8, lunarRover.speed + 0.35);
+                } else {
+                    lunarRover.speed *= 0.9;
+                }
+                lunarRover.x = Math.max(90, Math.min(WORLD_SIZE - 90, lunarRover.x + Math.cos(lunarRover.angle) * lunarRover.speed));
+                lunarRover.y = Math.max(90, Math.min(WORLD_SIZE - 90, lunarRover.y + Math.sin(lunarRover.angle) * lunarRover.speed));
+                player.x = lunarRover.x;
+                player.y = lunarRover.y;
+
+                if (lunarRover.speed > 1.2 && Math.random() < 0.45) {
+                    lunarRover.tracks.push({ x: lunarRover.x, y: lunarRover.y + 14, alpha: 0.45 });
+                    if (lunarRover.tracks.length > 90) lunarRover.tracks.shift();
+                }
+            } else if (dx !== 0 || dy !== 0) {
+                const len = Math.hypot(dx, dy);
+                dx /= len;
+                dy /= len;
+                if (dx !== 0) player.facing = dx > 0 ? 1 : -1;
+
+                player.x += dx * player.speed;
+                player.y += dy * player.speed;
+                player.walkCycle += 0.22;
+                player.stepTimer++;
+                if (player.stepTimer % 16 === 0 && player.z === 0) {
+                    sfx.playStep();
+                }
+
+                if (game.scene === 'ship') {
+                    player.x = Math.max(SHIP_BOUNDS.x + 36, Math.min(SHIP_BOUNDS.x + SHIP_BOUNDS.w - 36, player.x));
+                    player.y = Math.max(SHIP_BOUNDS.y + 55, Math.min(SHIP_BOUNDS.y + SHIP_BOUNDS.h - 24, player.y));
+                } else {
+                    player.x = Math.max(60, Math.min(WORLD_SIZE - 60, player.x));
+                    player.y = Math.max(60, Math.min(WORLD_SIZE - 60, player.y));
+                }
+            }
+
+            // Actualizar proyectiles láser
+            for (let i = projectiles.length - 1; i >= 0; i--) {
+                const p = projectiles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life--;
+                let hit = false;
+                for (const m of monsters) {
+                    if (m.hp > 0 && Math.hypot(p.x - m.x, p.y - m.y) < 34) {
+                        damageMonster(m, 30);
+                        hit = true;
+                        break;
+                    }
+                }
+                if (hit || p.life <= 0) {
+                    projectiles.splice(i, 1);
+                }
+            }
+
+            // Actualizar Monstruos en la Superficie Lunar
+            if (game.scene === 'surface') {
+                const sunStrong = game.sunElevation > 7;
+                monsters.forEach(m => {
+                    if (m.hp <= 0) {
+                        m.respawnTimer--;
+                        if (m.respawnTimer <= 0) {
+                            m.hp = m.maxHp;
+                            m.x = m.homeX;
+                            m.y = m.homeY;
+                        }
+                        return;
+                    }
+
+                    // Zona segura si el jugador construyó la Estación Solar Elevada
+                    const inSafeSolarZone = game.hasSolarTowerBuilt && Math.hypot(m.x - (landerExterior.x - 150), m.y - landerExterior.y) < 220;
+                    const distToPlayer = Math.hypot(player.x - m.x, player.y - m.y);
+                    const speedFactor = sunStrong ? 0.58 : 1.05; // La luz solar frena a los monstruos
+
+                    if (distToPlayer < 430 && !inSafeSolarZone) {
+                        if (distToPlayer > 395 && Math.random() < 0.03) {
+                            sfx.playMonsterGrowl();
+                        }
+                        const ang = Math.atan2(player.y - m.y, player.x - m.x);
+                        m.x += Math.cos(ang) * m.speed * speedFactor;
+                        m.y += Math.sin(ang) * m.speed * speedFactor;
+                    } else {
+                        // Patrulla alrededor de su guarida
+                        const angHome = Math.atan2(m.homeY - m.y, m.homeX - m.x);
+                        if (Math.hypot(m.homeX - m.x, m.homeY - m.y) > 25) {
+                            m.x += Math.cos(angHome) * 1.2;
+                            m.y += Math.sin(angHome) * 1.2;
+                        }
+                    }
+
+                    // Colisión y daño al jugador (solo si no está saltando alto ni en Rover)
+                    if (distToPlayer < 34 && player.z < 24 && player.invulnTimer <= 0) {
+                        if (lunarRover.driven && lunarRover.speed > 3.5) {
+                            // El Rover atropella y aturde al monstruo
+                            damageMonster(m, 25);
+                            player.invulnTimer = 30;
+                        } else {
+                            player.lives--;
+                            player.invulnTimer = 75;
+                            sfx.playHurt();
+                            addFloatingText(player.x, player.y - 35, '-1 ❤️ ¡Cuidado!', '#f43f5e');
+                            updateHUD();
+                            if (player.lives <= 0) {
+                                game.paused = true;
+                                document.getElementById('gameOverModal').classList.remove('hidden');
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Textos flotantes
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                floatingTexts[i].y -= 0.9;
+                floatingTexts[i].life--;
+                if (floatingTexts[i].life <= 0) floatingTexts.splice(i, 1);
+            }
+
+            // Cámara suave centrada en el jugador
+            if (game.scene === 'ship') {
+                camera.x = (SHIP_BOUNDS.x + SHIP_BOUNDS.w / 2) - canvas.width / 2;
+                camera.y = (SHIP_BOUNDS.y + SHIP_BOUNDS.h / 2) - canvas.height / 2;
+            } else {
+                camera.x = Math.max(0, Math.min(WORLD_SIZE - canvas.width, player.x - canvas.width / 2));
+                camera.y = Math.max(0, Math.min(WORLD_SIZE - canvas.height, player.y - canvas.height / 2));
+            }
+        }
+
+        // =========================================================================
+        // 11. RENDERIZADO HD (NAVE CLPS CON MÁQUINAS/PANTALLAS, LUNA, ROVER, AVATARES)
+        // =========================================================================
+        function drawShipInterior() {
+            ctx.fillStyle = '#020617';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
+
+            // Alas solares exteriores de la nave
+            ctx.fillStyle = '#1e3a8a';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 2;
+            ctx.fillRect(SHIP_BOUNDS.x - 140, SHIP_BOUNDS.y + 110, 140, 190);
+            ctx.strokeRect(SHIP_BOUNDS.x - 140, SHIP_BOUNDS.y + 110, 140, 190);
+            ctx.fillRect(SHIP_BOUNDS.x + SHIP_BOUNDS.w, SHIP_BOUNDS.y + 110, 140, 190);
+            ctx.strokeRect(SHIP_BOUNDS.x + SHIP_BOUNDS.w, SHIP_BOUNDS.y + 110, 140, 190);
+
+            // Casco principal de la cabina CLPS
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.roundRect(SHIP_BOUNDS.x, SHIP_BOUNDS.y, SHIP_BOUNDS.w, SHIP_BOUNDS.h, 36);
+            ctx.fill();
+            ctx.stroke();
+
+            // Rejilla industrial del suelo metálico
+            ctx.strokeStyle = 'rgba(148, 163, 184, 0.08)';
+            ctx.lineWidth = 1;
+            for (let gx = SHIP_BOUNDS.x + 30; gx < SHIP_BOUNDS.x + SHIP_BOUNDS.w; gx += 36) {
+                ctx.beginPath();
+                ctx.moveTo(gx, SHIP_BOUNDS.y + 20);
+                ctx.lineTo(gx, SHIP_BOUNDS.y + SHIP_BOUNDS.h - 20);
+                ctx.stroke();
+            }
+            for (let gy = SHIP_BOUNDS.y + 30; gy < SHIP_BOUNDS.y + SHIP_BOUNDS.h; gy += 36) {
+                ctx.beginPath();
+                ctx.moveTo(SHIP_BOUNDS.x + 20, gy);
+                ctx.lineTo(SHIP_BOUNDS.x + SHIP_BOUNDS.w - 20, gy);
+                ctx.stroke();
+            }
+
+            // Pantallas panorámicas superiores de telemetría NASA
+            const timeNow = Date.now() * 0.004;
+            for (let i = 0; i < 3; i++) {
+                const sx = SHIP_BOUNDS.x + 85 + i * 175;
+                const sy = SHIP_BOUNDS.y + 18;
+                ctx.fillStyle = '#020617';
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 2;
+                ctx.fillRect(sx, sy, 145, 52);
+                ctx.strokeRect(sx, sy, 145, 52);
+
+                // Onda orbital animada en pantalla
+                ctx.strokeStyle = i === 0 ? '#facc15' : i === 1 ? '#38bdf8' : '#34d399';
+                ctx.beginPath();
+                for (let px = 6; px < 138; px += 6) {
+                    const py = sy + 26 + Math.sin(timeNow + px * 0.08 + i) * 14;
+                    if (px === 6) ctx.moveTo(sx + px, py);
+                    else ctx.lineTo(sx + px, py);
+                }
+                ctx.stroke();
+            }
+
+            // Racks de servidores y tanques criogénicos laterales
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(SHIP_BOUNDS.x + 18, SHIP_BOUNDS.y + 95, 42, 230);
+            ctx.fillRect(SHIP_BOUNDS.x + SHIP_BOUNDS.w - 60, SHIP_BOUNDS.y + 95, 42, 230);
+            for (let r = 0; r < 8; r++) {
+                ctx.fillStyle = (Math.floor(timeNow) + r) % 2 === 0 ? '#34d399' : '#38bdf8';
+                ctx.fillRect(SHIP_BOUNDS.x + 28, SHIP_BOUNDS.y + 108 + r * 26, 8, 5);
+                ctx.fillStyle = (Math.floor(timeNow) + r) % 2 === 0 ? '#facc15' : '#f43f5e';
+                ctx.fillRect(SHIP_BOUNDS.x + SHIP_BOUNDS.w - 46, SHIP_BOUNDS.y + 108 + r * 26, 8, 5);
+            }
+
+            // Mesa Holográfica Central de Planificación Lunar
+            const holoX = SHIP_BOUNDS.x + SHIP_BOUNDS.w / 2;
+            const holoY = SHIP_BOUNDS.y + SHIP_BOUNDS.h / 2 + 12;
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.arc(holoX, holoY, 44, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(56, 189, 248, 0.25)';
+            ctx.beginPath();
+            ctx.arc(holoX, holoY, 26 + Math.sin(timeNow * 1.5) * 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#e0f2fe';
+            ctx.font = 'bold 10px Fredoka';
+            ctx.textAlign = 'center';
+            ctx.fillText('MAPA 3D [E]', holoX, holoY + 4);
+
+            // Escotilla inferior hacia la superficie lunar
+            ctx.fillStyle = '#facc15';
+            ctx.fillRect(airlockInterior.x - 52, airlockInterior.y - 12, 104, 22);
+            ctx.fillStyle = '#0f172a';
+            ctx.font = 'bold 11px Fredoka';
+            ctx.fillText('🚪 SALIR A LA LUNA [E]', airlockInterior.x, airlockInterior.y + 3);
+
+            // Dibujar Astronautas NPC
+            npcs.forEach(npc => {
+                drawRobloxCharacter(npc.x, npc.y, 0, 1, npc.suitColor, npc.accentColor, 0, false);
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 12px Fredoka';
+                ctx.textAlign = 'center';
+                ctx.fillText(npc.name, npc.x, npc.y - 54);
+
+                const isDone = game.completedMissions.has(npc.missionId);
+                ctx.fillStyle = isDone ? '#34d399' : '#facc15';
+                ctx.font = 'bold 16px Fredoka';
+                ctx.fillText(isDone ? '✓' : '!', npc.x, npc.y - 68);
+            });
+
+            // Dibujar al Jugador
+            drawRobloxCharacter(player.x, player.y, player.z, player.facing, '#38bdf8', '#facc15', player.walkCycle, game.hasPhotonicPistol);
+
+            ctx.restore();
+        }
+
+        function drawLunarSurface() {
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
+
+            // Suelo HD de regolito lunar
+            ctx.fillStyle = regolithPattern || '#334155';
+            ctx.fillRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+
+            // Cráteres topográficos
+            craters.forEach(c => {
+                ctx.fillStyle = 'rgba(15, 23, 42, 0.38)';
+                ctx.beginPath();
+                ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(226, 232, 240, 0.14)';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            });
+
+            // Huellas del Rover Lunar
+            lunarRover.tracks.forEach(tr => {
+                ctx.fillStyle = `rgba(15, 23, 42, ${tr.alpha})`;
+                ctx.fillRect(tr.x - 10, tr.y, 6, 4);
+                ctx.fillRect(tr.x + 6, tr.y, 6, 4);
+            });
+
+            // Cúpula segura si construyó la Estación Solar Elevada
+            if (game.hasSolarTowerBuilt) {
+                const sx = landerExterior.x - 150;
+                const sy = landerExterior.y;
+                ctx.fillStyle = 'rgba(250, 204, 21, 0.14)';
+                ctx.beginPath();
+                ctx.arc(sx, sy, 220, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#facc15';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.fillStyle = '#fef08a';
+                ctx.font = 'bold 11px Fredoka';
+                ctx.textAlign = 'center';
+                ctx.fillText('☀️ ESTACIÓN SOLAR ELEVADA (ZONA SEGURA)', sx, sy - 25);
+            }
+
+            // Mini sitios en el mapa (Domos, Torres, Naves Estrelladas, Guaridas)
+            lunarStructures.forEach(st => {
+                if (st.type === 'dome') {
+                    ctx.fillStyle = '#1e293b';
+                    ctx.strokeStyle = '#38bdf8';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(st.x, st.y, 44, Math.PI, 0);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                } else if (st.type === 'tower') {
+                    ctx.strokeStyle = '#facc15';
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.moveTo(st.x - 16, st.y + 30);
+                    ctx.lineTo(st.x, st.y - 38);
+                    ctx.lineTo(st.x + 16, st.y + 30);
+                    ctx.stroke();
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.beginPath();
+                    ctx.arc(st.x, st.y - 40, 7, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (st.type === 'wreck') {
+                    ctx.save();
+                    ctx.translate(st.x, st.y);
+                    ctx.rotate(-0.35);
+                    ctx.fillStyle = '#475569';
+                    ctx.strokeStyle = '#fb923c';
+                    ctx.lineWidth = 2;
+                    ctx.fillRect(-36, -18, 72, 36);
+                    ctx.strokeRect(-36, -18, 72, 36);
+                    ctx.restore();
+                } else if (st.type === 'lair') {
+                    ctx.fillStyle = 'rgba(88, 28, 135, 0.45)';
+                    ctx.beginPath();
+                    ctx.arc(st.x, st.y, 52, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.fillStyle = '#cbd5e1';
+                ctx.font = 'bold 11px Fredoka';
+                ctx.textAlign = 'center';
+                ctx.fillText(st.name, st.x, st.y + 48);
+            });
+
+            // Balizas de Investigación Científica NASA (Azules)
+            researchNodes.forEach(node => {
+                ctx.fillStyle = node.claimed ? '#34d399' : '#38bdf8';
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, 16, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 11px Fredoka';
+                ctx.textAlign = 'center';
+                ctx.fillText('🔬 [E]', node.x, node.y - 22);
+            });
+
+            // Exterior de la Nave CLPS
+            drawLanderExterior(landerExterior.x, landerExterior.y);
+
+            // Carrito Rover Lunar conducible
+            drawLunarRover(lunarRover.x, lunarRover.y, lunarRover.angle, lunarRover.driven);
+
+            // HAZ DE LUZ AMARILLA GUÍA HACIA EL OBJETIVO DE LA MISIÓN ACTIVA
+            const activeNpc = npcs.find(n => n.missionId === game.activeMissionId);
+            if (activeNpc) {
+                // Camino luminoso amarillo desde el jugador al objetivo
+                ctx.save();
+                ctx.strokeStyle = 'rgba(250, 204, 21, 0.65)';
+                ctx.lineWidth = 6;
+                ctx.setLineDash([16, 12]);
+                ctx.lineDashOffset = -Date.now() * 0.05;
+                ctx.beginPath();
+                ctx.moveTo(player.x, player.y);
+                ctx.lineTo(activeNpc.targetX, activeNpc.targetY);
+                ctx.stroke();
+                ctx.restore();
+
+                // Pilar de luz dorada en el objetivo
+                const beamGrad = ctx.createLinearGradient(activeNpc.targetX, activeNpc.targetY - 140, activeNpc.targetX, activeNpc.targetY + 20);
+                beamGrad.addColorStop(0, 'rgba(250, 204, 21, 0)');
+                beamGrad.addColorStop(1, 'rgba(250, 204, 21, 0.55)');
+                ctx.fillStyle = beamGrad;
+                ctx.fillRect(activeNpc.targetX - 28, activeNpc.targetY - 140, 56, 160);
+
+                ctx.fillStyle = '#facc15';
+                ctx.font = 'bold 13px Fredoka';
+                ctx.textAlign = 'center';
+                ctx.fillText(`🎯 ${activeNpc.targetLabel} [E]`, activeNpc.targetX, activeNpc.targetY - 35);
+            }
+
+            // Dibujar Monstruos Lunares
+            monsters.forEach(m => {
+                if (m.hp > 0) drawShadowMonster(m);
+            });
+
+            // Dibujar Jugador (si no está dentro del Rover)
+            if (!lunarRover.driven) {
+                if (player.invulnTimer % 8 < 5) {
+                    drawRobloxCharacter(player.x, player.y, player.z, player.facing, '#38bdf8', '#facc15', player.walkCycle, game.hasPhotonicPistol);
+                }
+            }
+
+            // Onda de pulso solar y rayos láser
+            if (player.pulseWave > 0) {
+                ctx.strokeStyle = `rgba(250, 204, 21, ${1 - player.pulseWave / 150})`;
+                ctx.lineWidth = 5;
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.pulseWave, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            projectiles.forEach(p => {
+                ctx.fillStyle = '#facc15';
+                ctx.shadowColor = '#facc15';
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+
+            // Textos flotantes de puntos/daño
+            floatingTexts.forEach(ft => {
+                ctx.fillStyle = ft.color;
+                ctx.font = 'bold 15px Fredoka';
+                ctx.textAlign = 'center';
+                ctx.fillText(ft.text, ft.x, ft.y);
+            });
+
+            // Iluminación dinámica según el ángulo de elevación del Sol en el Polo Sur
+            const darkness = Math.max(0.05, Math.min(0.62, (12 - game.sunElevation) / 28));
+            ctx.fillStyle = `rgba(2, 6, 23, ${darkness})`;
+            ctx.fillRect(camera.x, camera.y, canvas.width, canvas.height);
+
+            ctx.restore();
+        }
+
+        function drawRobloxCharacter(x, y, z, facing, suitColor, accentColor, walkCycle, hasGun) {
+            ctx.save();
+            // Sombra en el suelo
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+            ctx.beginPath();
+            ctx.ellipse(x, y + 18, 16, 7, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.translate(x, y - z);
+
+            // Mochila de soporte vital (PLSS)
+            ctx.fillStyle = '#94a3b8';
+            ctx.fillRect(facing === 1 ? -16 : 6, -24, 10, 24);
+
+            // Piernas animadas estilo Roblox
+            const legOffset = Math.sin(walkCycle) * 5;
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillRect(-10, 4 + legOffset, 8, 14);
+            ctx.fillRect(2, 4 - legOffset, 8, 14);
+
+            // Torso
+            ctx.fillStyle = suitColor;
+            ctx.beginPath();
+            ctx.roundRect(-13, -22, 26, 28, 5);
+            ctx.fill();
+
+            ctx.fillStyle = accentColor;
+            ctx.fillRect(-13, -12, 26, 6);
+
+            // Casco y visor dorado
+            ctx.fillStyle = '#f8fafc';
+            ctx.beginPath();
+            ctx.roundRect(-12, -44, 24, 22, 7);
+            ctx.fill();
+
+            ctx.fillStyle = '#facc15';
+            ctx.beginPath();
+            ctx.roundRect(facing === 1 ? -4 : -10, -40, 14, 12, 4);
+            ctx.fill();
+
+            // Pistola Fotónica NASA equipada
+            if (hasGun) {
+                ctx.fillStyle = '#facc15';
+                ctx.fillRect(facing === 1 ? 10 : -24, -14, 14, 6);
+            }
+            ctx.restore();
+        }
+
+        function drawLanderExterior(x, y) {
+            ctx.save();
+            ctx.translate(x, y);
+            // Patas de aterrizaje
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(-45, 20);
+            ctx.lineTo(-68, 55);
+            ctx.moveTo(45, 20);
+            ctx.lineTo(68, 55);
+            ctx.stroke();
+
+            // Módulo central dorado y blanco
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.roundRect(-50, -35, 100, 58, 14);
+            ctx.fill();
+            ctx.fillStyle = '#f8fafc';
+            ctx.beginPath();
+            ctx.roundRect(-38, -68, 76, 38, 16);
+            ctx.fill();
+
+            ctx.fillStyle = '#facc15';
+            ctx.font = 'bold 12px Fredoka';
+            ctx.textAlign = 'center';
+            ctx.fillText('🚀 NAVE CLPS [E ENTRAR]', 0, -78);
+            ctx.restore();
+        }
+
+        function drawLunarRover(x, y, angle, driven) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+
+            // Ruedas
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(-22, -20, 14, 7);
+            ctx.fillRect(10, -20, 14, 7);
+            ctx.fillRect(-22, 13, 14, 7);
+            ctx.fillRect(10, 13, 14, 7);
+
+            // Chasis dorado NASA
+            ctx.fillStyle = '#eab308';
+            ctx.beginPath();
+            ctx.roundRect(-24, -14, 48, 28, 6);
+            ctx.fill();
+
+            // Antena parabólica del Rover
+            ctx.fillStyle = '#f8fafc';
+            ctx.beginPath();
+            ctx.arc(-10, 0, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Faros solares delanteros
+            if (driven) {
+                const beam = ctx.createLinearGradient(24, 0, 130, 0);
+                beam.addColorStop(0, 'rgba(250, 204, 21, 0.45)');
+                beam.addColorStop(1, 'rgba(250, 204, 21, 0)');
+                ctx.fillStyle = beam;
+                ctx.beginPath();
+                ctx.moveTo(24, -10);
+                ctx.lineTo(130, -36);
+                ctx.lineTo(130, 36);
+                ctx.lineTo(24, 10);
+                ctx.fill();
+            }
+            ctx.restore();
+
+            if (!driven) {
+                ctx.fillStyle = '#38bdf8';
+                ctx.font = 'bold 11px Fredoka';
+                ctx.textAlign = 'center';
+                ctx.fillText('🚙 Rover Lunar [R]', x, y - 26);
+            }
+        }
+
+        function drawShadowMonster(m) {
+            ctx.save();
+            const size = m.type === 'boss' ? 46 : 32;
+            ctx.fillStyle = 'rgba(0,0,0,0.45)';
+            ctx.beginPath();
+            ctx.ellipse(m.x, m.y + size * 0.55, size * 0.6, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#1e1b4b';
+            ctx.strokeStyle = m.color;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(m.x - size / 2, m.y - size / 2, size, size, 8);
+            ctx.fill();
+            ctx.stroke();
+
+            // Ojos brillantes
+            ctx.fillStyle = m.color;
+            ctx.fillRect(m.x - 9, m.y - 6, 6, 5);
+            ctx.fillRect(m.x + 3, m.y - 6, 6, 5);
+
+            // Barra de vida del monstruo
+            const barW = 38;
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(m.x - barW / 2, m.y - size / 2 - 12, barW, 5);
+            ctx.fillStyle = m.color;
+            ctx.fillRect(m.x - barW / 2, m.y - size / 2 - 12, barW * (m.hp / m.maxHp), 5);
+            ctx.restore();
+        }
+
+        function drawRadar() {
+            const w = radarCanvas.width;
+            const h = radarCanvas.height;
+            const scale = w / WORLD_SIZE;
+            radarCtx.clearRect(0, 0, w, h);
+            radarCtx.fillStyle = '#020617';
+            radarCtx.fillRect(0, 0, w, h);
+
+            // Estructuras
+            radarCtx.fillStyle = '#64748b';
+            lunarStructures.forEach(st => {
+                radarCtx.fillRect(st.x * scale - 2, st.y * scale - 2, 4, 4);
+            });
+
+            // Monstruos activos
+            radarCtx.fillStyle = '#f43f5e';
+            monsters.forEach(m => {
+                if (m.hp > 0) {
+                    radarCtx.beginPath();
+                    radarCtx.arc(m.x * scale, m.y * scale, 2.5, 0, Math.PI * 2);
+                    radarCtx.fill();
+                }
+            });
+
+            // Nave CLPS
+            radarCtx.fillStyle = '#38bdf8';
+            radarCtx.fillRect(landerExterior.x * scale - 3, landerExterior.y * scale - 3, 6, 6);
+
+            // Objetivo de misión activa
+            const activeNpc = npcs.find(n => n.missionId === game.activeMissionId);
+            if (activeNpc) {
+                radarCtx.fillStyle = '#facc15';
+                radarCtx.beginPath();
+                radarCtx.arc(activeNpc.targetX * scale, activeNpc.targetY * scale, 4, 0, Math.PI * 2);
+                radarCtx.fill();
+            }
+
+            // Jugador
+            radarCtx.fillStyle = '#34d399';
+            radarCtx.beginPath();
+            radarCtx.arc(player.x * scale, player.y * scale, 3, 0, Math.PI * 2);
+            radarCtx.fill();
+        }
+
+        function draw() {
+            if (game.scene === 'ship') {
+                drawShipInterior();
+            } else {
+                drawLunarSurface();
+            }
+            drawRadar();
+        }
+
+        // =========================================================================
+        // 12. UTILIDADES DE HUD Y BUCLE PRINCIPAL DEL JUEGO
+        // =========================================================================
+        function updateHUD() {
+            document.getElementById('hudHearts').textContent = '❤️'.repeat(Math.max(0, player.lives)) + '🖤'.repeat(Math.max(0, player.maxLives - player.lives));
+            document.getElementById('hudPoints').textContent = game.points;
+            document.getElementById('hudMissionsCount').textContent = `${game.completedMissions.size} / ${npcs.length}`;
+        }
+
+        function addFloatingText(x, y, text, color) {
+            floatingTexts.push({ x, y, text, color, life: 55 });
+        }
+
+        let toastTimeout = null;
+        function showToast(msg, borderColor = '#38bdf8') {
+            const toast = document.getElementById('toastBanner');
+            toast.textContent = msg;
+            toast.style.borderColor = borderColor;
+            toast.classList.remove('hidden');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3400);
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.onload = function () {
+            gameLoop();
+        };
+    </script>
+</body>
+</html>

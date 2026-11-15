@@ -11,6 +11,9 @@ function el(tag, className, text) {
 
 const DEFAULT_VOLUME = 0.6;
 
+/** The mini-game (`web/public/juego/`), served next to the app; relative so it works under any base path. */
+export const GAME_URL = './juego/index.html';
+
 /** A button with an icon and a text label (the label is hidden on narrow screens; the button keeps its accessible name). */
 function toolButton(testId, iconName, onClick) {
   const button = el('button', 'tb-button');
@@ -26,6 +29,7 @@ function toolButton(testId, iconName, onClick) {
  * The top bar: the name of the app, the language and the site on the left; the 3D view toggles (from right to
  * left: sound, lighten shadows, LROC image, free view) and a drop-down menu on the right. The menu
  * opens the planner panel and the Analysis window, switches Compare on and off and starts the tutorial.
+ * Beside the menu, a link takes the visitor to the mini-game.
  * @param {{get(): object, set(p: object): void}} store
  * @param {{analysis: {open(): void}, sites: Map<string, object>, siteList: Array<{id: string, name: string}>, audioCue?: {setEnabled(on: boolean): boolean}, tutorial?: {open(): void}}} deps
  */
@@ -119,7 +123,14 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
   menuWrap.append(menuButton, menu);
   attachMenu({ trigger: menuButton, menu });
 
-  header.append(brand, locale, site, el('div', 'topbar-spacer'), tools, menuWrap);
+  // the game lives on its own page: a plain link, so it works as a redirect (and with the keyboard)
+  const gameLink = el('a', 'tb-button tb-game');
+  gameLink.href = GAME_URL;
+  gameLink.dataset.testid = 'game-link';
+  const gameLabel = el('span', 'tb-label');
+  gameLink.append(icon('gamepad'), gameLabel);
+
+  header.append(brand, locale, site, el('div', 'topbar-spacer'), tools, gameLink, menuWrap);
 
   /** Text, state and availability of every control for the current state. */
   function refresh(state) {
@@ -148,6 +159,10 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
     volume.setAttribute('aria-label', t('ctl.volume'));
     volume.title = t('ctl.volume');
     if (state.volume !== undefined && Number(volume.value) !== state.volume) volume.value = String(state.volume);
+
+    gameLabel.textContent = t('app.game');
+    gameLink.setAttribute('aria-label', t('app.gameLabel'));
+    gameLink.title = t('app.gameLabel');
 
     menuLabel.textContent = t('ui.menu');
     menuButton.setAttribute('aria-label', t('ui.menu'));

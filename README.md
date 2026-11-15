@@ -11,7 +11,7 @@ Responde a la pregunta de planificación —¿qué sitio y qué fecha dan mejor 
 - **Ventana de Análisis:** mejores ventanas de aterrizaje de 2026 a 2030, calendario de luz, gráfico polar del cielo y comparación de los cinco sitios con exportación a CSV.
 - **Escena 3D:** terreno LOLA real de 5 m con sombras reales, un rover NASA que se conduce hasta el módulo de aterrizaje del sitio, señales con datos del lugar, una Tierra con imagen NASA que gira con la hora, polvo con gravedad lunar y, en cuatro sitios, un mapa de tonos de imágenes LROC.
 - **Cinco sitios con datos reales:** Connecting Ridge (Site 01), Shackleton Rim (Site 04), Nobile Rim 1 (Site 06), Haworth y Malapert Massif (Site 23).
-- **Español e inglés**, todo estático y sin servidor, y funciona sin conexión (la página no hace peticiones a terceros; una prueba lo vigila).
+- **Español e inglés**, todo estático y sin servidor, y funciona sin conexión (la página principal no hace peticiones a terceros; una prueba lo vigila). La excepción es el [juego](#juego-misión-rescate-lunar), que es una página aparte y sí las necesita.
 
 ## Estado del proyecto
 
@@ -24,7 +24,7 @@ Hitos del [diseño](docs/superpowers/specs/2026-11-14-lunar-navigator-design.md)
 | M2 | Escena 3D con terreno, Sol, Tierra, rover y cartel | Hecho |
 | M3 | Cinco regiones con horizonte lejano | Hecho |
 | M4 | Animación, sonido, textos, accesibilidad, README con fuentes y límites | Hecho |
-| Extras | Ventana de Análisis, señales y datos por sitio, módulo y rocas, Tierra NASA, polvo, mapa de tonos LROC | Hecho |
+| Extras | Ventana de Análisis, señales y datos por sitio, módulo y rocas, Tierra NASA, polvo, mapa de tonos LROC, tutorial, juego «Misión Rescate Lunar» | Hecho |
 
 Pendiente o por decidir: ver [Ideas y pendiente](#ideas-y-pendiente).
 
@@ -43,9 +43,9 @@ data-pipeline/ (Python, se ejecuta una vez)       web/public/sites/<id>/        
 
 ## Interfaz
 
-- **Barra superior:** a la izquierda el nombre de la aplicación y, a su derecha, el selector de idioma (ES/EN) y el **selector de sitio** (el sitio del escenario A, el que se ve en 3D). A la derecha, de derecha a izquierda: **Activar sonido** (con un deslizador de **volumen** a su izquierda), **Aclarar sombras**, **Imagen LROC** y **Vista libre** (o **Seguir al robot**), y en la esquina el **menú desplegable**. En pantallas estrechas los botones muestran solo su icono (siguen teniendo nombre para lectores de pantalla) y, en móvil, la barra pasa a dos filas: nombre, idioma y menú arriba; sitio y botones debajo.
+- **Barra superior:** a la izquierda el nombre de la aplicación y, a su derecha, el selector de idioma (ES/EN) y el **selector de sitio** (el sitio del escenario A, el que se ve en 3D). A la derecha, de derecha a izquierda: **Activar sonido** (con un deslizador de **volumen** a su izquierda), **Aclarar sombras**, **Imagen LROC** y **Vista libre** (o **Seguir al robot**), el botón **Juego** (un enlace al [juego](#juego-misión-rescate-lunar)) y, en la esquina, el **menú desplegable**. En pantallas estrechas los botones muestran solo su icono (siguen teniendo nombre para lectores de pantalla) y, en móvil, la barra pasa a dos filas: nombre, idioma y menú arriba; sitio y botones debajo.
 - **Menú:** **Planificador** (abre o cierra el cajón de la derecha), **Análisis** (abre la ventana de Análisis), **Comparar** (activa o quita el escenario B; al activarlo se abre el planificador) y **Tutorial** (vuelve a abrir el recorrido guiado). Se maneja con el teclado: flechas, Inicio/Fin, Esc para cerrarlo.
-- **Tutorial:** la primera vez que se abre la página aparece una ventana pequeña que recorre los controles en 13 pasos (bienvenida, idioma, sitio, vista libre, imagen LROC, aclarar sombras, sonido, menú, reproducir, saltos, línea de tiempo, velocidad y cómo conducir el rover), oscureciendo la página y resaltando el botón que explica. Abajo a la izquierda están **Anterior** y **Siguiente** y abajo a la derecha **Saltar tutorial**; también valen las flechas ← → y Esc. El navegador recuerda que ya se vio (en `localStorage`; si lo bloquea, se muestra cada vez). Los pasos están en `web/src/ui/tutorial.js` y sus textos en `web/src/strings/`.
+- **Tutorial:** la primera vez que se abre la página aparece una ventana pequeña que recorre los controles en 15 pasos (bienvenida, idioma, sitio, vista libre, imagen LROC, aclarar sombras, volumen, sonido, juego, menú, reproducir, saltos, línea de tiempo, velocidad y cómo conducir el rover), oscureciendo la página y resaltando el botón que explica. Abajo a la izquierda están **Anterior** y **Siguiente** y abajo a la derecha **Saltar tutorial**; también valen las flechas ← → y Esc. El navegador recuerda que ya se vio (en `localStorage`; si lo bloquea, se muestra cada vez). Los pasos están en `web/src/ui/tutorial.js` y sus textos en `web/src/strings/`.
 - **Barra inferior, como un reproductor de vídeo:**
   - **Saltos:** −1 día, −1 hora, +1 hora y +1 día, parando en los extremos de los datos.
   - **Reproducir:** un triángulo que se convierte en el signo de pausa. Si se pulsa al final de los datos, vuelve a empezar desde el principio.
@@ -74,6 +74,15 @@ La escena muestra el sitio seleccionado en el escenario A a pantalla completa; l
 - **Límite de pendiente por sitio:** cada sitio usa el más bajo de 15°, 20°… 45° con el que la meta sigue siendo alcanzable desde ~400 m: 15° en Connecting Ridge, Haworth y Malapert, 20° en Nobile Rim 1 y 35° en el borde de Shackleton (una pared de cráter). El robot no entra en terreno más empinado (se detiene y avisa; distingue "pendiente de más de N°" de "límite del terreno cartografiado") y la ayuda de la escena muestra el límite.
 - **Accesibilidad:** el cartel cerrado no se expone a lectores de pantalla ni al foco, las etiquetas del mapa tienen una lista equivalente para lectores de pantalla, el lienzo 3D tiene etiqueta, `<html lang>` sigue al idioma de la interfaz y las teclas con Ctrl/Alt/Meta no se capturan.
 - Sin WebGL, el panel sigue funcionando y la escena muestra un aviso.
+
+## Juego: Misión Rescate Lunar
+
+Un botón dorado con un mando, **Juego**, a la izquierda del menú de la barra superior, lleva (en la misma pestaña) a un juego en 2D ambientado en el polo sur lunar: ayudas a una tripulación a completar cinco misiones con un astronauta, un rover, una tienda y una radio. El tutorial lo explica en su propio paso.
+
+- **Dónde está:** `web/public/juego/index.html` (una sola página con su código; se publica en `<sitio>/juego/index.html`). El botón es un enlace normal (`./juego/index.html`), así que funciona con cualquier ruta base.
+- **Volver:** en el juego hay un botón **← Volver a Inside Moon 153** en la pantalla de introducción y otro, **← Inside Moon 153**, el primero de la barra de arriba durante la partida. Los dos enlazan con `../index.html`. Mientras hay un diálogo o la tienda abiertos, esa barra queda tapada: se cierran primero.
+- **Idioma y conexión:** el juego está solo en español y **necesita conexión a internet**: carga Tailwind CSS desde `cdn.tailwindcss.com` y las fuentes Fredoka y JetBrains Mono desde Google Fonts, así que esos dos servicios ven la visita (la página principal no los usa). Sin conexión se ve sin estilos. Hacerlo local queda en [Ideas y pendiente](#ideas-y-pendiente).
+- **Origen:** es el archivo entregado por el equipo, sin cambios en el juego salvo los dos botones de vuelta. Es independiente de la app: no comparte código, datos ni estado con ella, y sus textos (por ejemplo, las cifras o las descripciones de la NASA) no están revisados contra las fuentes del resto del proyecto.
 
 ## Ventana de Análisis
 
@@ -200,4 +209,5 @@ En la página, los nombres aparecen discretos al final del planificador (menú �
 - Un modelo de rover lunar: NASA 3D Resources no ofrece un LRV en GLB, y el rover actual es el de Marte.
 - Inclinar el eje de la Tierra y usar la fase real de la Luna de las efemérides.
 - Coordenadas de aterrizaje concretas en vez del centro del DEM, y más regiones.
+- Hacer el juego independiente de internet (Tailwind compilado y fuentes locales) y traducirlo al inglés.
 - Partir el JavaScript en bloques (hoy es un solo paquete de unos 767 kB, 212 kB comprimido) y precargar los terrenos de los sitios que faltan.
