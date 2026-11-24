@@ -1,31 +1,92 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Moon Insight 153: lunar landing sites at the south pole, 2026–2030 (NASA Space Apps Challenge 2026)." />
-    <meta name="author" content="Israel Alejandro Calvario Mena, Gerardo Andrés Galindo Aparicio, Jessica Betzania Texis Juárez" />
-    <title>Moon Insight 153</title>
-    <style>
-      /* Shown from the first paint, before the bundle and its styles arrive; main.js removes it. */
-      #splash { position: fixed; inset: 0; z-index: 100; display: grid; place-content: center; gap: 18px; justify-items: center; padding: 24px; background: #090909; color: #f4f1e9; font: 15px/1.5 system-ui, sans-serif; text-align: center; transition: opacity .35s ease; }
-      #splash.splash-out { opacity: 0; pointer-events: none; }
-      #splash h1 { margin: 0; font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 600; letter-spacing: .01em; }
-      #splash p { margin: 0; color: #aaa69b; font-family: ui-monospace, monospace; font-size: 12px; letter-spacing: .04em; }
-      #splash .splash-bar { width: min(240px, 60vw); height: 2px; overflow: hidden; background: #393731; }
-      #splash .splash-bar::after { content: ''; display: block; width: 40%; height: 100%; background: #d4ad5b; animation: splash-slide 1.4s ease-in-out infinite; }
-      @keyframes splash-slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
-      @media (prefers-reduced-motion: reduce) { #splash .splash-bar::after { animation-duration: 4s; } #splash { transition: none; } }
-    </style>
-  </head>
-  <body>
-    <div id="splash" role="status">
-      <h1>Moon Insight 153</h1>
-      <div class="splash-bar" aria-hidden="true"></div>
-      <p id="splash-text">Cargando…</p>
-    </div>
-    <div id="scene"></div>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moon Insight 153 · Elige un sitio</title>
+<style>
+:root{--bg:#090909;--fg:#f4f1e9;--mut:#aaa69b;--card:#14120fe6;--acc:#d4ad5b}
+html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#top{position:fixed;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px;pointer-events:none}
+#top h1{font-size:1.05rem;margin:0}#top p{margin:3px 0 0;font-size:.78rem;color:var(--mut)}
+#lang{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;background:#ffffff18;color:var(--fg);border:0;border-radius:8px;padding:6px 10px;cursor:pointer}
+.tag{position:fixed;transform:translate(12px,-50%);font-size:.72rem;background:#000a;padding:2px 6px;border-radius:6px;pointer-events:none;white-space:nowrap}
+.tag.on{background:var(--acc);color:#1a1405}
+#info{position:fixed;left:0;right:0;bottom:0;padding:12px 12px calc(env(safe-area-inset-bottom,0px) + 12px);display:none}
+.card{max-width:580px;margin:0 auto;background:var(--card);border-radius:14px;padding:14px;backdrop-filter:blur(8px)}
+.card h2{margin:0;font-size:1.15rem}.co{color:var(--mut);font-size:.78rem;margin:2px 0 8px}
+.card p{margin:6px 0;font-size:.86rem;line-height:1.4}.card p b{color:var(--acc)}
+.row{display:flex;gap:8px;margin-top:10px}
+button{padding:12px;border:0;border-radius:9px;background:#ffffff18;color:var(--fg);font-size:.92rem;cursor:pointer}
+#x{flex:0 0 44px}#go{flex:1;background:var(--acc);color:#1a1405;font-weight:700}
+#err{position:fixed;inset:40% 0 auto;text-align:center;padding:14px;background:#000c;color:#ff9a9a;display:none}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="top"><h1 id="t1"></h1><p id="t2"></p></div>
+<button id="lang">ES / EN</button>
+<div id="tags"></div>
+<div id="info"><div class="card"><h2 id="iN"></h2><div class="co" id="iC"></div><p id="iB"></p><p><b id="iWk"></b> <span id="iW"></span></p>
+<div class="row"><button id="x">✕</button><button id="go"></button></div></div></div>
+<div id="err"></div>
+<script type="module">
+import * as THREE from './three.module.js';
+const $=id=>document.getElementById(id),rnd=(a,b)=>a+Math.random()*(b-a),KEY='inside-moon-153.lang';
+let lang='es';
+try{const q=new URLSearchParams(location.search).get('lang'),s=localStorage.getItem(KEY);lang=q==='en'||q==='es'?q:(s==='en'||s==='es'?s:'es');}catch{}
+const T={es:{t:'🌙 Polo Sur Lunar · Elige un sitio de aterrizaje',h:'Arrastra para girar · rueda para acercar · clic en un anillo para ver el sitio · doble clic para entrar',go:'🚀 Entrar al sitio (doble clic)',why:'¿Por qué importa?',err:'No se pudieron cargar los sitios. Abre la página desde el servidor del proyecto (npm run dev).',w:'O'},
+ en:{t:'🌙 Lunar South Pole · Pick a landing site',h:'Drag to rotate · wheel to zoom · click a ring for details · double-click to enter',go:'🚀 Enter the site (double-click)',why:'Why it matters:',err:'Could not load the sites. Open the page from the project server (npm run dev).',w:'W'}};
+const rd=new THREE.WebGLRenderer({canvas:$('c'),antialias:true});rd.setPixelRatio(Math.min(devicePixelRatio,2));
+const sc=new THREE.Scene(),cam=new THREE.PerspectiveCamera(45,1,.05,2000);
+const resize=()=>{rd.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();};addEventListener('resize',resize);resize();
+{const a=[];for(let i=0;i<1500;i++){const u=Math.random()*2-1,t=Math.random()*6.2832,q=Math.sqrt(1-u*u);a.push(q*Math.cos(t)*600,u*600,q*Math.sin(t)*600);}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(a,3));sc.add(new THREE.Points(g,new THREE.PointsMaterial({color:0xffffff,size:1.4,sizeAttenuation:false})));}
+const tex=new THREE.TextureLoader().load('./moon.jpg');tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=8;
+const R=10,mg=new THREE.Group(),moon=new THREE.Mesh(new THREE.SphereGeometry(R,96,64),new THREE.MeshStandardMaterial({map:tex,roughness:1}));
+mg.add(moon);sc.add(mg);const dl=new THREE.DirectionalLight(0xffffff,3.2);dl.position.set(30,12,40);sc.add(dl,new THREE.AmbientLight(0xdbe4ff,.5));
+/* Misma convención de la textura: longitud 0 en +x, el este hacia -z */
+const ll=(la,lo)=>{const f=(90-la)*Math.PI/180,t=(lo+180)*Math.PI/180;return new THREE.Vector3(-Math.sin(f)*Math.cos(t),Math.cos(f),Math.sin(f)*Math.sin(t));};
+let S=[];
+try{const base='../sites/',list=await(await fetch(base+'index.json')).json();
+ const infos=await Promise.all(list.map(s=>fetch(`${base}${s.id}/info.json`).then(r=>r.json())));
+ S=list.map((s,i)=>({id:s.id,info:infos[i]}));}catch(e){$('err').style.display='block';$('err').textContent=T[lang].err;}
+const picks=[];
+S.forEach((s,i)=>{const v=ll(s.info.lat_deg,s.info.lon_deg);
+ const r=new THREE.Mesh(new THREE.RingGeometry(.16,.22,32),new THREE.MeshBasicMaterial({color:0xffffff,side:THREE.DoubleSide}));
+ r.position.copy(v).multiplyScalar(R*1.012);r.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1),v);mg.add(r);
+ const p=new THREE.Mesh(new THREE.SphereGeometry(.3,8,8),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
+ p.position.copy(r.position);p.userData.i=i;mg.add(p);picks.push(p);
+ const t=document.createElement('div');t.className='tag';$('tags').appendChild(t);Object.assign(s,{ring:r,pick:p,tag:t});});
+function texts(){const L=T[lang];document.documentElement.lang=lang;$('t1').textContent=L.t;$('t2').textContent=L.h;$('go').textContent=L.go;$('iWk').textContent=L.why;
+ S.forEach(s=>s.tag.textContent=s.info.sign[lang].title);if(sel>=0)fill(sel);}
+mg.rotation.set(-1.25,.5,0);cam.position.set(0,0,28);
+let sel=-1,tgt=null,zoomT=28,down=null,moved=false;const sp=new THREE.Vector3(),rc=new THREE.Raycaster(),m2=new THREE.Vector2();
+function hit(e){m2.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);rc.setFromCamera(m2,cam);const h=rc.intersectObjects([moon,...picks])[0];return h&&h.object.userData.i!==undefined?h.object.userData.i:-1;}
+function fill(i){const s=S[i],d=s.info,g=d.sign[lang];$('iN').textContent=g.title;
+ $('iC').textContent=Math.abs(d.lat_deg).toFixed(2)+'° S, '+Math.abs(d.lon_deg).toFixed(2)+'° '+(d.lon_deg<0?T[lang].w:'E');$('iB').textContent=g.body;$('iW').textContent=g.why;}
+function select(i){sel=i;const v=ll(S[i].info.lat_deg,S[i].info.lon_deg);tgt={rx:Math.atan2(v.y,Math.hypot(v.x,v.z)),ry:Math.atan2(-v.x,v.z)};zoomT=11.6;fill(i);$('info').style.display='block';}
+const enter=i=>{try{localStorage.setItem(KEY,lang);}catch{}location.href='../index.html?site='+encodeURIComponent(S[i].id)+'&lang='+lang;};
+$('x').onclick=()=>{sel=-1;tgt=null;zoomT=28;$('info').style.display='none';};$('go').onclick=()=>sel>=0&&enter(sel);
+$('lang').onclick=()=>{lang=lang==='es'?'en':'es';try{localStorage.setItem(KEY,lang);}catch{}texts();};
+const cv=$('c');
+cv.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY};moved=false;});
+cv.addEventListener('pointermove',e=>{if(!down)return;const dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.abs(dx)+Math.abs(dy)>4)moved=true;
+ if(moved){tgt=null;mg.rotation.y+=dx*.006*(cam.position.z/28);mg.rotation.x=Math.max(-1.57,Math.min(1.57,mg.rotation.x+dy*.006*(cam.position.z/28)));down={x:e.clientX,y:e.clientY};}});
+addEventListener('pointerup',e=>{if(down&&!moved){const i=hit(e);if(i>=0)select(i);}down=null;});
+cv.addEventListener('dblclick',e=>{const i=hit(e);if(i>=0)enter(i);});
+cv.addEventListener('wheel',e=>{zoomT=Math.max(11.3,Math.min(40,zoomT+e.deltaY*.02));},{passive:true});
+const wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
+(function tick(){
+ if(tgt){mg.rotation.x+=(tgt.rx-mg.rotation.x)*.08;mg.rotation.y+=wrap(tgt.ry-mg.rotation.y)*.08;}else if(!down&&sel<0)mg.rotation.y+=.0012;
+ cam.position.z+=(zoomT-cam.position.z)*.08;
+ const k=Math.max(.06,Math.min(1.2,(cam.position.z-10)/16));
+ S.forEach((s,i)=>{s.ring.scale.setScalar(k*(i===sel?1.4:1));s.pick.scale.setScalar(k);s.ring.material.color.set(i===sel?0xd4ad5b:0xffffff);
+  s.ring.getWorldPosition(sp);const front=sp.clone().normalize().dot(cam.position.clone().normalize())>.15,q=sp.clone().project(cam);
+  s.tag.style.display=front&&(cam.position.z<24||i===sel)?'block':'none';s.tag.style.left=((q.x+1)/2*innerWidth)+'px';s.tag.style.top=((1-q.y)/2*innerHeight)+'px';s.tag.className='tag'+(i===sel?' on':'');});
+ rd.render(sc,cam);requestAnimationFrame(tick);})();
+texts();
+</script>
+</body>
 </html>
