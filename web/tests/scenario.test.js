@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, test } from 'vitest';
 import { DEFAULT_THRESHOLDS, evaluateScenario, viability } from '../src/metrics/scenario.js';
 import { HOUR, T0, loadTinySite } from './helpers.js';

@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { beforeEach, describe, expect, test } from 'vitest';
 import { createRoverHum } from '../src/scene/roverHum.js';
 

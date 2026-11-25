@@ -1,3 +1,4 @@
+// @vitest-environment node
 import * as THREE from 'three';
 import { describe, expect, test } from 'vitest';
 import { DustSim, MOON_G, createDust } from '../src/scene/dust.js';
@@ -37,7 +38,7 @@ describe('earth texture', () => {
     // mid Pacific, mid Atlantic and the Indian Ocean: dominated by blue even with some cloud
     let blueOceans = 0;
     for (const [lon, lat] of [[-150, 0], [-30, -20], [80, -25], [-140, -30]]) {
-      const [r, g, b] = at(lon, lat);
+      const [r, , b] = at(lon, lat);
       if (b > r) blueOceans++;
     }
     expect(blueOceans).toBeGreaterThanOrEqual(3);

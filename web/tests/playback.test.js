@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createStore } from '../src/state.js';
 import { DEFAULT_SPEED_MS, SKIPS, SPEEDS, createPlayback } from '../src/ui/playback.js';

@@ -1,4 +1,4 @@
-import { createAnalysis } from '../panel/analysis.js';
+import { createLazyAnalysis } from '../panel/analysisLazy.js';
 import { mountPanel } from '../panel/panel.js';
 import { createPlayback } from './playback.js';
 import { createPlayBar } from './playbar.js';
@@ -16,7 +16,7 @@ import { createTutorial } from './tutorial.js';
  */
 export function mountInterface(root, store, siteList, sites, { renderTimeline, audioCue }) {
   const playback = createPlayback(store, sites);
-  const analysis = createAnalysis(store, siteList, sites);
+  const analysis = createLazyAnalysis(store, siteList, sites);
   const tutorial = createTutorial();
   const top = createTopBar(store, { analysis, sites, siteList, audioCue, tutorial });
   const bottom = createPlayBar(store, sites, playback);

@@ -103,10 +103,11 @@ describe('top bar', () => {
     expect(q('menu').contains(q('sound-toggle'))).toBe(false);
   });
 
-  test('the Analysis item opens the Analysis window', () => {
+  test('the Analysis item opens the Analysis window (its code loads on first use)', async () => {
     setup();
+    expect(document.querySelector('[data-testid="analysis"]')).toBeNull();
     q('analysis-open').click();
-    expect(document.querySelector('[data-testid="analysis"]').hidden).toBe(false);
+    await vi.waitFor(() => expect(document.querySelector('[data-testid="analysis"]').hidden).toBe(false));
   });
 
   test('the toggles show their state with aria-pressed and a text that follows the state', () => {

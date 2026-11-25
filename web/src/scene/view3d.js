@@ -2,20 +2,19 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { ensureTerrain } from '../data/siteData.js';
 import { getLocale, t } from '../i18n.js';
-import { horizonAt } from '../metrics/visibility.js';
 import { siteOverview } from '../metrics/overview.js';
 import { createInput } from './input.js';
 import { createDust } from './dust.js';
 import { loadEarthImage } from './earthTexture.js';
-import { buildLander, disposeObject, footingAt, loadApolloModule } from './lander.js';
+import { addDecor } from './decor.js';
 import { buildPoiMarkers, createPoiTags } from './poiTags.js';
 import { findPois } from './pois.js';
 import { createRobotMesh, loadNasaRover } from './robotMesh.js';
 import { createSignPanel } from './signPanel.js';
 import { MAX_SLOPE_DEG, createRobot, followCamera, nextSignOpen, speedFraction, stepRobot } from './robot.js';
+import { createSkyReadout } from './skyReadout.js';
 import { skyAt } from './sky.js';
 import { contains, heightAt, normalAt } from './terrainData.js';
-import { buildRocks, placeRocks } from './rocks.js';
 import { createQualityController } from './quality.js';
 import { startFor } from './startPlan.js';
 import { createTrip } from './trip.js';
@@ -92,15 +91,12 @@ export function mountScene(container, store, sites, audioCue = null) {
   const sign = createSignPanel();
   const routeEl = el('div', 'scene-route');
   routeEl.hidden = true;
-  const skyEl = el('div', 'scene-sky');
-  const skySun = el('div', 'scene-sky-row scene-sky-sun');
-  const skyEarth = el('div', 'scene-sky-row scene-sky-earth');
-  skyEl.append(skySun, skyEarth);
+  const skyReadout = createSkyReadout();
   const tags = createPoiTags(hud); // first, so the HUD panels stay above the floating labels
   const loadingEl = el('div', 'scene-loading');
   loadingEl.setAttribute('role', 'status');
   loadingEl.hidden = true;
-  hud.append(help, blockedEl, routeEl, skyEl, loadingEl, sign.el);
+  hud.append(help, blockedEl, routeEl, skyReadout.el, loadingEl, sign.el);
   container.append(hud);
 
   const camera = new THREE.PerspectiveCamera(60, 1, 0.5, 150_000);
@@ -186,7 +182,17 @@ export function mountScene(container, store, sites, audioCue = null) {
     world.scene.add(buildPoiMarkers(pois, groundAt));
     if (!plans.has(id)) plans.set(id, startFor(site));
     const plan = plans.get(id);
-    addDecor(id);
+    const decorWorld = world;
+    addDecor({
+      world,
+      site,
+      plan,
+      rockCache,
+      siteId: id,
+      isCurrent: () => world === decorWorld,
+      onChange: () => invalidate(true),
+      modelUrl: `${import.meta.env.BASE_URL}models/apollo-lunar-module.glb`,
+    });
     slopeLimitDeg = plan.limitDeg;
     setRobot(plan.x, plan.z, plan.headingDeg);
     routeEl.hidden = plan.reachable;
@@ -206,71 +212,11 @@ export function mountScene(container, store, sites, audioCue = null) {
   const groundAt = (x, z) => heightAt(site.terrain, x, z);
   const poiBase = (poi) => groundAt(poi.x, poi.z);
 
-  /** Boulders over the terrain (denser around the landing zone and the robot's start) and the lander on the site point. */
-  function addDecor(id) {
-    const plan = plans.get(id) ?? { x: 0, z: 0 };
-    if (!rockCache.has(id)) {
-      rockCache.set(
-        id,
-        placeRocks(site.terrain, {
-          patches: [
-            { x: 0, z: 0, radiusM: 110, count: 260 },
-            { x: plan.x, z: plan.z, radiusM: 80, count: 260 },
-          ],
-          keepClear: [
-            { x: 0, z: 0, radiusM: 7 },
-            { x: plan.x, z: plan.z, radiusM: 4 },
-          ],
-        }),
-      );
-    }
-    world.scene.add(buildRocks(rockCache.get(id)));
-    const { base, feet } = footingAt(site.terrain, 0, 0);
-    const lander = buildLander(feet);
-    lander.position.set(0, base, 0);
-    world.scene.add(lander);
-
-    // NASA's Apollo Lunar Module replaces the simple lander once it has loaded (if this world is still on screen)
-    const target = world;
-    const meanFoot = base + feet.reduce((sum, f) => sum + f.dy, 0) / feet.length;
-    loadApolloModule(`${import.meta.env.BASE_URL}models/apollo-lunar-module.glb`).then((model) => {
-      if (!model) return;
-      if (world !== target) {
-        disposeObject(model);
-        return;
-      }
-      target.scene.remove(lander);
-      disposeObject(lander);
-      model.position.set(0, meanFoot, 0);
-      target.scene.add(model);
-      invalidate(true);
-    });
-  }
-
   function applySky() {
     lastSky = skyAt(site, store.get().scenarios.A.timeMs);
     world.updateSky(lastSky, store.get().scenarios.A.timeMs);
-    renderSkyReadout();
+    skyReadout.update(site, lastSky);
     invalidate(true);
-  }
-
-  /** Sun and Earth azimuth/elevation against the horizon of the site centre, in words. */
-  function renderSkyReadout() {
-    const bodies = site.info.bodies;
-    const row = (node, key, body, radiusDeg) => {
-      const horizon = horizonAt(site.horizon, body.azDeg);
-      const visible = body.elDeg + radiusDeg > horizon;
-      node.classList.toggle('hidden-body', !visible);
-      // the horizon part is a span of its own so narrow screens can drop it (see scene.css)
-      const part = (text, className) => el('span', className, text);
-      node.replaceChildren(
-        part(t('sky.pos', { name: t(key), az: Math.round(body.azDeg), el: body.elDeg.toFixed(1) })),
-        part(` · ${t('sky.hz', { horizon: horizon.toFixed(1) })}`, 'scene-sky-hz'),
-        part(` · ${t(visible ? 'sky.visible' : 'sky.hidden')}`),
-      );
-    };
-    row(skySun, 'sky.sun', lastSky.sun, bodies.sun_radius_deg);
-    row(skyEarth, 'sky.earth', lastSky.earth, bodies.earth_radius_deg);
   }
 
   function applyTexts() {
@@ -285,7 +231,7 @@ export function mountScene(container, store, sites, audioCue = null) {
     routeEl.textContent = t('scene.noRoute');
     sign.setInfo(site.info, getLocale(), siteOverview(site));
     tags.setPois(pois, poiBase);
-    if (lastSky) renderSkyReadout();
+    if (lastSky) skyReadout.update(site, lastSky);
   }
 
   /** Follow camera (default) or a free orbit around the rover. */

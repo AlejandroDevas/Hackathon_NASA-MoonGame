@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, test } from 'vitest';
 import { DEFAULT_THRESHOLDS } from '../src/metrics/scenario.js';
 import { PREFS_KEY, loadPrefs, sanitizePrefs, startPrefsSync } from '../src/prefs.js';

@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { afterEach, describe, expect, test } from 'vitest';
 import { createAudioCue } from '../src/scene/audioCue.js';
 

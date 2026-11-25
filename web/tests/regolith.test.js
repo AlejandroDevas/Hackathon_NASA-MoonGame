@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, test } from 'vitest';
 import { createRegolithTexture, regolithHeights, regolithPixels } from '../src/scene/regolith.js';
 import { buildTerrainGeometry, terrainColor } from '../src/scene/terrainMesh.js';

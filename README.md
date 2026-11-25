@@ -143,9 +143,14 @@ Para medir en desarrollo, la consola del navegador ofrece `__navigator.info()` (
 npm --prefix web install
 npm --prefix web run dev      # http://localhost:5173
 npm --prefix web test         # pruebas (Vitest): métricas, panel, ventana de Análisis, escena y datos
+npm --prefix web run lint     # ESLint (reglas recomendadas) sobre src/, tests/ y scripts/
 npm --prefix web run build    # versión estática en web/dist
 npm --prefix web run plan-starts   # recalcula web/public/sites/*/start.json (hay que repetirlo si cambia un terrain.bin)
 ```
+
+**En Windows PowerShell:** si `npm` dice que la ejecución de scripts está deshabilitada, usa `npm.cmd` en su lugar (`npm.cmd --prefix web run build`). Y `&&` no existe en PowerShell 5.1: encadena con `;` o ejecuta cada comando por separado.
+
+**Integración continua:** `.github/workflows/ci.yml` ejecuta en cada push a `main` y en cada pull request el lint, las pruebas y el build de `web/`, y las pruebas Python de `data-pipeline/` (las de efemérides se saltan solas si no están los kernels SPICE, que no se versionan). Los saltos de línea se normalizan a LF con `.gitattributes` y `.editorconfig`.
 
 ### Verlo desde otro dispositivo (red local)
 
@@ -257,4 +262,4 @@ No se usó ChatGPT ni otras herramientas de IA. Estas herramientas se usaron par
 - Un modelo de rover lunar: NASA 3D Resources no ofrece un LRV en GLB, y el rover actual es el de Marte.
 - Inclinar el eje de la Tierra y usar la fase real de la Luna de las efemérides.
 - Coordenadas de aterrizaje concretas en vez del centro del DEM, y más regiones.
-- Partir el JavaScript en bloques (hoy es un solo paquete de unos 767 kB, 212 kB comprimido) y precargar los terrenos de los sitios que faltan.
+- Precargar en reposo los terrenos de los sitios que faltan. El JavaScript ya va en bloques: la app (~194 kB), three.js (~579 kB, en su propio archivo para que el navegador lo conserve entre versiones) y, bajo demanda, la ventana de Análisis y los cargadores GLTF/Draco. No se divide más porque el 3D es lo primero que se ve.

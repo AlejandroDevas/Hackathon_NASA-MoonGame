@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, test } from 'vitest';
 import { utcTzDate } from '../src/panel/utcAxis.js';
 

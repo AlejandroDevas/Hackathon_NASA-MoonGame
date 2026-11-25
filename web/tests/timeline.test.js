@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, test } from 'vitest';
 import { createPlayer, advanceTime } from '../src/panel/player.js';
 import { timelineData } from '../src/panel/timelineData.js';

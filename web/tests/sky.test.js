@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, test } from 'vitest';
 import { directionFromAzEl, skyAt } from '../src/scene/sky.js';
 import { HOUR, T0, loadTinySite, makeSite } from './helpers.js';

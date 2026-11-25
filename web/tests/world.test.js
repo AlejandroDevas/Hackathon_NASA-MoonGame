@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, test, vi } from 'vitest';
 import { directionFromAzEl } from '../src/scene/sky.js';
 import { gridToScene } from '../src/scene/terrainData.js';

@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createStore } from '../src/state.js';
 import { buildUrlSearch, formatUrlTime, parseUrlState, startUrlSync } from '../src/urlState.js';

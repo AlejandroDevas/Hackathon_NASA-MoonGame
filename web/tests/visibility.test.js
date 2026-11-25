@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, test } from 'vitest';
 import { horizonAt, indexAt, marginSeries } from '../src/metrics/visibility.js';
 import { HOUR, T0, loadTinySite } from './helpers.js';

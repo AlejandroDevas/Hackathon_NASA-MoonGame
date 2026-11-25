@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, test } from 'vitest';
 import { compassKey, findPois, relativeTo } from '../src/scene/pois.js';
 import { gridToScene } from '../src/scene/terrainData.js';

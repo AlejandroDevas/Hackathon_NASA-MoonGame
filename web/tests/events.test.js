@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, test } from 'vitest';
 import { nextTransition, visibilityWindows } from '../src/metrics/events.js';
 import { HOUR, T0, loadTinySite, makeSite } from './helpers.js';

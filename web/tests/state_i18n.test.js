@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { afterEach, describe, expect, test, vi } from 'vitest';
 import { formatDuration, formatDurationLong, setLocale, t } from '../src/i18n.js';
 import en from '../src/strings/en.json';

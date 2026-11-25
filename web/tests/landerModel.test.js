@@ -1,3 +1,4 @@
+// @vitest-environment node
 import * as THREE from 'three';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { APOLLO_MODULE_WIDTH_M, loadApolloModule } from '../src/scene/lander.js';

@@ -1,3 +1,4 @@
+// @vitest-environment node
 import * as THREE from 'three';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createRobotMesh, loadNasaRover } from '../src/scene/robotMesh.js';
