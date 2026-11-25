@@ -18,6 +18,8 @@ import { contains, heightAt, normalAt } from './terrainData.js';
 import { buildRocks, placeRocks } from './rocks.js';
 import { createQualityController } from './quality.js';
 import { startFor } from './startPlan.js';
+import { createTrip } from './trip.js';
+import { createTouchControls, isTouchDevice } from './touchControls.js';
 import { initialPixelRatio } from './pixelRatio.js';
 import { createWorld } from './world.js';
 
@@ -103,6 +105,9 @@ export function mountScene(container, store, sites, audioCue = null) {
 
   const camera = new THREE.PerspectiveCamera(60, 1, 0.5, 150_000);
   const input = createInput(window);
+  // phones and tablets have no keyboard: an on-screen pad drives the rover instead
+  const touch = isTouchDevice() ? createTouchControls(input) : null;
+  if (touch) hud.append(touch.el);
   const robotMesh = createRobotMesh();
 
   const plans = new Map(); // site id -> planStart result, computed once per site (takes ~1 s)
@@ -111,6 +116,7 @@ export function mountScene(container, store, sites, audioCue = null) {
   let pois = [];
   let loadingId = null; // site whose terrain is being fetched
   let dust = null; // ballistic dust thrown up by the rover, one per world
+  const trip = createTrip(); // metres and time until the rover first reaches the lander
   let lastPos = null; // robot position in the previous frame, to know how far it drove
   let slopeLimitDeg = MAX_SLOPE_DEG;
   let siteId = null;
@@ -185,6 +191,8 @@ export function mountScene(container, store, sites, audioCue = null) {
     setRobot(plan.x, plan.z, plan.headingDeg);
     routeEl.hidden = plan.reachable;
     signOpen = false;
+    trip.reset();
+    sign.setTrip(null);
     camera.position.set(robot.x, robot.y + 6, robot.z + 12);
     world.updateLod(camera.position, Infinity); // the first frame already has the detail around the robot
     applyTexts();
@@ -267,9 +275,12 @@ export function mountScene(container, store, sites, audioCue = null) {
 
   function applyTexts() {
     renderer.domElement.setAttribute('aria-label', t('scene.label'));
-    help.textContent = `${t('scene.help')} · ${t('scene.slopeLimit', { limit: slopeLimitDeg })}${
+    // with the touch pad the keyboard keys are no use, and the pad takes the corner the long text would fill
+    const driving = touch ? t('scene.helpTouch') : t('scene.help');
+    help.textContent = `${driving} · ${t('scene.slopeLimit', { limit: slopeLimitDeg })}${
       viewMode === 'free' ? ` · ${t('scene.helpFree')}` : ''
     }`;
+    touch?.refreshTexts();
     shownBlockReason = null; // the warning text is rebuilt on the next frame in the new language
     routeEl.textContent = t('scene.noRoute');
     sign.setInfo(site.info, getLocale(), siteOverview(site));
@@ -350,7 +361,10 @@ export function mountScene(container, store, sites, audioCue = null) {
       const dz = robot.z - lastPos.z;
       const moved = Math.hypot(dx, dz);
       speed = speedFraction(moved, dt);
-      if (moved > 0.001 && moved < 6) dust.emitFromWheels(robot, moved, dx / moved, dz / moved, moved / dt);
+      if (moved > 0.001 && moved < 6) {
+        dust.emitFromWheels(robot, moved, dx / moved, dz / moved, moved / dt);
+        trip.addDistance(moved);
+      }
     }
     audioCue?.setRoverSpeed?.(speed); // the motor is heard through the chassis only while driving
     lastPos = { x: robot.x, z: robot.z };
@@ -364,6 +378,7 @@ export function mountScene(container, store, sites, audioCue = null) {
 
     const { x: beforeX, z: beforeZ, headingDeg: beforeHeading } = robot;
     robot = stepRobot(robot, input.read(), site.terrain, dt, slopeLimitDeg);
+    trip.tick(dt);
     const robotMoved = robot.x !== beforeX || robot.z !== beforeZ || robot.headingDeg !== beforeHeading;
     if (robotMoved) placeRobotMesh();
     throwDust(dt);
@@ -389,7 +404,10 @@ export function mountScene(container, store, sites, audioCue = null) {
 
     const wasOpen = signOpen;
     signOpen = nextSignOpen(signOpen, Math.hypot(robot.x, robot.z));
-    if (signOpen && !wasOpen) audioCue?.play('radio'); // the rover reports in from the lander
+    if (signOpen && !wasOpen) {
+      audioCue?.play('radio'); // the rover reports in from the lander
+      sign.setTrip(trip.arrive());
+    }
     sign.setOpen(signOpen);
     if (robot.blockedBy !== shownBlockReason) {
       shownBlockReason = robot.blockedBy;
@@ -463,6 +481,7 @@ export function mountScene(container, store, sites, audioCue = null) {
       renderer.domElement.removeEventListener('webglcontextrestored', onContextRestored);
       unsubscribe();
       observer.disconnect();
+      touch?.dispose();
       input.dispose();
       audioCue?.dispose();
       controls?.dispose();

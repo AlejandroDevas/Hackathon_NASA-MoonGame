@@ -1,5 +1,6 @@
 import { setLocale, t } from '../i18n.js';
 import { icon } from './icons.js';
+import { buildUrlSearch } from '../urlState.js';
 import { attachMenu } from './menu.js';
 
 function el(tag, className, text) {
@@ -14,6 +15,23 @@ const LANG_KEY = 'inside-moon-153.lang';
 
 /** The mini-game (`web/public/juego/`), served next to the app; relative so it works under any base path. */
 export const GAME_URL = './juego/index.html';
+
+const TOAST_MS = 2200;
+
+/** A short message that fades by itself (a polite status for screen readers too). */
+function showToast(text) {
+  document.querySelector('.toast')?.remove();
+  const toast = el('div', 'toast', text);
+  toast.setAttribute('role', 'status');
+  document.body.append(toast);
+  setTimeout(() => toast.remove(), TOAST_MS);
+}
+
+/** The link to the scenario on screen: this page with its site, date and language. */
+export function shareLink(state, win = window) {
+  const { siteId, timeMs } = state.scenarios.A;
+  return `${win.location.origin}${win.location.pathname}${buildUrlSearch('', { siteId, timeMs, locale: state.locale })}`;
+}
 
 /** A button with an icon and a text label (the label is hidden on narrow screens; the button keeps its accessible name). */
 function toolButton(testId, iconName, onClick) {
@@ -125,7 +143,15 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
     store.set({ scenarios: { A: scenarios.A, B: turningOn ? { ...scenarios.A } : null }, ...(turningOn ? { panelOpen: true } : {}) });
   });
   const tutorialItem = menuItem('tutorial-open', 'menuitem', () => tutorial?.open());
-  menu.append(planner.item, analysisItem.item, compare.item, tutorialItem.item);
+  const shareItem = menuItem('share-link', 'menuitem', async () => {
+    try {
+      await navigator.clipboard.writeText(shareLink(store.get()));
+      showToast(t('ui.shareDone'));
+    } catch {
+      showToast(t('ui.shareFail')); // no clipboard (an insecure page, or the browser said no)
+    }
+  });
+  menu.append(planner.item, analysisItem.item, compare.item, shareItem.item, tutorialItem.item);
   menuWrap.append(menuButton, menu);
   attachMenu({ trigger: menuButton, menu });
 
@@ -178,6 +204,7 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
     analysisItem.text.textContent = t('analysis.open');
     compare.text.textContent = state.scenarios.B ? t('app.compareOff') : t('app.compare');
     compare.item.setAttribute('aria-checked', String(Boolean(state.scenarios.B)));
+    shareItem.text.textContent = t('ui.menuShare');
     tutorialItem.text.textContent = t('ui.menuTutorial');
   }
 

@@ -79,3 +79,23 @@
 @media (prefers-reduced-motion: reduce) {
   .scene-loading::before { animation-duration: 3s; }
 }
+
+/* on-screen driving pad (phones and tablets; see touchControls.js) */
+.scene-touch { position: absolute; right: 12px; bottom: 12px; display: grid; justify-items: end; gap: 8px; pointer-events: auto; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.scene-touch-pad { display: grid; grid-template: '. up .' 'left . right' '. down .' / 52px 52px 52px; grid-auto-rows: 52px; gap: 4px; }
+.scene-touch-up { grid-area: up; }
+.scene-touch-left { grid-area: left; }
+.scene-touch-right { grid-area: right; }
+.scene-touch-down { grid-area: down; }
+.scene-touch-btn { display: grid; place-items: center; min-width: 44px; min-height: 44px; padding: 0; border: 1px solid #d4ad5b66; border-radius: 10px; background: #090909cc; color: var(--text); font-size: 20px; line-height: 1; cursor: pointer; touch-action: none; -webkit-tap-highlight-color: transparent; backdrop-filter: blur(8px); }
+.scene-touch-btn.held { border-color: var(--sun); background: #493a24; color: var(--sun); }
+.scene-touch-btn:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
+.scene-touch-boost { width: auto; min-height: 40px; padding: 0 14px; font: 500 12px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.scene-touch-boost[aria-pressed='true'] { border-color: var(--sun); background: var(--sun); color: var(--ink); }
+
+/* result of the drive, at the top of the sign */
+.scene-sign-trip-block { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; margin-top: 0; padding: 0 0 10px; border-top: 0; border-bottom: 1px solid var(--border); }
+.scene-sign-trip { margin: 0 !important; color: var(--sun); font-family: var(--font-mono); font-size: 12px !important; font-weight: 500; }
+.scene-sign-again { color: var(--text); font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+.scene-sign-again:hover { color: var(--sun); }
+.scene-sign-again:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }

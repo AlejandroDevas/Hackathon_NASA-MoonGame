@@ -7,6 +7,9 @@ const WINDOWS = [
   { key: 'ctl.window.lunar', ms: 29.5 * 24 * HOUR_MS },
 ];
 
+/** The analysis windows the planner offers, in ms (a saved choice must be one of them). */
+export const WINDOW_MS = WINDOWS.map((w) => w.ms);
+
 /** Clamp `timeMs` to the ephemeris range. */
 export function clampTime(eph, timeMs) {
   const last = eph.startMs + (eph.count - 1) * eph.stepMs;

@@ -87,10 +87,10 @@ describe('top bar', () => {
     expect(q('volume').getAttribute('aria-label')).toBe('Volumen');
   });
 
-  test('the menu offers the planner, the Analysis window, Compare and the tutorial, and nothing else', () => {
+  test('the menu offers the planner, the Analysis window, Compare, copying the link and the tutorial, and nothing else', () => {
     setup();
     const items = [...q('menu').querySelectorAll('[role^="menuitem"]')].map((n) => n.dataset.testid);
-    expect(items).toEqual(['panel-toggle', 'analysis-open', 'compare-toggle', 'tutorial-open']);
+    expect(items).toEqual(['panel-toggle', 'analysis-open', 'compare-toggle', 'share-link', 'tutorial-open']);
     expect(q('menu').getAttribute('role')).toBe('menu');
     expect(q('menu').hidden).toBe(true);
   });

@@ -10,6 +10,8 @@ import '@fontsource/ibm-plex-mono/latin-500.css';
 import { ensureTerrain, loadSite } from './data/siteData.js';
 import { setLocale, t } from './i18n.js';
 import { litStart } from './metrics/overview.js';
+import { loadPrefs, startPrefsSync } from './prefs.js';
+import { parseUrlState, startUrlSync } from './urlState.js';
 import { DEFAULT_THRESHOLDS } from './metrics/scenario.js';
 import { clampTime } from './panel/controls.js';
 import './panel/panel.css';
@@ -77,14 +79,16 @@ async function main() {
     const loaded = await Promise.all(siteList.map((entry) => loadSite(SITES_URL, entry.id, { terrain: false })));
     const sites = new Map(siteList.map((entry, i) => [entry.id, loaded[i]]));
 
-    // ?site=<id> (sent by the start screen, public/inicio/) picks the site shown first.
-    const wantedSite = new URLSearchParams(window.location.search).get('site');
-    const first = siteList.some((entry) => entry.id === wantedSite) ? wantedSite : siteList[0].id;
+    // ?site=<id> (sent by the start screen, public/inicio/) picks the site shown first, and ?t=<UTC date> the
+    // moment: both come from a shared link (see urlState.js).
+    const wanted = parseUrlState(window.location.search, siteList.map((entry) => entry.id));
+    const first = wanted.siteId ?? siteList[0].id;
     setSplashText('app.loadingTerrain');
     await ensureTerrain(sites.get(first));
-    const timeMs = openingTime(sites.get(first));
+    const timeMs = wanted.timeMs === null ? openingTime(sites.get(first)) : clampTime(sites.get(first).eph, wanted.timeMs).timeMs;
     const locale = startingLocale();
     setLocale(locale);
+    const prefs = loadPrefs(); // the choices of the last visit (view, volume, thresholds...)
     const store = createStore({
       scenarios: { A: { siteId: first, timeMs }, B: null },
       windowMs: 7 * DAY_MS,
@@ -96,8 +100,12 @@ async function main() {
       viewMode: 'follow',
       panelOpen: false,
       locale,
+      ...prefs,
     });
+    startPrefsSync(store);
+    startUrlSync(store);
     const audioCue = createAudioCue({ createMusic: createAmbientMusic, createHum: createRoverHum });
+    if (prefs.volume !== undefined) audioCue.setVolume?.(prefs.volume);
     const scene = mountScene(document.getElementById('scene'), store, sites, audioCue);
     if (import.meta.env.DEV) window.__navigator = scene.debug;
     const ui = mountInterface(root, store, siteList, sites, { renderTimeline, audioCue });
