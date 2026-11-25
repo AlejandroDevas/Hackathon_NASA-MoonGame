@@ -15,7 +15,8 @@ import { MAX_SLOPE_DEG, createRobot, followCamera, nextSignOpen, speedFraction, 
 import { createSkyReadout } from './skyReadout.js';
 import { skyAt } from './sky.js';
 import { contains, heightAt, normalAt } from './terrainData.js';
-import { createQualityController } from './quality.js';
+import { createMinimap } from './minimap.js';
+import { createQualityController, renderScaleFor } from './quality.js';
 import { startFor } from './startPlan.js';
 import { createTrip } from './trip.js';
 import { createTouchControls, isTouchDevice } from './touchControls.js';
@@ -96,7 +97,8 @@ export function mountScene(container, store, sites, audioCue = null) {
   const loadingEl = el('div', 'scene-loading');
   loadingEl.setAttribute('role', 'status');
   loadingEl.hidden = true;
-  hud.append(help, blockedEl, routeEl, skyReadout.el, loadingEl, sign.el);
+  const minimap = createMinimap();
+  hud.append(help, blockedEl, routeEl, skyReadout.el, minimap.el, loadingEl, sign.el);
   container.append(hud);
 
   const camera = new THREE.PerspectiveCamera(60, 1, 0.5, 150_000);
@@ -131,6 +133,7 @@ export function mountScene(container, store, sites, audioCue = null) {
   const quality = createQualityController();
   let qualityIgnoreUntil = 0; // frames while a site is loading say nothing about steady-state speed
   let forcedScale = null; // debug: pin the render scale while measuring
+  let qualityMode = store.get().quality ?? 'auto'; // the visitor's choice: auto, high, medium or low
   let dustWasFlying = false;
   let prevStamp = null; // timestamp of the previous frame, if it was drawn (for the frame-time samples)
   const lastCamPos = new THREE.Vector3(1e9, 1e9, 1e9);
@@ -179,6 +182,7 @@ export function mountScene(container, store, sites, audioCue = null) {
     lastPos = null;
     if (!poiCache.has(id)) poiCache.set(id, findPois(site.terrain));
     pois = poiCache.get(id);
+    minimap.setTerrain(site.terrain, pois);
     world.scene.add(buildPoiMarkers(pois, groundAt));
     if (!plans.has(id)) plans.set(id, startFor(site));
     const plan = plans.get(id);
@@ -227,6 +231,7 @@ export function mountScene(container, store, sites, audioCue = null) {
       viewMode === 'free' ? ` · ${t('scene.helpFree')}` : ''
     }`;
     touch?.refreshTexts();
+    minimap.refreshTexts();
     shownBlockReason = null; // the warning text is rebuilt on the next frame in the new language
     routeEl.textContent = t('scene.noRoute');
     sign.setInfo(site.info, getLocale(), siteOverview(site));
@@ -284,7 +289,7 @@ export function mountScene(container, store, sites, audioCue = null) {
   function resize() {
     const width = Math.max(container.clientWidth, 1);
     const height = Math.max(container.clientHeight, 1);
-    renderer.setPixelRatio(forcedScale ?? devicePixelRatio * quality.scale);
+    renderer.setPixelRatio(forcedScale ?? devicePixelRatio * renderScaleFor(qualityMode, quality.scale));
     renderer.setSize(width, height, false);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
@@ -327,6 +332,7 @@ export function mountScene(container, store, sites, audioCue = null) {
     trip.tick(dt);
     const robotMoved = robot.x !== beforeX || robot.z !== beforeZ || robot.headingDeg !== beforeHeading;
     if (robotMoved) placeRobotMesh();
+    minimap.update(robot); // redraws only when the rover moved or turned
     throwDust(dt);
 
     const k = 1 - Math.exp(-6 * dt);
@@ -355,6 +361,7 @@ export function mountScene(container, store, sites, audioCue = null) {
       sign.setTrip(trip.arrive());
     }
     sign.setOpen(signOpen);
+    minimap.setHidden(signOpen); // the sign takes that corner
     if (robot.blockedBy !== shownBlockReason) {
       shownBlockReason = robot.blockedBy;
       if (shownBlockReason) {
@@ -385,7 +392,7 @@ export function mountScene(container, store, sites, audioCue = null) {
     tags.update(camera, container.clientWidth, container.clientHeight, robot, poiBase);
     renderer.render(world.scene, camera);
 
-    if (prevStamp !== null && forcedScale === null && timestamp > qualityIgnoreUntil) {
+    if (prevStamp !== null && forcedScale === null && qualityMode === 'auto' && timestamp > qualityIgnoreUntil) {
       const scale = quality.record(timestamp - prevStamp, timestamp);
       if (scale !== null) resize();
     }
@@ -402,6 +409,10 @@ export function mountScene(container, store, sites, audioCue = null) {
     world.setShadowLift(Boolean(state.shadowLift));
     world.setLrocTexture(state.lrocTexture !== false);
     if (state.viewMode !== viewMode) setViewMode(state.viewMode);
+    if ((state.quality ?? 'auto') !== qualityMode) {
+      qualityMode = state.quality ?? 'auto';
+      resize(); // the new render scale applies at once
+    }
     if (state.locale !== locale) {
       locale = state.locale;
       applyTexts();

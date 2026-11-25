@@ -1,5 +1,6 @@
 import { DEFAULT_THRESHOLDS } from './metrics/scenario.js';
 import { WINDOW_MS } from './panel/controls.js';
+import { QUALITY_MODES } from './scene/quality.js';
 
 export const PREFS_KEY = 'inside-moon-153.prefs';
 
@@ -19,6 +20,7 @@ export function sanitizePrefs(raw) {
   if (typeof raw.lrocTexture === 'boolean') out.lrocTexture = raw.lrocTexture;
   if (raw.viewMode === 'follow' || raw.viewMode === 'free') out.viewMode = raw.viewMode;
   if (inRange(raw.volume, 0, 1)) out.volume = raw.volume;
+  if (QUALITY_MODES.includes(raw.quality)) out.quality = raw.quality;
   if (WINDOW_MS.includes(raw.windowMs)) out.windowMs = raw.windowMs;
   const th = raw.thresholds;
   if (th && typeof th === 'object') {
@@ -33,8 +35,8 @@ export function sanitizePrefs(raw) {
 
 /** What gets saved from the state. */
 function pick(state) {
-  const { shadowLift, lrocTexture, viewMode, volume, windowMs, thresholds } = state;
-  return { shadowLift, lrocTexture, viewMode, volume, windowMs, thresholds };
+  const { shadowLift, lrocTexture, viewMode, volume, quality, windowMs, thresholds } = state;
+  return { shadowLift, lrocTexture, viewMode, volume, quality, windowMs, thresholds };
 }
 
 /** The choices saved by the last visit ({} without storage or with a damaged file). */

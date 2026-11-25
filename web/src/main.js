@@ -98,6 +98,7 @@ async function main() {
       shadowLift: false,
       lrocTexture: true,
       viewMode: 'follow',
+      quality: 'auto',
       panelOpen: false,
       locale,
       ...prefs,

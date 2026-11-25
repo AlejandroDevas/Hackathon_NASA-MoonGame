@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, test } from 'vitest';
-import { SCALES, createQualityController } from '../src/scene/quality.js';
+import { QUALITY_MODES, SCALES, createQualityController, nextQualityMode, renderScaleFor } from '../src/scene/quality.js';
 
 /** Feed `count` frames of `ms` each, advancing a fake clock; returns the scale changes in order. */
 function feed(controller, clock, count, ms) {
@@ -70,5 +70,36 @@ describe('createQualityController', () => {
     for (let i = 1; i < SCALES.length; i++) expect(SCALES[i]).toBeLessThan(SCALES[i - 1]);
     expect(SCALES[0]).toBe(1);
     expect(SCALES[SCALES.length - 1] ** 2).toBeGreaterThanOrEqual(0.25);
+  });
+});
+
+describe('quality modes', () => {
+  test('High, Medium and Low pin the render scale, whatever the controller says', () => {
+    expect(renderScaleFor('high', 0.5)).toBe(1);
+    expect(renderScaleFor('medium', 1)).toBe(0.7);
+    expect(renderScaleFor('low', 1)).toBe(0.5);
+  });
+
+  test('Auto, and anything unknown, follows the controller', () => {
+    expect(renderScaleFor('auto', 0.85)).toBe(0.85);
+    expect(renderScaleFor(undefined, 0.6)).toBe(0.6);
+    expect(renderScaleFor('ultra', 0.7)).toBe(0.7);
+  });
+
+  test('the pinned scales are among the ones the controller uses, ordered from sharpest to cheapest', () => {
+    const pinned = ['high', 'medium', 'low'].map((mode) => renderScaleFor(mode, 0));
+    expect(pinned).toEqual([...pinned].sort((a, b) => b - a));
+    expect(Math.min(...pinned)).toBeGreaterThanOrEqual(Math.min(...SCALES));
+  });
+
+  test('pressing the menu item cycles Auto, High, Medium, Low and back', () => {
+    let mode = 'auto';
+    const seen = [mode];
+    for (let i = 0; i < QUALITY_MODES.length; i++) {
+      mode = nextQualityMode(mode);
+      seen.push(mode);
+    }
+    expect(seen).toEqual(['auto', 'high', 'medium', 'low', 'auto']);
+    expect(nextQualityMode('whatever')).toBe('auto');
   });
 });

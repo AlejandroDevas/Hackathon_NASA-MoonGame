@@ -81,16 +81,16 @@ describe('top bar', () => {
 
   test('the volume slider sits in the top bar, just left of the sound button', () => {
     setup();
-    const tools = [...document.querySelector('.topbar-tools').children];
+    const tools = [...q('sound-toggle').parentElement.children];
     expect(tools.indexOf(q('volume'))).toBe(tools.indexOf(q('sound-toggle')) - 1);
     expect(q('volume').type).toBe('range');
     expect(q('volume').getAttribute('aria-label')).toBe('Volumen');
   });
 
-  test('the menu offers the planner, the Analysis window, Compare, copying the link and the tutorial, and nothing else', () => {
+  test('the menu offers the planner, the Analysis window, Compare, graphics quality, copying the link and the tutorial, and nothing else', () => {
     setup();
     const items = [...q('menu').querySelectorAll('[role^="menuitem"]')].map((n) => n.dataset.testid);
-    expect(items).toEqual(['panel-toggle', 'analysis-open', 'compare-toggle', 'share-link', 'tutorial-open']);
+    expect(items).toEqual(['panel-toggle', 'analysis-open', 'compare-toggle', 'quality-cycle', 'share-link', 'tutorial-open']);
     expect(q('menu').getAttribute('role')).toBe('menu');
     expect(q('menu').hidden).toBe(true);
   });
@@ -472,5 +472,21 @@ describe('mountInterface', () => {
     ui.dispose();
     expect(document.querySelector('.topbar')).toBeNull();
     expect(document.querySelector('.playbar')).toBeNull();
+  });
+});
+
+describe('top bar groups', () => {
+  beforeEach(() => setup());
+  const group = (testId) => q(testId).closest('[role="group"]');
+
+  test('the view toggles share one labelled group and the volume and sound another', () => {
+    const view = group('view-toggle');
+    expect(group('lroc-toggle')).toBe(view);
+    expect(group('shadow-lift-toggle')).toBe(view);
+    const sound = group('sound-toggle');
+    expect(group('volume')).toBe(sound);
+    expect(sound).not.toBe(view);
+    expect(view.getAttribute('aria-label')).toBe('Vista de la escena');
+    expect(sound.getAttribute('aria-label')).toBe('Sonido');
   });
 });

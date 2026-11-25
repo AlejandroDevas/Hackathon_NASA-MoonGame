@@ -51,3 +51,18 @@ export function createQualityController({ slowMs = 24, fastMs = 18, window = 40,
     },
   };
 }
+
+/** The graphics quality choices: Auto lets the controller above decide; the others pin the render scale. */
+export const QUALITY_MODES = ['auto', 'high', 'medium', 'low'];
+const MODE_SCALE = { high: 1, medium: 0.7, low: 0.5 };
+
+/** The render scale to use: the pinned one for High/Medium/Low, the controller's for Auto (or anything unknown). */
+export function renderScaleFor(mode, autoScale) {
+  return MODE_SCALE[mode] ?? autoScale;
+}
+
+/** The next choice when the menu item is pressed: Auto, High, Medium, Low, and back to Auto. */
+export function nextQualityMode(mode) {
+  const index = QUALITY_MODES.indexOf(mode);
+  return QUALITY_MODES[(index + 1) % QUALITY_MODES.length];
+}

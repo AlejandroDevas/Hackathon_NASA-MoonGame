@@ -1,5 +1,6 @@
 import { setLocale, t } from '../i18n.js';
 import { icon } from './icons.js';
+import { nextQualityMode } from '../scene/quality.js';
 import { buildUrlSearch } from '../urlState.js';
 import { attachMenu } from './menu.js';
 
@@ -107,9 +108,15 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
     audioCue?.setVolume?.(next);
   });
 
+  // two groups with a thin divider between them: what the 3D view shows, and the sound
   const tools = el('div', 'topbar-tools');
-  tools.setAttribute('role', 'group');
-  tools.append(view.button, lroc.button, shadow.button, volume, sound.button);
+  const viewGroup = el('div', 'tb-group');
+  viewGroup.setAttribute('role', 'group');
+  viewGroup.append(view.button, lroc.button, shadow.button);
+  const soundGroup = el('div', 'tb-group');
+  soundGroup.setAttribute('role', 'group');
+  soundGroup.append(volume, sound.button);
+  tools.append(viewGroup, soundGroup);
 
   // drop-down menu
   const menuWrap = el('div', 'topbar-menu');
@@ -143,6 +150,7 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
     store.set({ scenarios: { A: scenarios.A, B: turningOn ? { ...scenarios.A } : null }, ...(turningOn ? { panelOpen: true } : {}) });
   });
   const tutorialItem = menuItem('tutorial-open', 'menuitem', () => tutorial?.open());
+  const qualityItem = menuItem('quality-cycle', 'menuitem', () => store.set({ quality: nextQualityMode(store.get().quality ?? 'auto') }));
   const shareItem = menuItem('share-link', 'menuitem', async () => {
     try {
       await navigator.clipboard.writeText(shareLink(store.get()));
@@ -151,7 +159,7 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
       showToast(t('ui.shareFail')); // no clipboard (an insecure page, or the browser said no)
     }
   });
-  menu.append(planner.item, analysisItem.item, compare.item, shareItem.item, tutorialItem.item);
+  menu.append(planner.item, analysisItem.item, compare.item, qualityItem.item, shareItem.item, tutorialItem.item);
   menuWrap.append(menuButton, menu);
   attachMenu({ trigger: menuButton, menu });
 
@@ -168,6 +176,8 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
   function refresh(state) {
     document.documentElement.lang = state.locale;
     kicker.textContent = t('app.kicker');
+    viewGroup.setAttribute('aria-label', t('ui.groupView'));
+    soundGroup.setAttribute('aria-label', t('ui.groupSound'));
     title.textContent = t('app.title');
     locale.setAttribute('aria-label', t('ctl.language'));
     if (locale.value !== state.locale) locale.value = state.locale;
@@ -204,6 +214,7 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
     analysisItem.text.textContent = t('analysis.open');
     compare.text.textContent = state.scenarios.B ? t('app.compareOff') : t('app.compare');
     compare.item.setAttribute('aria-checked', String(Boolean(state.scenarios.B)));
+    qualityItem.text.textContent = t('ui.menuQuality', { mode: t(`quality.${state.quality ?? 'auto'}`) });
     shareItem.text.textContent = t('ui.menuShare');
     tutorialItem.text.textContent = t('ui.menuTutorial');
   }

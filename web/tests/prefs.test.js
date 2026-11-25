@@ -110,3 +110,19 @@ describe('startPrefsSync', () => {
     expect(loadPrefs(storage)).toMatchObject({ viewMode: 'free', volume: 0.3, lrocTexture: false });
   });
 });
+
+describe('graphics quality preference', () => {
+  test('a known mode is kept, anything else is dropped', () => {
+    expect(sanitizePrefs({ quality: 'low' })).toEqual({ quality: 'low' });
+    expect(sanitizePrefs({ quality: 'ultra' })).toEqual({});
+    expect(sanitizePrefs({ quality: 3 })).toEqual({});
+  });
+
+  test('is saved when it changes', () => {
+    const storage = memoryStorage();
+    const store = createStore({ ...baseState(), quality: 'auto' });
+    startPrefsSync(store, storage);
+    store.set({ quality: 'medium' });
+    expect(loadPrefs(storage).quality).toBe('medium');
+  });
+});
