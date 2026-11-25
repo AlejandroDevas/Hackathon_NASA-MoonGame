@@ -77,7 +77,9 @@ async function main() {
     const loaded = await Promise.all(siteList.map((entry) => loadSite(SITES_URL, entry.id, { terrain: false })));
     const sites = new Map(siteList.map((entry, i) => [entry.id, loaded[i]]));
 
-    const first = siteList[0].id;
+    // ?site=<id> (sent by the start screen, public/inicio/) picks the site shown first.
+    const wantedSite = new URLSearchParams(window.location.search).get('site');
+    const first = siteList.some((entry) => entry.id === wantedSite) ? wantedSite : siteList[0].id;
     setSplashText('app.loadingTerrain');
     await ensureTerrain(sites.get(first));
     const timeMs = openingTime(sites.get(first));
@@ -107,4 +109,24 @@ async function main() {
   }
 }
 
-main();
+const STARTED_KEY = 'inside-moon-153.started';
+
+/** First visit of the session without ?site= or ?lang=: show the Moon start screen (public/inicio/) first. */
+function needsStartScreen() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('site') || params.has('lang')) {
+      window.sessionStorage.setItem(STARTED_KEY, '1');
+      return false;
+    }
+    return !window.sessionStorage.getItem(STARTED_KEY);
+  } catch {
+    return false;
+  }
+}
+
+if (needsStartScreen()) {
+  window.location.replace(`${import.meta.env.BASE_URL}inicio/index.html`);
+} else {
+  main();
+}

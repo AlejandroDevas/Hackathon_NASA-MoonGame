@@ -6,6 +6,7 @@ Responde a la pregunta de planificación —¿qué sitio y qué fecha dan mejor 
 
 ## Qué incluye
 
+- **Pantalla de inicio:** al abrir la página por primera vez en la sesión aparece la Luna en 3D con un anillo por cada sitio; se elige uno (clic para ver su ficha, doble clic o «Entrar al sitio» para abrirlo) y la aplicación arranca en él. Está en `web/public/inicio/`.
 - **Interfaz tipo reproductor:** la escena 3D ocupa toda la pantalla; arriba, el nombre, el idioma, cuatro botones de la vista y un menú; abajo, un reproductor del tiempo simulado. El planificador (métricas, gráfica, umbrales y comparación) es un cajón oculto que se abre desde el menú.
 - **Planificador:** altura del Sol y de la Tierra sobre el horizonte, tiempo hasta que se ponen o salen (con la fecha cuando falta un mes o más), % de luz, racha de luz continua más larga, noche más larga, mayor hueco sin Tierra, y un semáforo de viabilidad con umbrales editables. Gráfica de elevación con cursor arrastrable y modo **Comparar** (dos escenarios lado a lado).
 - **Ventana de Análisis:** mejores ventanas de aterrizaje de 2026 a 2030, calendario de luz, gráfico polar del cielo y comparación de los cinco sitios con exportación a CSV.
@@ -43,6 +44,7 @@ data-pipeline/ (Python, se ejecuta una vez)       web/public/sites/<id>/        
 
 ## Interfaz
 
+- **Pantalla de inicio (`web/public/inicio/`):** una Luna con la textura `moon.jpg` y un anillo por sitio, con el cartel de cada uno en español o inglés (botón ES / EN). Arrastrar gira, la rueda acerca, un clic muestra la ficha del sitio (qué es y por qué importa) y doble clic —o el botón «Entrar al sitio»— abre la aplicación con `?site=<id>&lang=<es|en>`. `web/src/main.js` la muestra solo la primera vez de cada sesión (`sessionStorage`) y se la salta si la dirección ya trae `?site=` o `?lang=`, como cuando el juego enlaza de vuelta. Es una página estática aparte con su propia copia de three.js (`three.module.js`, `three.core.js`), así que no pasa por Vite.
 - **Barra superior:** a la izquierda el nombre de la aplicación y, a su derecha, el selector de idioma (ES/EN) y el **selector de sitio** (el sitio del escenario A, el que se ve en 3D). A la derecha, de derecha a izquierda: **Activar sonido** (con un deslizador de **volumen** a su izquierda), **Aclarar sombras**, **Imagen LROC** y **Vista libre** (o **Seguir al robot**), el botón **Juego** (un enlace al [juego](#juego-misión-rescate-lunar)) y, en la esquina, el **menú desplegable**. En pantallas estrechas los botones muestran solo su icono (siguen teniendo nombre para lectores de pantalla) y, en móvil, la barra pasa a dos filas: nombre, idioma y menú arriba; sitio y botones debajo.
 - **Menú:** **Planificador** (abre o cierra el cajón de la derecha), **Análisis** (abre la ventana de Análisis), **Comparar** (activa o quita el escenario B; al activarlo se abre el planificador) y **Tutorial** (vuelve a abrir el recorrido guiado). Se maneja con el teclado: flechas, Inicio/Fin, Esc para cerrarlo.
 - **Tutorial:** la primera vez que se abre la página aparece una ventana pequeña que recorre los controles en 15 pasos (bienvenida, idioma, sitio, vista libre, imagen LROC, aclarar sombras, volumen, sonido, juego, menú, reproducir, saltos, línea de tiempo, velocidad y cómo conducir el rover), oscureciendo la página y resaltando el botón que explica. Abajo a la izquierda están **Anterior** y **Siguiente** y abajo a la derecha **Saltar tutorial**; también valen las flechas ← → y Esc. El navegador recuerda que ya se vio (en `localStorage`; si lo bloquea, se muestra cada vez). Los pasos están en `web/src/ui/tutorial.js` y sus textos en `web/src/strings/`.
@@ -187,6 +189,7 @@ Los kernels SPICE (`de421.bsp`, `moon_pa_de421_1900-2050.bpc`, `moon_080317.tf`,
 | Horizonte lejano | [DEM LOLA regional de 80 m/píxel, 80–90° S (PGDA)](https://pgda.gsfc.nasa.gov/products/90) | Se combina con cada DEM local de 5 m |
 | Efemérides | [Skyfield](https://rhodesmill.org/skyfield/planetary.html) con kernels SPICE de NAIF/JPL | Validadas contra [JPL Horizons](https://ssd-api.jpl.nasa.gov/doc/horizons.html) |
 | Imagen del suelo | LROC NAC, mosaico del polo sur | NASA/GSFC/Arizona State University; `data-pipeline/lunarnav/lroc.py` |
+| Textura de la Luna (pantalla de inicio) | `web/public/inicio/moon.jpg` (2048 × 1024, escala de grises) | **Origen y licencia por documentar**: la subió un integrante del equipo sin indicar la fuente; hay que confirmarla y anotarla aquí antes de la entrega |
 | Rover | NASA 3D Resources, *Mars 2020 Perseverance Rover* | NASA/JPL-Caltech; `web/public/models/README.md` |
 | Módulo de aterrizaje | NASA 3D Resources, *Apollo Lunar Module* | `web/public/models/README.md` |
 | Tierra | NASA Earth Observatory, *Blue Marble: Next Generation* | Recoloreado el océano; `web/public/textures/README.md` |
@@ -196,6 +199,13 @@ Los kernels SPICE (`de421.bsp`, `moon_pa_de421_1900-2050.bpc`, `moon_080317.tf`,
 NASA no respalda este proyecto. Los modelos y las imágenes de NASA se usan según las [guías de uso de medios de NASA](https://www.nasa.gov/nasa-brand-center/images-and-media/).
 
 Citar para la topografía: Barker, M. K. et al. (2021), *Improved LOLA Elevation Maps for South Pole Landing Sites: Error Estimates and Their Impact on Illumination Conditions*, Planetary and Space Science 203, 105119, [doi:10.1016/j.pss.2020.105119](https://doi.org/10.1016/j.pss.2020.105119). Las efemérides están validadas en `data-pipeline/VALIDATION.md` (elevación y acimut, dos semanas de 2026 y 2030, en el sitio real y en (0, 0)).
+
+## Documentos y demostración
+
+- `DEMO/VideoDEMO.mp4`: vídeo de demostración de la aplicación.
+- `docs/entregables/`: documentos del equipo en Word. `Analisis_Moon_Insight_153.docx` y `Analisis_Moon_Insight_153_completo.docx` son el análisis del proyecto (el segundo, en su versión completa) y `Bitacora_Insight_Moon_153.docx` es la bitácora.
+- `Juego/`: el HTML original del juego «Misión Rescate Lunar», tal como llegó antes de integrarlo; la versión que usa la aplicación (sin conexión y con inglés) es `web/public/juego/`.
+- `docs/superpowers/` y `docs/diseno-interfaz.md`: diseños y planes; `INVESTIGACION_TECNOLOGIAS.md` e `docs/investigacion-audio.md`: investigación.
 
 ## Equipo
 
@@ -240,6 +250,8 @@ No se usó ChatGPT ni otras herramientas de IA. Estas herramientas se usaron par
 
 ## Ideas y pendiente
 
+- Documentar el origen y la licencia de `web/public/inicio/moon.jpg` (ver Créditos).
+- Un módulo `web/src/ui/uxEnhance.js` que el `main.js` subido a GitHub importaba no llegó al repositorio; se quitó ese import para que la aplicación compile. Si existe en el equipo de quien lo escribió, hay que subirlo y volver a llamarlo desde `main.js`.
 - Aplicar el mosaico LROC NAC a 1 m/px (teselas de 2–3 GB; haría falta además quitar las sombras de 2010) o usar un producto con iluminación uniforme; hoy solo se usan sus vistas previas de ~32 m.
 - Un modelo de rover lunar: NASA 3D Resources no ofrece un LRV en GLB, y el rover actual es el de Marte.
 - Inclinar el eje de la Tierra y usar la fase real de la Luna de las efemérides.
