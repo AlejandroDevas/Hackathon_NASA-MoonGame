@@ -3,6 +3,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { ensureTerrain } from '../data/siteData.js';
 import { getLocale, t } from '../i18n.js';
 import { siteOverview } from '../metrics/overview.js';
+import { horizonAt } from '../metrics/visibility.js';
+import { createBodyMarkers } from './bodyMarkers.js';
 import { createInput } from './input.js';
 import { createDust } from './dust.js';
 import { loadEarthImage } from './earthTexture.js';
@@ -21,7 +23,7 @@ import { startFor } from './startPlan.js';
 import { createTrip } from './trip.js';
 import { createTouchControls, isTouchDevice } from './touchControls.js';
 import { initialPixelRatio } from './pixelRatio.js';
-import { createWorld } from './world.js';
+import { DEFAULT_SHADOW_MAP_SIZE, SMALL_SHADOW_MAP_SIZE, createWorld } from './world.js';
 
 const MAX_FRAME_S = 0.1;
 const UP = new THREE.Vector3(0, 1, 0);
@@ -94,6 +96,10 @@ export function mountScene(container, store, sites, audioCue = null) {
   routeEl.hidden = true;
   const skyReadout = createSkyReadout();
   const tags = createPoiTags(hud); // first, so the HUD panels stay above the floating labels
+  // the markers keep clear of the readout, the minimap and the (open) sign
+  const bodyMarkers = createBodyMarkers(hud, {
+    obstacles: () => [skyReadout.el, minimap.el, signOpen ? sign.el : null],
+  });
   const loadingEl = el('div', 'scene-loading');
   loadingEl.setAttribute('role', 'status');
   loadingEl.hidden = true;
@@ -163,7 +169,10 @@ export function mountScene(container, store, sites, audioCue = null) {
     }
     siteId = id;
     site = sites.get(id);
-    world = createWorld(site);
+    world = createWorld(site, {
+      shadowMapSize:
+        renderer.capabilities.maxTextureSize >= DEFAULT_SHADOW_MAP_SIZE[0] ? DEFAULT_SHADOW_MAP_SIZE : SMALL_SHADOW_MAP_SIZE,
+    });
     world.setShadowLift(Boolean(store.get().shadowLift));
     world.setLrocTexture(store.get().lrocTexture !== false);
     world.scene.add(robotMesh);
@@ -220,7 +229,19 @@ export function mountScene(container, store, sites, audioCue = null) {
     lastSky = skyAt(site, store.get().scenarios.A.timeMs);
     world.updateSky(lastSky, store.get().scenarios.A.timeMs);
     skyReadout.update(site, lastSky);
+    updateBodyMarkers();
     invalidate(true);
+  }
+
+  /** Only a body above the horizon of the terrain gets an edge marker (same rule as the sky readout). */
+  function updateBodyMarkers() {
+    if (!lastSky) return;
+    const { bodies } = site.info;
+    const above = (body, radiusDeg) => body.elDeg + radiusDeg > horizonAt(site.horizon, body.azDeg);
+    bodyMarkers.setVisible({
+      sun: above(lastSky.sun, bodies.sun_radius_deg),
+      earth: above(lastSky.earth, bodies.earth_radius_deg),
+    });
   }
 
   function applyTexts() {
@@ -237,6 +258,7 @@ export function mountScene(container, store, sites, audioCue = null) {
     sign.setInfo(site.info, getLocale(), siteOverview(site));
     tags.setPois(pois, poiBase);
     if (lastSky) skyReadout.update(site, lastSky);
+    updateBodyMarkers(); // the labels follow the language
   }
 
   /** Follow camera (default) or a free orbit around the rover. */
@@ -390,6 +412,10 @@ export function mountScene(container, store, sites, audioCue = null) {
     lastCamPos.copy(camera.position);
     lastCamQuat.copy(camera.quaternion);
     tags.update(camera, container.clientWidth, container.clientHeight, robot, poiBase);
+    bodyMarkers.update(camera, container.clientWidth, container.clientHeight, {
+      sun: world.sunDisc.position,
+      earth: world.earth.position,
+    });
     renderer.render(world.scene, camera);
 
     if (prevStamp !== null && forcedScale === null && qualityMode === 'auto' && timestamp > qualityIgnoreUntil) {

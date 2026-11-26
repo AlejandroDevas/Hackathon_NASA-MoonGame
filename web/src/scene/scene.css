@@ -107,3 +107,12 @@
 @media (max-width: 520px) {
   .scene-minimap { top: 10px; right: 10px; width: 96px; height: 96px; }
 }
+
+/* Sun and Earth markers at the edge of the view, while the body is above the horizon but out of the picture */
+.scene-bodies { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.scene-body { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 6px; padding: 3px 8px 3px 6px; border: 1px solid currentColor; border-radius: 999px; background: #090909d9; font: 500 11px/1 var(--font-mono); letter-spacing: .04em; white-space: nowrap; will-change: transform; }
+.scene-body[hidden] { display: none; }
+.scene-body-sun { color: var(--sun); }
+.scene-body-earth { color: var(--earth); }
+.scene-body-dot { width: 9px; height: 9px; border-radius: 50%; background: currentColor; }
+.scene-body-arrow { display: inline-block; width: 0; height: 0; margin-left: 2px; border-top: 4px solid transparent; border-bottom: 4px solid transparent; border-left: 7px solid currentColor; }
