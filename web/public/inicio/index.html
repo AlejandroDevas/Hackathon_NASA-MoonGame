@@ -8,9 +8,18 @@
 :root{--bg:#090909;--fg:#f4f1e9;--mut:#aaa69b;--card:#14120fe6;--acc:#d4ad5b}
 html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
-#top{position:fixed;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top,0px) + 12px) 14px;pointer-events:none}
-#top h1{font-size:1.05rem;margin:0}#top p{margin:3px 0 0;font-size:.78rem;color:var(--mut)}
-#lang{z-index:6;position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:12px;background:#ffffff18;color:var(--fg);border:0;border-radius:8px;padding:6px 10px;cursor:pointer}
+#top{position:fixed;z-index:4;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top,0px) + 16px) 84px 44px 18px;pointer-events:none;background:linear-gradient(#050505d9,#05050500)}
+#top .eb{display:flex;align-items:center;gap:8px;font:600 .72rem ui-monospace,"IBM Plex Mono",Consolas,monospace;letter-spacing:.24em;text-transform:uppercase;color:var(--acc)}
+#top .eb svg{width:14px;height:14px;fill:currentColor}
+#top h1{margin:6px 0 0;font-size:clamp(1.35rem,3.4vw,2.1rem);font-weight:600;line-height:1.1;letter-spacing:.005em;text-shadow:0 2px 18px #000}
+#hints{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+#hints li{display:flex;align-items:center;gap:7px;padding:6px 12px 6px 9px;border:1px solid #ffffff24;border-radius:999px;background:#0c0b09a6;backdrop-filter:blur(8px);font-size:.78rem;color:var(--mut);white-space:nowrap}
+#hints svg{color:var(--acc);width:15px;height:15px;flex:none;fill:none;stroke:var(--acc);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#hints b{color:var(--fg);font-weight:600}
+#lang{z-index:6;position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);right:16px;background:#0c0b09a6;color:var(--fg);border:1px solid #ffffff24;border-radius:999px;padding:7px 13px;cursor:pointer;backdrop-filter:blur(8px);font:600 .74rem ui-monospace,"IBM Plex Mono",Consolas,monospace;letter-spacing:.14em}
+#lang:hover{border-color:var(--acc);color:var(--acc)}
+#lang:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+@media (max-width:520px){#top{padding-right:78px}#hints{gap:6px}#hints li{font-size:.72rem;padding:5px 10px 5px 8px}}
 .tag{position:fixed;transform:translate(12px,-50%);font-size:.72rem;background:#000a;padding:2px 6px;border-radius:6px;pointer-events:none;white-space:nowrap}
 .tag.on{background:var(--acc);color:#1a1405}
 #info{position:fixed;left:0;right:0;bottom:0;padding:12px 12px calc(env(safe-area-inset-bottom,0px) + 12px);display:none}
@@ -43,7 +52,7 @@ button{padding:12px;border:0;border-radius:9px;background:#ffffff18;color:var(--
 <canvas id="c"></canvas>
 <section id="intro"><div><h1>Insight Moon 153</h1><p id="introS"></p></div>
 <button id="play" type="button"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></i><span>Play</span></button></section>
-<div id="top"><h1 id="t1"></h1><p id="t2"></p></div>
+<header id="top"><div class="eb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg><span id="t0"></span></div><h1 id="t1"></h1><ul id="hints"></ul></header>
 <button id="lang">ES / EN</button>
 <div id="tags"></div>
 <div id="info"><div class="card"><button id="x" aria-label="Cerrar">✕</button><span class="pill" id="iK"></span><h2 id="iN"></h2>
@@ -55,8 +64,9 @@ import * as THREE from './three.module.js';
 const $=id=>document.getElementById(id),rnd=(a,b)=>a+Math.random()*(b-a),KEY='inside-moon-153.lang';
 let lang='es';
 try{const q=new URLSearchParams(location.search).get('lang'),s=localStorage.getItem(KEY);lang=q==='en'||q==='es'?q:(s==='en'||s==='es'?s:'es');}catch{}
-const T={es:{t:'🌙 Polo Sur Lunar · Elige un sitio de aterrizaje',h:'Arrastra para girar · rueda para acercar · clic en un anillo para ver el sitio · doble clic para entrar',co:'Coordenadas',key:'Dato clave',sub:'Exploración del Polo Sur Lunar',pl:'Iniciar exploración',err:'No se pudieron cargar los sitios. Abre la página desde el servidor del proyecto (npm run dev).',w:'O'},
- en:{t:'🌙 Lunar South Pole · Pick a landing site',h:'Drag to rotate · wheel to zoom · click a ring for details · double-click to enter',co:'Coordinates',key:'Key data',sub:'Lunar South Pole Exploration',pl:'Start exploring',err:'Could not load the sites. Open the page from the project server (npm run dev).',w:'W'}};
+const T={es:{t0:'Polo Sur Lunar',t:'Elige un sitio de aterrizaje',h:[['drag','Arrastra','girar'],['wheel','Rueda','acercar'],['tap','Clic','ver el sitio'],['dbl','Doble clic','entrar']],ht:[['drag','Arrastra','girar'],['tap','Toca un anillo','ver el sitio'],['dbl','Doble toque','entrar']],co:'Coordenadas',key:'Dato clave',sub:'Exploración del Polo Sur Lunar',pl:'Iniciar exploración',err:'No se pudieron cargar los sitios. Abre la página desde el servidor del proyecto (npm run dev).',w:'O'},
+ en:{t0:'Lunar South Pole',t:'Pick a landing site',h:[['drag','Drag','rotate'],['wheel','Scroll','zoom'],['tap','Click','see details'],['dbl','Double-click','enter']],ht:[['drag','Drag','rotate'],['tap','Tap a ring','see details'],['dbl','Double-tap','enter']],co:'Coordinates',key:'Key data',sub:'Lunar South Pole Exploration',pl:'Start exploring',err:'Could not load the sites. Open the page from the project server (npm run dev).',w:'W'}};
+const ICON={drag:'<path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/>',wheel:'<rect x="6.5" y="3" width="11" height="18" rx="5.5"/><path d="M12 7v4"/>',tap:'<circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/>',dbl:'<circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="8.5"/>'};
 const BRIEF={
  'site01-connecting-ridge':{es:{k:'POLO SUR · CRESTA DE ALTA ILUMINACIÓN',d:'Hasta ~90 % de luz (LROC); >70 % a 1 m del suelo',b:'Une los bordes de Shackleton y de Gerlache; hay cráteres en sombra permanente cerca.'},en:{k:'SOUTH POLE · HIGHLY ILLUMINATED RIDGE',d:'Up to ~90 % sunlit (LROC); >70 % at 1 m above ground',b:'Links the rims of Shackleton and de Gerlache craters; permanently shadowed craters nearby.'}},
  'site04-shackleton-rim':{es:{k:'POLO SUR · BORDE DE CRÁTER',d:'Cráter de ~21 km y más de 4 km de profundidad',b:'Interior casi todo en sombra permanente; los picos del borde reciben luz solar.'},en:{k:'SOUTH POLE · CRATER RIM',d:'Crater ~21 km wide, over 4 km deep',b:'Interior almost entirely in permanent shadow; rim peaks receive sunlight.'}},
@@ -84,7 +94,7 @@ S.forEach((s,i)=>{const v=ll(s.info.lat_deg,s.info.lon_deg);
  const p=new THREE.Mesh(new THREE.SphereGeometry(.3,8,8),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));
  p.position.copy(r.position);p.userData.i=i;mg.add(p);picks.push(p);
  const t=document.createElement('div');t.className='tag';$('tags').appendChild(t);Object.assign(s,{ring:r,pick:p,tag:t});});
-function texts(){const L=T[lang];document.documentElement.lang=lang;$('t1').textContent=L.t;$('t2').textContent=L.h;$('introS').textContent=L.sub;$('play').setAttribute('aria-label',L.pl);$('iCk').textContent=L.co;$('iDk').textContent=L.key;
+function texts(){const L=T[lang];document.documentElement.lang=lang;$('t0').textContent=L.t0;$('t1').textContent=L.t;$('hints').innerHTML=(matchMedia('(hover:none)').matches?L.ht:L.h).map(([i,k,v])=>`<li><svg viewBox="0 0 24 24" aria-hidden="true">${ICON[i]}</svg><span><b>${k}</b> · ${v}</span></li>`).join('');$('introS').textContent=L.sub;$('play').setAttribute('aria-label',L.pl);$('iCk').textContent=L.co;$('iDk').textContent=L.key;
  S.forEach(s=>s.tag.textContent=s.info.sign[lang].title);if(sel>=0)fill(sel);}
 mg.rotation.set(-.35,.5,0);cam.position.set(0,0,40);
 let sel=-1,tgt=null,zoomT=40,down=null,moved=false,started=false;const sp=new THREE.Vector3(),rc=new THREE.Raycaster(),m2=new THREE.Vector2();
