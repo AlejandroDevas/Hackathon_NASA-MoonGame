@@ -191,7 +191,7 @@
   "tutorial.view.title": "Free view / Follow the rover",
   "tutorial.view.text": "In free view you drag to look around and use the wheel to zoom. “Follow the rover” puts the camera back behind the rover.",
   "tutorial.lroc.title": "LROC image",
-  "tutorial.lroc.text": "Paints the ground with the light and dark patches seen in real photos from NASA's LRO probe. Turn it off to see the relief alone. Not available at Nobile Rim 1.",
+  "tutorial.lroc.text": "Paints the ground with the light and dark patches seen in real photos from NASA's LRO probe. Turn it off to see the relief alone. Not available at Nobile Rim 1, Nobile Rim 2 or Leibnitz Beta Plateau.",
   "tutorial.shadows.title": "Lighten shadows",
   "tutorial.shadows.text": "At the south pole the Sun sits almost on the horizon and shadows are very dark. This button lightens them so you can see what they hide. It only changes how things look, not the data.",
   "tutorial.sound.title": "Sound",

@@ -58,6 +58,17 @@ describe('sites catalogue', () => {
     for (const key of ['name', 'lat_deg', 'lon_deg', 'sign', 'sources']) expect(info[key]).toEqual(cfg[key]);
   });
 
+  test('only the sites inside the LROC mosaic (south of 85.5 S, enough coverage) carry a tone map', () => {
+    const withMap = ARTEMIS_SITES.filter((id) => read(id, 'info.json').albedo);
+    expect(withMap.sort()).toEqual(
+      ['haworth', 'site01-connecting-ridge', 'site04-shackleton-rim', 'site07-peak-near-shackleton', 'site11-de-gerlache-rim', 'site23-malapert-massif'].sort(),
+    );
+    for (const id of withMap) {
+      expect(existsSync(join(SITES, id, 'albedo.bin')), `${id}/albedo.bin`).toBe(true);
+      expect(read(id, 'info.json').albedo.coverage).toBeGreaterThan(0.5);
+    }
+  });
+
   test.each(ARTEMIS_SITES)('%s is inside the south polar cap', (id) => {
     const { lat_deg: lat } = read(id, 'info.json');
     expect(lat).toBeLessThan(-80);

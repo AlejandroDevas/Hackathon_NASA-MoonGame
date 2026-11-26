@@ -77,5 +77,16 @@
         ]
       }
     ]
+  },
+  "albedo": {
+    "file": "albedo.bin",
+    "rows": 1001,
+    "cols": 1001,
+    "coverage": 1.0,
+    "source": "LROC NAC south-pole mosaic (Wagner et al. 2015), browse tiles, relative local tone of the sunlit parts",
+    "neutral": 100,
+    "tiles": [
+      "NAC_POLE_P892S1350"
+    ]
   }
 }

@@ -191,7 +191,7 @@
   "tutorial.view.title": "Vista libre / Seguir al robot",
   "tutorial.view.text": "Con la vista libre arrastras para mirar alrededor y usas la rueda para acercar. «Seguir al robot» vuelve a la cámara que va detrás del rover.",
   "tutorial.lroc.title": "Imagen LROC",
-  "tutorial.lroc.text": "Pinta el suelo con las manchas claras y oscuras que se ven en las fotos reales de la sonda LRO de la NASA. Apágalo para ver solo el relieve. En Nobile Rim 1 no está disponible.",
+  "tutorial.lroc.text": "Pinta el suelo con las manchas claras y oscuras que se ven en las fotos reales de la sonda LRO de la NASA. Apágalo para ver solo el relieve. No está disponible en Nobile Rim 1, Nobile Rim 2 ni Leibnitz Beta Plateau.",
   "tutorial.shadows.title": "Aclarar sombras",
   "tutorial.shadows.text": "En el polo sur el Sol está casi a ras del horizonte y las sombras son muy negras. Este botón las aclara para que veas lo que esconden. Solo cambia cómo se ve, no los datos.",
   "tutorial.sound.title": "Sonido",
