@@ -17,6 +17,9 @@ const LANG_KEY = 'inside-moon-153.lang';
 /** The mini-game (`web/public/juego/`), served next to the app; relative so it works under any base path. */
 export const GAME_URL = './juego/index.html';
 
+/** The start screen with the Moon (`web/public/inicio/`); relative, like the game's. */
+export const HOME_URL = './inicio/index.html';
+
 const TOAST_MS = 2200;
 
 /** A short message that fades by itself (a polite status for screen readers too). */
@@ -55,6 +58,13 @@ function toolButton(testId, iconName, onClick) {
  */
 export function createTopBar(store, { analysis, sites, siteList, audioCue, tutorial }) {
   const header = el('header', 'topbar');
+
+  // back to the start screen (the Moon with the landing sites); a plain link, so it also works with the keyboard
+  const homeLink = el('a', 'tb-button tb-home');
+  homeLink.href = HOME_URL;
+  homeLink.dataset.testid = 'home-link';
+  const homeLabel = el('span', 'tb-label');
+  homeLink.append(icon('home'), homeLabel);
 
   const brand = el('div', 'topbar-brand');
   const kicker = el('p', 'topbar-kicker');
@@ -170,7 +180,7 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
   const gameLabel = el('span', 'tb-label');
   gameLink.append(icon('gamepad'), gameLabel);
 
-  header.append(brand, locale, site, el('div', 'topbar-spacer'), tools, gameLink, menuWrap);
+  header.append(homeLink, brand, locale, site, el('div', 'topbar-spacer'), tools, gameLink, menuWrap);
 
   /** Text, state and availability of every control for the current state. */
   function refresh(state) {
@@ -201,6 +211,11 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
     volume.setAttribute('aria-label', t('ctl.volume'));
     volume.title = t('ctl.volume');
     if (state.volume !== undefined && Number(volume.value) !== state.volume) volume.value = String(state.volume);
+
+    homeLabel.textContent = t('app.home');
+    homeLink.href = `${HOME_URL}?lang=${state.locale}`; // the start screen opens in the same language
+    homeLink.setAttribute('aria-label', t('app.homeLabel'));
+    homeLink.title = t('app.homeLabel');
 
     gameLabel.textContent = t('app.game');
     gameLink.href = `${GAME_URL}?lang=${state.locale}`; // the game opens in the same language

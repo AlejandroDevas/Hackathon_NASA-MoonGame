@@ -23,6 +23,7 @@ html, body { height: 100%; overflow: hidden; }
 .tb-button, .pb-button, .drawer-close { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 12px; }
 .tb-button:hover, .pb-button:hover, .topbar-locale:hover, .topbar-site:hover, .drawer-close:hover { border-color: var(--sun); background: var(--surface-raised); }
 .tb-button[aria-pressed='true'], .pb-button[aria-expanded='true'] { border-color: var(--sun); color: var(--sun); }
+.tb-home, .tb-game { text-decoration: none; }
 .tb-game { text-decoration: none; border-color: var(--sun); color: var(--sun); }
 .tb-button:disabled { opacity: .45; cursor: not-allowed; }
 .tb-button:disabled:hover { border-color: var(--border); background: var(--surface-2); }
@@ -137,7 +138,8 @@ html, body { height: 100%; overflow: hidden; }
 @media (max-width: 720px) {
   :root { --topbar-h: 94px; --playbar-h: 98px; }
   /* two rows: the name, the language and the menu above; the site and the view toggles below */
-  .topbar { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; grid-template-areas: 'brand locale game menu' 'site site tools tools'; align-content: center; gap: 8px; padding: 0 10px; }
+  .topbar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto auto; grid-template-areas: 'home brand locale game menu' 'site site site tools tools'; align-content: center; gap: 8px; padding: 0 10px; }
+  .tb-home { grid-area: home; }
   .topbar-brand { grid-area: brand; }
   .topbar-locale { grid-area: locale; }
   .topbar-menu { grid-area: menu; }
@@ -168,9 +170,11 @@ html, body { height: 100%; overflow: hidden; }
 }
 
 @media (max-width: 420px) {
-  .topbar-locale { padding: 0 4px; }
-  .topbar-title { font-size: 1rem; }
-  .tb-button { padding: 0 6px; }
+  .topbar { gap: 6px; padding: 0 8px; }
+  .topbar-locale { padding: 0 2px; }
+  .topbar-title { font-size: .74rem; }
+  .tb-button { padding: 0 5px; }
+  .tb-volume { width: 40px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

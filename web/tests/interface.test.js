@@ -55,13 +55,14 @@ afterEach(() => {
 });
 
 describe('top bar', () => {
-  test('the name is on the left, followed by the language selector', () => {
+  test('on the left: the home button, the name, the language selector and the site', () => {
     setup();
     const bar = document.querySelector('.topbar');
     const children = [...bar.children].map((c) => c.className);
-    expect(children[0]).toContain('topbar-brand');
-    expect(children[1]).toContain('topbar-locale');
-    expect(children[2]).toContain('topbar-site');
+    expect(children[0]).toContain('tb-home');
+    expect(children[1]).toContain('topbar-brand');
+    expect(children[2]).toContain('topbar-locale');
+    expect(children[3]).toContain('topbar-site');
     expect(bar.querySelector('h1').textContent).toBe(es['app.title']);
     expect(bar.querySelector('.topbar-kicker').textContent).toBe(es['app.kicker']);
     expect(q('locale').tagName).toBe('SELECT');

@@ -172,6 +172,8 @@
   "card.onDate": "≈ {date} (UTC)",
   "app.lroc": "Imagen LROC",
   "app.lrocNone": "Este sitio queda fuera del mosaico LROC (termina en 85,5° S).",
+  "app.home": "Inicio",
+  "app.homeLabel": "Volver a la pantalla de inicio para elegir otro sitio",
   "app.game": "Juego",
   "app.gameLabel": "Jugar a «Misión Rescate Lunar» (abre otra página)",
   "ui.menuTutorial": "Tutorial",
