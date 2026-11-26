@@ -70,6 +70,41 @@ describe('loadSite', () => {
     expect(site.terrainPromise).toBeNull();
   });
 
+  test('ensureTerrain reports how much has arrived while the body streams in, and ends with 1', async () => {
+    const bytes = await readFile(join(FIXTURES, 'tiny-site', 'terrain.bin'));
+    const chunks = [bytes.subarray(0, 4000), bytes.subarray(4000, 12000), bytes.subarray(12000)];
+    const base = globalThis.fetch;
+    vi.stubGlobal('fetch', async (url) => {
+      if (!url.endsWith('terrain.bin')) return base(url);
+      let next = 0;
+      return { ok: true, status: 200, body: { getReader: () => ({ read: async () => (next < chunks.length ? { done: false, value: chunks[next++] } : { done: true }) }) } };
+    });
+    const site = await loadSite('/fixtures', 'tiny-site', { terrain: false });
+    const heard = [];
+    const joined = [];
+    const first = ensureTerrain(site, (f) => heard.push(f));
+    const second = ensureTerrain(site, (f) => joined.push(f)); // joins the request under way, and hears it too
+    const [a, b] = await Promise.all([first, second]);
+    expect(a).toBe(b);
+    expect(a.rows).toBe(101);
+    expect(heard.at(-1)).toBe(1);
+    expect(heard.slice(0, -1)).toEqual([...heard.slice(0, -1)].sort((x, y) => x - y)); // never goes backwards
+    expect(heard[0]).toBeGreaterThan(0);
+    expect(heard[0]).toBeLessThanOrEqual(0.95);
+    expect(joined).toEqual(heard);
+    let late = null;
+    await ensureTerrain(site, (f) => (late = f)); // already loaded: reports done at once
+    expect(late).toBe(1);
+  });
+
+  test('a stream that fails reports nothing wrong and a later attempt starts afresh', async () => {
+    const site = { info: { terrain: { file: 'terrain.bin', rows: 101, cols: 101, min_m: 0, max_m: 1, pixel_m: 5, observer_rc: [50, 50], north_bearing_deg: 0 } }, dir: '/x', terrain: null, terrainPromise: null };
+    vi.stubGlobal('fetch', async () => ({ ok: true, status: 200, body: { getReader: () => ({ read: async () => { throw new Error('connection dropped'); } }) } }));
+    await expect(ensureTerrain(site, () => {})).rejects.toThrow('connection dropped');
+    expect(site.terrainPromise).toBeNull();
+    expect(site.terrainListeners).toBeNull();
+  });
+
   test('a missing site throws an error naming the URL', async () => {
     await expect(loadSite('/fixtures', 'nope')).rejects.toThrow('/fixtures/nope/info.json');
   });

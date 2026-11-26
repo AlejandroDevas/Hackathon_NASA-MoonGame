@@ -1,66 +1,6 @@
-<!doctype html>
-<html lang="es">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Insight Moon 153 · Elige un sitio</title>
-<style>
-:root{--bg:#090909;--fg:#f4f1e9;--mut:#aaa69b;--card:#14120fe6;--acc:#d4ad5b}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
-canvas{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
-#top{position:fixed;z-index:4;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top,0px) + 16px) 84px 44px 18px;pointer-events:none;background:linear-gradient(#050505d9,#05050500)}
-#top .eb{display:flex;align-items:center;gap:8px;font:600 .72rem ui-monospace,"IBM Plex Mono",Consolas,monospace;letter-spacing:.24em;text-transform:uppercase;color:var(--acc)}
-#top .eb svg{width:14px;height:14px;fill:currentColor}
-#top h1{margin:6px 0 0;font-size:clamp(1.35rem,3.4vw,2.1rem);font-weight:600;line-height:1.1;letter-spacing:.005em;text-shadow:0 2px 18px #000}
-#hints{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
-#hints li{display:flex;align-items:center;gap:7px;padding:6px 12px 6px 9px;border:1px solid #ffffff24;border-radius:999px;background:#0c0b09a6;backdrop-filter:blur(8px);font-size:.78rem;color:var(--mut);white-space:nowrap}
-#hints svg{color:var(--acc);width:15px;height:15px;flex:none;fill:none;stroke:var(--acc);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-#hints b{color:var(--fg);font-weight:600}
-#lang{z-index:6;position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);right:16px;background:#0c0b09a6;color:var(--fg);border:1px solid #ffffff24;border-radius:999px;padding:7px 13px;cursor:pointer;backdrop-filter:blur(8px);font:600 .74rem ui-monospace,"IBM Plex Mono",Consolas,monospace;letter-spacing:.14em}
-#lang:hover{border-color:var(--acc);color:var(--acc)}
-#lang:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
-@media (max-width:520px){#top{padding-right:78px}#hints{gap:6px}#hints li{font-size:.72rem;padding:5px 10px 5px 8px}}
-.tag{position:fixed;transform:translate(12px,-50%);font-size:.72rem;background:#000a;padding:2px 6px;border-radius:6px;pointer-events:none;white-space:nowrap}
-.tag.on{background:var(--acc);color:#1a1405}
-#info{position:fixed;left:0;right:0;bottom:0;padding:12px 12px calc(env(safe-area-inset-bottom,0px) + 12px);display:none}
-.card{position:relative;max-width:520px;margin:0 auto;background:var(--card);border:1px solid #ffffff1f;border-radius:14px;padding:16px;backdrop-filter:blur(8px)}
-.pill{display:inline-block;font-size:.75rem;font-weight:700;letter-spacing:.04em;color:var(--acc);background:#d4ad5b22;border-radius:6px;padding:3px 8px;margin-right:44px}
-.card h2{margin:8px 0 10px;font-size:1.3rem}
-.kv{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:10px 12px;background:#ffffff0d;border-radius:10px}
-.kv span{display:block;font-size:.78rem;color:var(--mut)}.kv b{font-size:.95rem}
-.card p{margin:10px 0 0;font-size:.92rem;line-height:1.45;color:var(--mut)}
-button{padding:12px;border:0;border-radius:9px;background:#ffffff18;color:var(--fg);font-size:.92rem;cursor:pointer}
-#x{position:absolute;top:10px;right:10px;width:44px;height:44px;padding:0}
-#err{position:fixed;inset:40% 0 auto;text-align:center;padding:14px;background:#000c;color:#ff9a9a;display:none}
-#intro{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:calc(env(safe-area-inset-top,0px) + 72px) 16px calc(env(safe-area-inset-bottom,0px) + 56px);pointer-events:none;transition:opacity .7s,transform .7s}
-#intro.off{opacity:0;transform:scale(1.04)}
-#intro h1{margin:0;text-align:center;font-size:clamp(1.6rem,6.5vw,3.4rem);font-weight:600;letter-spacing:.22em;text-transform:uppercase;text-shadow:0 0 24px #ffffff59,0 0 60px #93c5fd33;animation:rev 1.25s cubic-bezier(.16,1,.3,1) both,glow 4s ease-in-out 1.25s infinite}
-#intro p{margin:14px 0 0;text-align:center;font-size:clamp(.78rem,2vw,.95rem);letter-spacing:.28em;text-transform:uppercase;color:#d8d5cc;animation:fade 1s cubic-bezier(.16,1,.3,1) .45s both}
-#play{pointer-events:auto;display:flex;align-items:center;gap:14px;padding:10px 32px 10px 10px;border:1px solid #ffffff59;border-radius:999px;background:#ffffff1a;backdrop-filter:blur(12px);color:#fff;font-size:.95rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;box-shadow:0 0 30px #ffffff24;animation:fade 1s cubic-bezier(.16,1,.3,1) .75s both;transition:transform .3s,background .3s}
-#play:hover{background:#ffffff38;transform:scale(1.05)}
-#play:focus-visible{outline:2px solid var(--acc);outline-offset:4px}
-#play i{width:40px;height:40px;border-radius:50%;background:var(--acc);color:#1a1405;display:grid;place-items:center}
-#play svg{width:16px;height:16px;margin-left:2px;fill:currentColor}
-.intro #top{visibility:hidden}
-@keyframes rev{from{opacity:0;letter-spacing:.45em;transform:translateY(-18px);filter:blur(8px)}to{opacity:1;letter-spacing:.22em;transform:none;filter:blur(0)}}
-@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-@keyframes glow{50%{text-shadow:0 0 36px #ffffffa6,0 0 85px #93c5fd66}}
-@media (prefers-reduced-motion:reduce){#intro h1,#intro p,#play{animation:none}}
-</style>
-</head>
-<body class="intro">
-<canvas id="c"></canvas>
-<section id="intro"><div><h1>Insight Moon 153</h1><p id="introS"></p></div>
-<button id="play" type="button"><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></i><span>Play</span></button></section>
-<header id="top"><div class="eb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></svg><span id="t0"></span></div><h1 id="t1"></h1><ul id="hints"></ul></header>
-<button id="lang">ES / EN</button>
-<div id="tags"></div>
-<div id="info"><div class="card"><button id="x" aria-label="Cerrar">✕</button><span class="pill" id="iK"></span><h2 id="iN"></h2>
-<div class="kv"><div><span id="iCk"></span><b id="iC"></b></div><div><span id="iDk"></span><b id="iD"></b></div></div>
-<p id="iB"></p></div></div>
-<div id="err"></div>
-<script type="module">
-import * as THREE from './three.module.js';
+// The start screen: the Moon in 3D with a ring on every landing site. It shares three.js with the app (Vite bundles
+// both pages, so the library is downloaded once) and lives in its own page so the app itself opens straight on a site.
+import * as THREE from 'three';
 const $=id=>document.getElementById(id),rnd=(a,b)=>a+Math.random()*(b-a),KEY='inside-moon-153.lang';
 let lang='es';
 try{const q=new URLSearchParams(location.search).get('lang'),s=localStorage.getItem(KEY);lang=q==='en'||q==='es'?q:(s==='en'||s==='es'?s:'es');}catch{}
@@ -107,7 +47,14 @@ function fill(i){const s=S[i],d=s.info,g=d.sign[lang],br=(BRIEF[s.id]||{})[lang]
  $('iK').textContent=br.k;$('iK').style.display=br.k?'inline-block':'none';$('iN').textContent=g.title;
  $('iC').textContent=Math.abs(d.lat_deg).toFixed(2)+'° S, '+Math.abs(d.lon_deg).toFixed(2)+'° '+(d.lon_deg<0?T[lang].w:'E');$('iD').textContent=br.d;$('iB').textContent=br.b;}
 function select(i){sel=i;const v=ll(S[i].info.lat_deg,S[i].info.lon_deg);tgt={rx:Math.atan2(v.y,Math.hypot(v.x,v.z)),ry:Math.atan2(-v.x,v.z)};zoomT=11.6;fill(i);$('info').style.display='block';}
-const enter=i=>{try{localStorage.setItem(KEY,lang);}catch{}location.href='../index.html?site='+encodeURIComponent(S[i].id)+'&lang='+lang;};
+/* Entering a site: the camera dives towards it while the screen fades to the colour of the app's loading screen, so the
+   two pages read as one movement (no animation for those who asked for less motion) */
+let leaving=false;
+const enter=i=>{if(leaving)return;leaving=true;try{localStorage.setItem(KEY,lang);}catch{}
+ const go='../index.html?site='+encodeURIComponent(S[i].id)+'&lang='+lang;
+ if(matchMedia('(prefers-reduced-motion: reduce)').matches){location.href=go;return;}
+ const v=ll(S[i].info.lat_deg,S[i].info.lon_deg);tgt={rx:Math.atan2(v.y,Math.hypot(v.x,v.z)),ry:Math.atan2(-v.x,v.z)};zoomT=10.4;
+ document.body.classList.add('leaving');setTimeout(()=>{location.href=go;},700);};
 const close=()=>{sel=-1;tgt=null;zoomT=28;$('info').style.display='none';};$('x').onclick=close;
 /* Play: de la Luna completa gira y se acerca al polo sur, y aparecen los sitios */
 function startPlay(){if(started)return;started=true;document.body.classList.remove('intro');$('intro').classList.add('off');setTimeout(()=>{$('intro').style.display='none';},700);
@@ -133,6 +80,3 @@ const wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
  rd.render(sc,cam);requestAnimationFrame(tick);})();
 texts();
 $('play').onclick=startPlay;$('play').focus();
-</script>
-</body>
-</html>

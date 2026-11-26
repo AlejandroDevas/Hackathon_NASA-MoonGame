@@ -36,6 +36,19 @@ describe('mountScene fallbacks (jsdom has no WebGL)', () => {
     expect(scene.debug.signOpen()).toBe(false);
   });
 
+  test('the notice explains what to try and offers the planner, which needs no 3D view', () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const container = document.createElement('div');
+    const store = storeFor('tiny-site');
+    mountScene(container, store, new Map([['tiny-site', loadTinySite()]]));
+    expect(container.querySelector('.scene-notice-hint').textContent).toBe(es['scene.noWebglHint']);
+    const open = container.querySelector('[data-testid="notice-planner"]');
+    expect(open.textContent).toBe(es['scene.openPlanner']);
+    expect(store.get().panelOpen).toBeFalsy();
+    open.click();
+    expect(store.get().panelOpen).toBe(true);
+  });
+
   test('a site without terrain shows its own notice', () => {
     const container = document.createElement('div');
     const site = { ...loadTinySite(), terrain: null };

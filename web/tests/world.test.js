@@ -1,9 +1,17 @@
 // @vitest-environment node
+import * as THREE from 'three';
 import { describe, expect, test, vi } from 'vitest';
 import { directionFromAzEl } from '../src/scene/sky.js';
 import { gridToScene } from '../src/scene/terrainData.js';
 import { buildTerrainGeometry, terrainColor } from '../src/scene/terrainMesh.js';
-import { createWorld, horizonRingProfile, shadowFrustumHalfSize } from '../src/scene/world.js';
+import {
+  DEFAULT_SHADOW_MAP_SIZE,
+  SMALL_SHADOW_MAP_SIZE,
+  createWorld,
+  fitShadowCamera,
+  horizonRingProfile,
+  shadowFrustumHalfSize,
+} from '../src/scene/world.js';
 import { loadTinySite, loadTinyTerrain, makeTerrain } from './helpers.js';
 
 const tiny = loadTinyTerrain();
@@ -78,7 +86,15 @@ describe('createWorld', () => {
   test('the sun casts shadows, the Earth does not', () => {
     expect(world.sun.castShadow).toBe(true);
     expect(world.earth.castShadow).toBe(false);
-    expect(world.sun.shadow.mapSize.x).toBe(4096);
+    // wide and short: fitted to the terrain as seen from the nearly horizontal Sun, same texel count as 4096 x 4096
+    const { x, y } = world.sun.shadow.mapSize;
+    expect([x, y]).toEqual(DEFAULT_SHADOW_MAP_SIZE);
+    expect(x * y).toBe(4096 * 4096);
+  });
+
+  test('a smaller shadow map can be asked for (GPUs that cannot make 8192-wide textures)', () => {
+    const small = createWorld(loadTinySite(), { shadowMapSize: SMALL_SHADOW_MAP_SIZE });
+    expect(small.sun.shadow.mapSize.toArray()).toEqual(SMALL_SHADOW_MAP_SIZE);
   });
 
   test('has the terrain, the horizon ring and stars in the scene', () => {
@@ -115,10 +131,50 @@ describe('shadowFrustumHalfSize', () => {
     expect(shadowFrustumHalfSize(t)).toBeGreaterThanOrEqual(Math.hypot(4500, 4500));
   });
 
-  test('createWorld uses it for the shadow camera', () => {
+});
+
+describe('fitShadowCamera', () => {
+  const corners = [];
+  for (const x of [-2500, 2500]) for (const y of [700, 1100]) for (const z of [-2500, 2500]) corners.push(new THREE.Vector3(x, y, z));
+  const LIGHT_DISTANCE = 6000;
+
+  /** The corners as an orthographic camera with the fitted bounds would see them (NDC). */
+  function ndcOf(direction) {
+    const fit = fitShadowCamera(corners, direction, LIGHT_DISTANCE);
+    const camera = new THREE.OrthographicCamera(fit.left, fit.right, fit.top, fit.bottom, fit.near, fit.far);
+    camera.position.copy(direction).normalize().multiplyScalar(LIGHT_DISTANCE);
+    camera.lookAt(0, 0, 0);
+    camera.updateMatrixWorld(true);
+    return { fit, points: corners.map((c) => c.clone().project(camera)) };
+  }
+
+  test.each([
+    ['a Sun on the horizon from the east', [1, 0.02, 0]],
+    ['a low Sun from the north-west', [-0.68, 0.03, -0.73]],
+    ['a higher Sun', [0.3, 0.5, 0.2]],
+  ])('every corner of the terrain is inside the frustum for %s', (_name, v) => {
+    const { points } = ndcOf(new THREE.Vector3(...v));
+    for (const p of points) {
+      expect(Math.abs(p.x)).toBeLessThanOrEqual(1);
+      expect(Math.abs(p.y)).toBeLessThanOrEqual(1);
+      expect(Math.abs(p.z)).toBeLessThanOrEqual(1);
+    }
+  });
+
+  test('with the Sun on the horizon the frustum is a wide, shallow rectangle, not a square', () => {
+    const { fit } = ndcOf(new THREE.Vector3(1, 0.02, 0));
+    expect(fit.right - fit.left).toBeGreaterThan(4 * (fit.top - fit.bottom));
+  });
+
+  test('createWorld fits the shadow camera to the terrain and refits it when the Sun moves', () => {
     const world = createWorld(loadTinySite());
     const camera = world.sun.shadow.camera;
-    expect([camera.left, camera.right, camera.top, camera.bottom]).toEqual([-500, 500, 500, -500]);
+    world.updateSky({ sun: { azDeg: 90, elDeg: 1 }, earth: { azDeg: 180, elDeg: 5 } });
+    const low = camera.top - camera.bottom;
+    world.updateSky({ sun: { azDeg: 90, elDeg: 40 }, earth: { azDeg: 180, elDeg: 5 } });
+    expect(camera.top - camera.bottom).toBeGreaterThan(low); // a higher Sun sees a taller strip of ground
+    expect(camera.near).toBeGreaterThanOrEqual(1);
+    expect(camera.far).toBeGreaterThan(camera.near);
   });
 });
 

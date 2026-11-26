@@ -96,20 +96,56 @@ export function regolithPixels(size = REGOLITH_SIZE, seed = 20260101) {
   return pixels;
 }
 
+/** Relief (metres) that the 0..1 height field stands for when its slopes are turned into a normal map. */
+export const REGOLITH_RELIEF_M = 1.2;
+
 /**
- * Tiling regolith texture, used both as colour variation and as a bump map so the
- * grazing polar sunlight picks out the fine grain. Procedural: it is NOT satellite imagery.
+ * RGBA bytes of a tangent-space normal map of the regolith, with the tile wrapping around (so it joins
+ * seamlessly). u runs east and v south, like the terrain UVs. Unlike a screen-space bump map, a normal
+ * map is averaged by the mipmaps, so the grain fades to flat with distance instead of aliasing into
+ * stripes under the grazing polar sun.
+ * @returns {Uint8Array} size * size * 4 bytes
  */
-export function createRegolithTexture(size = REGOLITH_SIZE, seed = 20260101) {
-  const texture = new THREE.DataTexture(regolithPixels(size, seed), size, size, THREE.RGBAFormat);
+export function regolithNormalPixels(size = REGOLITH_SIZE, seed = 20260101, reliefM = REGOLITH_RELIEF_M) {
+  const heights = regolithHeights(size, seed);
+  const texelM = REGOLITH_TILE_M / size;
+  const at = (x, y) => heights[(((y % size) + size) % size) * size + (((x % size) + size) % size)] * reliefM;
+  const pixels = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const dhdu = (at(x + 1, y) - at(x - 1, y)) / (2 * texelM);
+      const dhdv = (at(x, y + 1) - at(x, y - 1)) / (2 * texelM);
+      const length = Math.hypot(dhdu, dhdv, 1);
+      const i = (y * size + x) * 4;
+      pixels[i] = Math.round((-dhdu / length * 0.5 + 0.5) * 255);
+      pixels[i + 1] = Math.round((-dhdv / length * 0.5 + 0.5) * 255);
+      pixels[i + 2] = Math.round((1 / length * 0.5 + 0.5) * 255);
+      pixels[i + 3] = 255;
+    }
+  }
+  return pixels;
+}
+
+function tilingTexture(pixels, size, name) {
+  const texture = new THREE.DataTexture(pixels, size, size, THREE.RGBAFormat);
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.magFilter = THREE.LinearFilter;
   texture.minFilter = THREE.LinearMipmapLinearFilter;
   texture.generateMipmaps = true;
-  texture.anisotropy = 8;
+  texture.anisotropy = 16; // the GPU clamps it to what it supports; it keeps grazing views from smearing
   texture.colorSpace = THREE.NoColorSpace;
   texture.needsUpdate = true;
-  texture.name = 'regolith';
+  texture.name = name;
   return texture;
+}
+
+/** Tiling regolith colour variation. Procedural: it is NOT satellite imagery. */
+export function createRegolithTexture(size = REGOLITH_SIZE, seed = 20260101) {
+  return tilingTexture(regolithPixels(size, seed), size, 'regolith');
+}
+
+/** Tiling tangent-space normal map of the same regolith, so the grazing polar sunlight picks out the fine grain. */
+export function createRegolithNormalTexture(size = REGOLITH_SIZE, seed = 20260101) {
+  return tilingTexture(regolithNormalPixels(size, seed), size, 'regolith-normal');
 }

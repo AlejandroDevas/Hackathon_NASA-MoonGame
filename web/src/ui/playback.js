@@ -77,6 +77,13 @@ export function createPlayback(store, sites) {
       if (store.get().playing) this.pause();
       else this.play();
     },
+    /** The next faster (or slower) speed of the list; stays at the end of it. */
+    faster() {
+      this.setSpeed(SPEEDS[Math.min(SPEEDS.findIndex((s) => s.ms === speedMs) + 1, SPEEDS.length - 1)].ms);
+    },
+    slower() {
+      this.setSpeed(SPEEDS[Math.max(SPEEDS.findIndex((s) => s.ms === speedMs) - 1, 0)].ms);
+    },
     /** Changes the speed; a running animation continues at the new speed. */
     setSpeed(ms) {
       if (!SPEEDS.some((s) => s.ms === ms) || ms === speedMs) return;

@@ -7,6 +7,7 @@ import '@fontsource/barlow-condensed/latin-600.css';
 import '@fontsource/barlow-condensed/latin-700.css';
 import '@fontsource/ibm-plex-mono/latin-400.css';
 import '@fontsource/ibm-plex-mono/latin-500.css';
+import { startTerrainPreload } from './data/preload.js';
 import { ensureTerrain, loadSite } from './data/siteData.js';
 import { setLocale, t } from './i18n.js';
 import { litStart } from './metrics/overview.js';
@@ -111,6 +112,7 @@ async function main() {
     if (import.meta.env.DEV) window.__navigator = scene.debug;
     const ui = mountInterface(root, store, siteList, sites, { renderTimeline, audioCue });
     ui.tutorial.openIfFirstVisit();
+    startTerrainPreload(sites, first); // the other sites' terrain, fetched while the browser is idle
   } catch (error) {
     root.textContent = t('app.loadError', { message: error.message });
   } finally {

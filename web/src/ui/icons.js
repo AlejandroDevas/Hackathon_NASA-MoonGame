@@ -18,6 +18,8 @@ const PATHS = {
   home: '<path d="m4 11.5 8-7 8 7"/><path d="M6.5 10v9.5h4v-5h3v5h4V10"/>',
   gamepad: '<path d="M7.5 8h9a4.5 4.5 0 0 1 4.4 5.4l-.7 3.2a2 2 0 0 1-3.4 1l-1.9-2.1h-4.6l-1.9 2.1a2 2 0 0 1-3.4-1l-.7-3.2A4.5 4.5 0 0 1 7.5 8z"/><path d="M8 10.5v3M6.5 12h3"/><circle cx="15.5" cy="11.2" r=".6"/><circle cx="17.5" cy="13" r=".6"/>',
   speed: '<path d="M4.5 16a8 8 0 1 1 15 0"/><path d="m12 13 4-4"/>',
+  event: '<rect x="4" y="5.5" width="16" height="14" rx="2"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/><path d="m10.5 14.5 1.5 1.5 2.5-3"/>',
+  zoom: '<circle cx="10.5" cy="10.5" r="5.5"/><path d="m15 15 5 5M8 10.5h5"/>',
 };
 
 /**

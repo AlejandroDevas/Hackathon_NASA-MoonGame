@@ -2,8 +2,9 @@ import js from '@eslint/js';
 import globals from 'globals';
 
 export default [
-  // dist/ is built output, public/ holds the stand-alone pages and bundled libraries (game, start screen, Draco)
-  { ignores: ['dist/**', 'public/**', 'node_modules/**'] },
+  // dist/ is built output, public/ holds the stand-alone pages and bundled libraries (game, Draco); inicio/ is the
+  // start screen, written compactly as one page script, so it is left out of the lint like the game page
+  { ignores: ['dist/**', 'public/**', 'inicio/**', 'node_modules/**'] },
   js.configs.recommended,
   {
     files: ['src/**/*.js'],

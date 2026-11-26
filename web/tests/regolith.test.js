@@ -1,6 +1,12 @@
 // @vitest-environment node
 import { describe, expect, test } from 'vitest';
-import { createRegolithTexture, regolithHeights, regolithPixels } from '../src/scene/regolith.js';
+import {
+  createRegolithNormalTexture,
+  createRegolithTexture,
+  regolithHeights,
+  regolithNormalPixels,
+  regolithPixels,
+} from '../src/scene/regolith.js';
 import { buildTerrainGeometry, terrainColor } from '../src/scene/terrainMesh.js';
 import { loadTinySite } from './helpers.js';
 
@@ -43,6 +49,58 @@ describe('regolith texture', () => {
     const texture = createRegolithTexture(SIZE, 5);
     expect(texture.wrapS).toBe(1000); // THREE.RepeatWrapping
     expect(texture.image.width).toBe(SIZE);
+    texture.dispose();
+  });
+});
+
+describe('regolith normal map', () => {
+  test('is a tangent-space map: every normal points up and has unit length', () => {
+    const pixels = regolithNormalPixels(SIZE, 3);
+    expect(pixels).toHaveLength(SIZE * SIZE * 4);
+    for (let i = 0; i < pixels.length; i += 4) {
+      const n = [pixels[i], pixels[i + 1], pixels[i + 2]].map((b) => (b / 255) * 2 - 1);
+      expect(n[2]).toBeGreaterThan(0);
+      expect(Math.hypot(...n)).toBeCloseTo(1, 1);
+      expect(pixels[i + 3]).toBe(255);
+    }
+  });
+
+  test('leans against the slope: where the ground rises towards the east the normal tilts towards the west', () => {
+    // u runs east, so the normal's x is minus the height gradient along u
+    const heights = regolithHeights(SIZE, 3);
+    const pixels = regolithNormalPixels(SIZE, 3);
+    let checked = 0;
+    for (let y = 1; y < SIZE - 1; y++) {
+      for (let x = 1; x < SIZE - 1; x++) {
+        const rise = heights[y * SIZE + x + 1] - heights[y * SIZE + x - 1];
+        if (Math.abs(rise) < 0.05) continue;
+        const nx = (pixels[(y * SIZE + x) * 4] / 255) * 2 - 1;
+        expect(Math.sign(nx)).toBe(-Math.sign(rise));
+        checked++;
+      }
+    }
+    expect(checked).toBeGreaterThan(20);
+  });
+
+  test('tiles seamlessly: the normals at the two edges of the tile are as alike as two neighbours', () => {
+    const pixels = regolithNormalPixels(SIZE, 3);
+    const px = (x, y, k) => pixels[(y * SIZE + x) * 4 + k];
+    let worstInside = 0;
+    let worstSeam = 0;
+    for (let y = 0; y < SIZE; y++) {
+      for (let k = 0; k < 3; k++) {
+        worstSeam = Math.max(worstSeam, Math.abs(px(0, y, k) - px(SIZE - 1, y, k)));
+        for (let x = 0; x < SIZE - 1; x++) worstInside = Math.max(worstInside, Math.abs(px(x + 1, y, k) - px(x, y, k)));
+      }
+    }
+    expect(worstSeam).toBeLessThanOrEqual(worstInside);
+  });
+
+  test('builds a repeating, mipmapped, anisotropic three.js texture', () => {
+    const texture = createRegolithNormalTexture(SIZE, 5);
+    expect(texture.wrapS).toBe(1000); // THREE.RepeatWrapping
+    expect(texture.generateMipmaps).toBe(true);
+    expect(texture.anisotropy).toBeGreaterThanOrEqual(8);
     texture.dispose();
   });
 });

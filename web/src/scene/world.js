@@ -4,7 +4,7 @@ import { gridToScene, heightAt } from './terrainData.js';
 import { earthYaw, subLunarLongitudeDeg } from './earthView.js';
 import { createCloudTexture, createEarthTexture } from './earthTexture.js';
 import { createGlowTexture } from './glow.js';
-import { createRegolithTexture } from './regolith.js';
+import { createRegolithNormalTexture, createRegolithTexture } from './regolith.js';
 import { createTerrainLod } from './terrainLod.js';
 import { ALBEDO_STRENGTH } from './terrainMesh.js';
 
@@ -17,8 +17,18 @@ const SUN_RADIUS_DEG = 0.2666;
 const EARTH_RADIUS_DEG = 0.95;
 const STAR_COUNT = 4500;
 const GLOW_RADIUS_DEG = 5;
-/** The shadow-lift aid multiplies the (almost black) ambient light by this much; a visual aid only. */
-const SHADOW_LIFT_FACTOR = 40;
+/** Intensity of the ambient fill light (colour 0x1b1814) normally, and with the shadow-lift aid on (a visual aid only). */
+const AMBIENT_INTENSITY = 1.6;
+const SHADOW_LIFT_INTENSITY = 40;
+/** Strength of the regolith normal map on the terrain. */
+const REGOLITH_NORMAL_SCALE = 0.5;
+/**
+ * Shadow map size in texels (width, height). The map is wide and short because it is fitted to the terrain as
+ * seen from the nearly horizontal Sun (see `fitShadowCamera`); the same number of texels as a 4096 x 4096 map.
+ */
+export const DEFAULT_SHADOW_MAP_SIZE = [8192, 2048];
+/** The same fitting on a GPU whose textures cannot be 8192 texels wide. */
+export const SMALL_SHADOW_MAP_SIZE = [4096, 1024];
 
 /**
  * Half-size (m) of the square shadow camera so it covers the whole terrain: the
@@ -32,6 +42,56 @@ export function shadowFrustumHalfSize(terrain) {
     farthest = Math.max(farthest, Math.hypot(x, z));
   }
   return Math.ceil((farthest + 100) / 100) * 100;
+}
+
+/** The eight corners of the box that holds the terrain (its four grid corners, at the lowest and highest height). */
+function terrainBoxCorners(terrain) {
+  const corners = [];
+  for (const [r, c] of [[0, 0], [0, terrain.cols - 1], [terrain.rows - 1, 0], [terrain.rows - 1, terrain.cols - 1]]) {
+    const { x, z } = gridToScene(terrain, r, c);
+    corners.push(new THREE.Vector3(x, terrain.minM, z), new THREE.Vector3(x, terrain.maxM, z));
+  }
+  return corners;
+}
+
+/**
+ * Fit the Sun's shadow camera to the terrain as seen from the Sun. The polar Sun is almost on the horizon, so
+ * the terrain is a wide, shallow strip from there: a square frustum wastes most of the shadow map on empty
+ * sky, while a rectangle that follows the strip gives every texel to ground.
+ * The light looks at the scene origin from `lightDistance` along `direction` (unit vector towards the Sun).
+ * @param {THREE.Vector3[]} corners box corners from `terrainBoxCorners`
+ * @returns {{left: number, right: number, top: number, bottom: number, near: number, far: number}}
+ */
+export function fitShadowCamera(corners, direction, lightDistance, marginM = 100) {
+  // light space, as Matrix4.lookAt builds it: z towards the Sun, x to the right, y up
+  const z = direction.clone().normalize();
+  const x = new THREE.Vector3(0, 1, 0).cross(z).normalize();
+  const y = z.clone().cross(x);
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+  let minZ = Infinity;
+  let maxZ = -Infinity;
+  for (const p of corners) {
+    const px = p.dot(x);
+    const py = p.dot(y);
+    const pz = p.dot(z);
+    minX = Math.min(minX, px);
+    maxX = Math.max(maxX, px);
+    minY = Math.min(minY, py);
+    maxY = Math.max(maxY, py);
+    minZ = Math.min(minZ, pz);
+    maxZ = Math.max(maxZ, pz);
+  }
+  return {
+    left: minX - marginM,
+    right: maxX + marginM,
+    bottom: minY - marginM,
+    top: maxY + marginM,
+    near: Math.max(1, lightDistance - maxZ - marginM),
+    far: lightDistance - minZ + marginM,
+  };
 }
 
 /** Elevation offset (metres) of the horizon silhouette at `radiusM`, for each of 360 azimuths. */
@@ -97,20 +157,22 @@ function buildStars() {
  * Earth, stars and the far-horizon silhouette. `updateSky` moves the Sun and Earth.
  * @param {{terrain: import('./terrainData.js').Terrain, horizon: Float32Array}} site
  */
-export function createWorld(site) {
+export function createWorld(site, { shadowMapSize = DEFAULT_SHADOW_MAP_SIZE } = {}) {
   let lightDistance = SUN_LIGHT_DISTANCE_M;
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000000);
 
-  // Procedural regolith grain (not imagery): colour variation plus a bump map that the grazing sunlight picks out.
+  // Procedural regolith grain (not imagery): colour variation plus a normal map that the grazing sunlight
+  // picks out. A normal map (not a bump map) so the grain fades with distance instead of aliasing into stripes.
   const regolith = createRegolithTexture();
+  const regolithNormal = createRegolithNormalTexture();
   // The 5 m terrain is drawn as chunks whose detail drops with distance from the camera (see terrainLod.js).
   const terrainMaterial = new THREE.MeshStandardMaterial({
     vertexColors: true,
     color: 0xaaa79e,
     map: regolith,
-    bumpMap: regolith,
-    bumpScale: 2.2,
+    normalMap: regolithNormal,
+    normalScale: new THREE.Vector2(REGOLITH_NORMAL_SCALE, REGOLITH_NORMAL_SCALE),
     roughness: 0.96,
     metalness: 0,
   });
@@ -121,26 +183,33 @@ export function createWorld(site) {
   const eyeY = heightAt(site.terrain, 0, 0) + 2;
   scene.add(buildHorizonRing(site.horizon, eyeY));
   scene.add(buildStars());
-  const ambient = new THREE.AmbientLight(0x161411, 1);
+  // Faint fill light: in the shade the ground still catches a little light from the sunlit terrain around it,
+  // so the shadows are dark but not a featureless black. The shadow-lift aid raises it to SHADOW_LIFT_INTENSITY.
+  const ambient = new THREE.AmbientLight(0x1b1814, AMBIENT_INTENSITY);
   const ambientBase = ambient.intensity;
   scene.add(ambient);
 
   const sun = new THREE.DirectionalLight(0xffffff, 3);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(4096, 4096);
+  sun.shadow.mapSize.set(shadowMapSize[0], shadowMapSize[1]);
+  const corners = terrainBoxCorners(site.terrain);
   const frustum = shadowFrustumHalfSize(site.terrain);
-  lightDistance = Math.max(SUN_LIGHT_DISTANCE_M, frustum + 500);
-  Object.assign(sun.shadow.camera, {
-    left: -frustum,
-    right: frustum,
-    top: frustum,
-    bottom: -frustum,
-    near: 100,
-    far: lightDistance + frustum + 500,
-  });
-  sun.shadow.bias = -0.0005;
+  const farthest = Math.max(...corners.map((p) => p.length()));
+  lightDistance = Math.max(SUN_LIGHT_DISTANCE_M, frustum + 500, farthest + 500);
   sun.shadow.normalBias = 0.5;
   scene.add(sun, sun.target);
+
+  /** Fit the shadow camera to the terrain for a Sun in `direction` (unit vector towards it). */
+  function fitShadow(direction) {
+    const fit = fitShadowCamera(corners, direction, lightDistance);
+    Object.assign(sun.shadow.camera, fit);
+    sun.shadow.camera.updateProjectionMatrix();
+    // bias and normal bias follow the size of one shadow texel (the coarser axis), so finer maps do not detach shadows
+    const texel = Math.max((fit.right - fit.left) / sun.shadow.mapSize.x, (fit.top - fit.bottom) / sun.shadow.mapSize.y);
+    sun.shadow.normalBias = Math.max(0.1, texel * 0.28);
+    sun.shadow.bias = -(texel * 2.5) / (fit.far - fit.near);
+  }
+  fitShadow(new THREE.Vector3(1, 0.03, 0).normalize());
 
   const sunDisc = new THREE.Mesh(
     new THREE.SphereGeometry(BODY_DISTANCE_M * Math.tan(SUN_RADIUS_DEG * RAD), 16, 16),
@@ -193,6 +262,7 @@ export function createWorld(site) {
   function updateSky(sky, timeMs = null) {
     const s = directionFromAzEl(sky.sun.azDeg, sky.sun.elDeg);
     sun.position.set(s.x, s.y, s.z).multiplyScalar(lightDistance);
+    fitShadow(new THREE.Vector3(s.x, s.y, s.z));
     sunDisc.position.set(s.x, s.y, s.z).multiplyScalar(BODY_DISTANCE_M);
     sunGlow.position.copy(sunDisc.position);
     const e = directionFromAzEl(sky.earth.azDeg, sky.earth.elDeg);
@@ -207,6 +277,7 @@ export function createWorld(site) {
       const materials = Array.isArray(object.material) ? object.material : [object.material];
       for (const material of materials) {
         material?.map?.dispose();
+        material?.normalMap?.dispose();
         material?.dispose();
       }
     });
@@ -229,7 +300,7 @@ export function createWorld(site) {
 
   /** Visual aid only: lighten the shadows without touching any calculation. */
   function setShadowLift(on) {
-    ambient.intensity = on ? ambientBase * SHADOW_LIFT_FACTOR : ambientBase;
+    ambient.intensity = on ? SHADOW_LIFT_INTENSITY : ambientBase;
   }
 
   return { scene, sun, sunDisc, sunGlow, earth, terrainMesh, ambient, terrain, updateLod, updateSky, setEarthMap, setLrocTexture, setShadowLift, eyeY, dispose };

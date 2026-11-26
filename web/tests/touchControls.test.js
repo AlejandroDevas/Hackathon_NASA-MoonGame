@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from 'vitest';
 import { setLocale } from '../src/i18n.js';
 import { createInput } from '../src/scene/input.js';
-import { createTouchControls, isTouchDevice } from '../src/scene/touchControls.js';
+import { STICK_DEAD_ZONE, createTouchControls, isTouchDevice, stickPresses } from '../src/scene/touchControls.js';
 
 afterEach(() => setLocale('es'));
 
@@ -106,6 +106,105 @@ describe('createTouchControls', () => {
     setLocale('en');
     controls.refreshTexts();
     expect(button(controls, 'left').getAttribute('aria-label')).toBe('Turn left');
+    controls.dispose();
+  });
+});
+
+describe('stickPresses', () => {
+  test('inside the dead zone nothing is pressed', () => {
+    expect(stickPresses(0.1, -0.1)).toEqual({ forward: false, backward: false, left: false, right: false });
+    expect(stickPresses(0, -STICK_DEAD_ZONE)).toEqual({ forward: false, backward: false, left: false, right: false });
+  });
+
+  test('pushing up drives forward, down backs up, sideways turns', () => {
+    expect(stickPresses(0, -1)).toMatchObject({ forward: true, backward: false, left: false, right: false });
+    expect(stickPresses(0, 1)).toMatchObject({ forward: false, backward: true });
+    expect(stickPresses(-1, 0)).toMatchObject({ left: true, right: false });
+    expect(stickPresses(1, 0)).toMatchObject({ left: false, right: true });
+  });
+
+  test('a diagonal presses two controls, so the rover drives and turns at once', () => {
+    expect(stickPresses(0.7, -0.7)).toMatchObject({ forward: true, right: true });
+  });
+});
+
+describe('the joystick', () => {
+  // the stick is 100 px wide and sits at (0, 0): its centre is (50, 50)
+  function setup() {
+    const input = createInput(window);
+    const controls = createTouchControls(input);
+    document.body.append(controls.el);
+    const stick = controls.el.querySelector('.scene-touch-stick');
+    stick.getBoundingClientRect = () => ({ left: 0, top: 0, width: 100, height: 100, right: 100, bottom: 100 });
+    return { input, controls, stick };
+  }
+  const at = (type, x, y, pointerId = 1) => {
+    const event = pointer(type, pointerId);
+    event.clientX = x;
+    event.clientY = y;
+    return event;
+  };
+
+  test('pushing the knob up drives forward, and letting go stops and brings the knob back', () => {
+    const { input, controls, stick } = setup();
+    stick.dispatchEvent(at('pointerdown', 50, 0));
+    expect(input.read()).toEqual({ forward: 1, turn: 0, boost: false });
+    expect(stick.querySelector('.scene-touch-knob').style.transform).toContain('-27.5px'); // the full travel
+    stick.dispatchEvent(at('pointerup', 50, 0));
+    expect(input.read()).toEqual({ forward: 0, turn: 0, boost: false });
+    expect(stick.querySelector('.scene-touch-knob').style.transform).toBe('');
+    controls.dispose();
+    input.dispose();
+  });
+
+  test('sliding the thumb round changes what is pressed: forward and right, then back', () => {
+    const { input, controls, stick } = setup();
+    stick.dispatchEvent(at('pointerdown', 50, 50)); // the centre: dead zone
+    expect(input.read()).toEqual({ forward: 0, turn: 0, boost: false });
+    stick.dispatchEvent(at('pointermove', 90, 10));
+    expect(input.read()).toEqual({ forward: 1, turn: 1, boost: false });
+    stick.dispatchEvent(at('pointermove', 50, 95));
+    expect(input.read()).toEqual({ forward: -1, turn: 0, boost: false });
+    controls.dispose();
+    input.dispose();
+  });
+
+  test('pulling the thumb far outside still counts as a full push, not more', () => {
+    const { input, controls, stick } = setup();
+    stick.dispatchEvent(at('pointerdown', 50, 50));
+    stick.dispatchEvent(at('pointermove', 900, 50));
+    expect(input.read().turn).toBe(1);
+    expect(stick.querySelector('.scene-touch-knob').style.transform).toContain('27.5px');
+    controls.dispose();
+    input.dispose();
+  });
+
+  test('a second finger does not take over the stick, and a cancelled touch releases it', () => {
+    const { input, controls, stick } = setup();
+    stick.dispatchEvent(at('pointerdown', 50, 5, 1));
+    stick.dispatchEvent(at('pointerdown', 5, 50, 2)); // ignored
+    stick.dispatchEvent(at('pointermove', 5, 50, 2)); // ignored
+    expect(input.read()).toEqual({ forward: 1, turn: 0, boost: false });
+    stick.dispatchEvent(at('pointercancel', 50, 5, 1));
+    expect(input.read()).toEqual({ forward: 0, turn: 0, boost: false });
+    controls.dispose();
+    input.dispose();
+  });
+
+  test('the stick and the turbo switch work together, and release lets go of both', () => {
+    const { input, controls, stick } = setup();
+    button(controls, 'boost').click();
+    stick.dispatchEvent(at('pointerdown', 50, 5));
+    expect(input.read()).toEqual({ forward: 1, turn: 0, boost: true });
+    controls.release();
+    expect(input.read()).toEqual({ forward: 0, turn: 0, boost: false });
+    controls.dispose();
+    input.dispose();
+  });
+
+  test('the arrow buttons are still there, out of sight, for assistive technology', () => {
+    const { controls } = setup();
+    expect(controls.el.querySelectorAll('.scene-touch-pad button')).toHaveLength(4);
     controls.dispose();
   });
 });
