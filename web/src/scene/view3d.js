@@ -5,6 +5,7 @@ import { getLocale, t } from '../i18n.js';
 import { siteOverview } from '../metrics/overview.js';
 import { horizonAt } from '../metrics/visibility.js';
 import { createBodyMarkers } from './bodyMarkers.js';
+import { bearingDeg, createCompass } from './compass.js';
 import { createInput } from './input.js';
 import { createDust } from './dust.js';
 import { loadEarthImage } from './earthTexture.js';
@@ -26,6 +27,8 @@ import { initialPixelRatio } from './pixelRatio.js';
 import { DEFAULT_SHADOW_MAP_SIZE, SMALL_SHADOW_MAP_SIZE, createWorld } from './world.js';
 
 const MAX_FRAME_S = 0.1;
+/** How long the full driving help stays on screen after arriving at a site or changing the view. */
+const HELP_FOLD_MS = 12_000;
 const UP = new THREE.Vector3(0, 1, 0);
 
 function inertHandle() {
@@ -35,12 +38,23 @@ function inertHandle() {
   };
 }
 
-function showNotice(container, text) {
+/**
+ * Say why there is no 3D view, in the middle of the screen. With a `store` it also offers a way forward: the
+ * planner, which does not need the 3D view.
+ */
+function showNotice(container, text, { hint = null, store = null } = {}) {
   container.replaceChildren();
   container.classList.add('scene-root', 'scene-root-notice');
-  const notice = document.createElement('div');
-  notice.className = 'scene-notice';
-  notice.textContent = text;
+  const notice = el('div', 'scene-notice');
+  notice.append(el('p', 'scene-notice-text', text));
+  if (hint) notice.append(el('p', 'scene-notice-hint', hint));
+  if (store) {
+    const open = el('button', 'tb-button scene-notice-action', t('scene.openPlanner'));
+    open.type = 'button';
+    open.dataset.testid = 'notice-planner';
+    open.addEventListener('click', () => store.set({ panelOpen: true }));
+    notice.append(open);
+  }
   container.append(notice);
 }
 
@@ -62,7 +76,7 @@ function el(tag, className, text) {
 export function mountScene(container, store, sites, audioCue = null) {
   const first = sites.get(store.get().scenarios.A.siteId);
   if (!first?.terrain) {
-    showNotice(container, t('scene.noTerrain'));
+    showNotice(container, t('scene.noTerrain'), { store });
     return inertHandle();
   }
 
@@ -70,7 +84,7 @@ export function mountScene(container, store, sites, audioCue = null) {
   try {
     renderer = new THREE.WebGLRenderer({ antialias: true });
   } catch {
-    showNotice(container, t('scene.noWebgl'));
+    showNotice(container, t('scene.noWebgl'), { hint: t('scene.noWebglHint'), store });
     return inertHandle();
   }
   // Sharp on high-density screens; the governor lowers it if the view runs slowly.
@@ -96,6 +110,7 @@ export function mountScene(container, store, sites, audioCue = null) {
   routeEl.hidden = true;
   const skyReadout = createSkyReadout();
   const tags = createPoiTags(hud); // first, so the HUD panels stay above the floating labels
+  const compass = createCompass(hud);
   // the markers keep clear of the readout, the minimap and the (open) sign
   const bodyMarkers = createBodyMarkers(hud, {
     obstacles: () => [skyReadout.el, minimap.el, signOpen ? sign.el : null],
@@ -103,6 +118,12 @@ export function mountScene(container, store, sites, audioCue = null) {
   const loadingEl = el('div', 'scene-loading');
   loadingEl.setAttribute('role', 'status');
   loadingEl.hidden = true;
+  const loadingText = el('span', 'scene-loading-text');
+  const retryButton = el('button', 'scene-loading-retry');
+  retryButton.type = 'button';
+  retryButton.dataset.testid = 'terrain-retry';
+  retryButton.hidden = true;
+  loadingEl.append(loadingText, retryButton);
   const minimap = createMinimap();
   hud.append(help, blockedEl, routeEl, skyReadout.el, minimap.el, loadingEl, sign.el);
   container.append(hud);
@@ -118,6 +139,8 @@ export function mountScene(container, store, sites, audioCue = null) {
   const poiCache = new Map(); // site id -> landmarks of the terrain
   const rockCache = new Map(); // site id -> boulder placements (positions only; meshes are rebuilt per world)
   let pois = [];
+  let goalPoi = null; // the landing zone, for the compass arrow
+  let helpTimer = null;
   let loadingId = null; // site whose terrain is being fetched
   let dust = null; // ballistic dust thrown up by the rover, one per world
   const trip = createTrip(); // metres and time until the rover first reaches the lander
@@ -148,6 +171,13 @@ export function mountScene(container, store, sites, audioCue = null) {
   let locale = null;
   let controls = null; // OrbitControls, created the first time the free view is used
   let viewMode = store.get().viewMode === 'free' ? 'free' : 'follow';
+
+  /** Show the whole driving help, and fold it to the short form after a while (a visitor needs it most on arrival). */
+  function wakeHelp() {
+    help.classList.remove('compact');
+    clearTimeout(helpTimer);
+    helpTimer = setTimeout(() => help.classList.add('compact'), HELP_FOLD_MS);
+  }
 
   /** Ask for a new frame, and for the shadow map to be redrawn too if `shadows` is true. */
   function invalidate(shadows = false) {
@@ -191,6 +221,7 @@ export function mountScene(container, store, sites, audioCue = null) {
     lastPos = null;
     if (!poiCache.has(id)) poiCache.set(id, findPois(site.terrain));
     pois = poiCache.get(id);
+    goalPoi = pois.find((poi) => poi.id === 'goal') ?? null;
     minimap.setTerrain(site.terrain, pois);
     world.scene.add(buildPoiMarkers(pois, groundAt));
     if (!plans.has(id)) plans.set(id, startFor(site));
@@ -216,6 +247,7 @@ export function mountScene(container, store, sites, audioCue = null) {
     world.updateLod(camera.position, Infinity); // the first frame already has the detail around the robot
     applyTexts();
     applySky();
+    wakeHelp();
     invalidate(true);
     lastLoadMs = performance.now() - loadStart;
     qualityIgnoreUntil = performance.now() + 4000;
@@ -248,9 +280,13 @@ export function mountScene(container, store, sites, audioCue = null) {
     renderer.domElement.setAttribute('aria-label', t('scene.label'));
     // with the touch pad the keyboard keys are no use, and the pad takes the corner the long text would fill
     const driving = touch ? t('scene.helpTouch') : t('scene.help');
-    help.textContent = `${driving} · ${t('scene.slopeLimit', { limit: slopeLimitDeg })}${
-      viewMode === 'free' ? ` · ${t('scene.helpFree')}` : ''
-    }`;
+    // the keys stay on screen; the slope limit and the free-view hint fold away once the visitor has had time to read them
+    help.replaceChildren(
+      el('span', 'scene-help-keys', driving),
+      el('span', 'scene-help-more', ` · ${t('scene.slopeLimit', { limit: slopeLimitDeg })}`),
+      ...(viewMode === 'free' ? [el('span', 'scene-help-more', ` · ${t('scene.helpFree')}`)] : []),
+    );
+    compass.refreshTexts();
     touch?.refreshTexts();
     minimap.refreshTexts();
     shownBlockReason = null; // the warning text is rebuilt on the next frame in the new language
@@ -283,6 +319,7 @@ export function mountScene(container, store, sites, audioCue = null) {
       renderer.domElement.style.touchAction = 'auto';
     }
     applyTexts();
+    wakeHelp();
   }
 
   /** The terrain of a site is fetched the first time it is chosen; show it once it arrives, if still wanted. */
@@ -290,9 +327,17 @@ export function mountScene(container, store, sites, audioCue = null) {
     if (loadingId === id) return;
     loadingId = id;
     help.textContent = t('scene.loading');
-    loadingEl.textContent = t('scene.loading');
+    loadingEl.classList.remove('failed');
+    retryButton.hidden = true;
+    loadingText.textContent = t('scene.loading');
     loadingEl.hidden = false;
-    ensureTerrain(target).then(
+    let shownPercent = -1;
+    ensureTerrain(target, (fraction) => {
+      const percent = Math.floor(fraction * 100);
+      if (percent === shownPercent || loadingId !== id) return;
+      shownPercent = percent;
+      loadingText.textContent = t('scene.loadingPercent', { percent });
+    }).then(
       () => {
         loadingId = null;
         loadingEl.hidden = true;
@@ -301,8 +346,14 @@ export function mountScene(container, store, sites, audioCue = null) {
       },
       (error) => {
         loadingId = null;
-        loadingEl.hidden = true;
         console.warn(`Terrain of ${id} could not be loaded.`, error);
+        // say so, and let the visitor try again (a dropped connection is the usual cause)
+        const name = target.info.sign?.[getLocale()]?.title ?? id;
+        loadingEl.classList.add('failed');
+        loadingText.textContent = t('scene.loadFailed', { name });
+        retryButton.textContent = t('scene.retry');
+        retryButton.hidden = false;
+        retryButton.onclick = () => showWhenLoaded(target, id);
         applyTexts();
       },
     );
@@ -384,6 +435,8 @@ export function mountScene(container, store, sites, audioCue = null) {
     }
     sign.setOpen(signOpen);
     minimap.setHidden(signOpen); // the sign takes that corner
+    camera.getWorldDirection(scratch);
+    compass.update(bearingDeg(scratch.x, scratch.z), robot, goalPoi, signOpen);
     if (robot.blockedBy !== shownBlockReason) {
       shownBlockReason = robot.blockedBy;
       if (shownBlockReason) {
@@ -461,6 +514,7 @@ export function mountScene(container, store, sites, audioCue = null) {
   return {
     dispose() {
       cancelAnimationFrame(frameHandle);
+      clearTimeout(helpTimer);
       renderer.domElement.removeEventListener('webglcontextrestored', onContextRestored);
       unsubscribe();
       observer.disconnect();

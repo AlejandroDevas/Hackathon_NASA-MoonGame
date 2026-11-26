@@ -1,6 +1,6 @@
 import { createLazyAnalysis } from '../panel/analysisLazy.js';
 import { mountPanel } from '../panel/panel.js';
-import { createPlayback } from './playback.js';
+import { SKIPS, createPlayback } from './playback.js';
 import { createPlayBar } from './playbar.js';
 import { createTopBar } from './topbar.js';
 import { createTutorial } from './tutorial.js';
@@ -50,12 +50,33 @@ export function mountInterface(root, store, siteList, sites, { renderTimeline, a
   };
   document.addEventListener('keydown', onKey);
 
+  // player shortcuts: space plays or pauses, [ and ] change the speed, , and . step an hour. They never fire while the
+  // visitor is typing or on a control that uses those keys, nor while the tutorial or the Analysis window is open.
+  const onShortcut = (event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey || event.defaultPrevented) return;
+    if (event.target instanceof Element && event.target.closest('input, select, textarea, button, a, [role^="menuitem"], [contenteditable]')) return;
+    if (tutorial.isOpen() || analysis.isOpen()) return;
+    const action = {
+      Space: () => playback.toggle(),
+      BracketRight: () => playback.faster(),
+      BracketLeft: () => playback.slower(),
+      Period: () => playback.shiftBy(SKIPS.hour),
+      Comma: () => playback.shiftBy(-SKIPS.hour),
+    }[event.code];
+    if (!action) return;
+    event.preventDefault();
+    action();
+    bottom.refresh(store.get()); // a speed change on a paused animation changes no state
+  };
+  document.addEventListener('keydown', onShortcut);
+
   return {
     playback,
     analysis,
     tutorial,
     dispose() {
       document.removeEventListener('keydown', onKey);
+      document.removeEventListener('keydown', onShortcut);
       tutorial.dispose();
       analysis.dispose();
       top.el.remove();

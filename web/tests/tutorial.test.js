@@ -5,7 +5,7 @@ import { createStore } from '../src/state.js';
 import en from '../src/strings/en.json';
 import es from '../src/strings/es.json';
 import { mountInterface } from '../src/ui/interface.js';
-import { TUTORIAL_STEPS, createTutorial } from '../src/ui/tutorial.js';
+import { ESSENTIAL_STEPS, TUTORIAL_STEPS, createTutorial } from '../src/ui/tutorial.js';
 import { HOUR, T0, loadTinySite } from './helpers.js';
 
 const site = loadTinySite();
@@ -85,9 +85,29 @@ describe('tutorial', () => {
     expect(q('tutorial-prev').disabled).toBe(true);
   });
 
+  test('the short tour is the essentials: welcome, a site, playing time, the timeline and driving the rover', () => {
+    expect(ESSENTIAL_STEPS.map((step) => step.id)).toEqual(['welcome', 'site', 'play', 'timeline', 'scene']);
+    for (const step of ESSENTIAL_STEPS) expect(TUTORIAL_STEPS).toContain(step);
+  });
+
+  test('the first visit gets the short tour, whose last step offers every control from the one after the welcome', () => {
+    const tutorial = createTutorial();
+    tutorial.openIfFirstVisit();
+    expect(document.querySelector('.tut-count').textContent).toBe('Paso 1 de 5');
+    expect(q('tutorial-more').hidden).toBe(true);
+    for (let i = 1; i < ESSENTIAL_STEPS.length; i += 1) q('tutorial-next').click();
+    expect(title()).toBe(es['tutorial.scene.title']);
+    expect(q('tutorial-more').hidden).toBe(false);
+    q('tutorial-more').click();
+    expect(tutorial.isOpen()).toBe(true);
+    expect(document.querySelector('.tut-count').textContent).toBe(`Paso 2 de ${TUTORIAL_STEPS.length}`);
+    expect(title()).toBe(es['tutorial.locale.title']);
+    expect(q('tutorial-more').hidden).toBe(true);
+  });
+
   test('Next and Previous walk through the steps, and the last step offers Finish', () => {
     const tutorial = createTutorial();
-    tutorial.open();
+    tutorial.open({ full: true });
     expect(document.querySelector('.tut-count').textContent).toBe(`Paso 1 de ${TUTORIAL_STEPS.length}`);
     q('tutorial-next').click();
     expect(title()).toBe(es['tutorial.locale.title']);
@@ -115,7 +135,7 @@ describe('tutorial', () => {
 
   test('the keyboard: right and left arrows move, Escape skips, and the keys do not reach the scene', () => {
     const tutorial = createTutorial();
-    tutorial.open();
+    tutorial.open({ full: true });
     const reachedScene = vi.fn();
     window.addEventListener('keydown', reachedScene);
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));

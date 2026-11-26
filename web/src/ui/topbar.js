@@ -169,7 +169,14 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
       showToast(t('ui.shareFail')); // no clipboard (an insecure page, or the browser said no)
     }
   });
-  menu.append(planner.item, analysisItem.item, compare.item, qualityItem.item, shareItem.item, tutorialItem.item);
+  // the game, also here: on a narrower screen its button leaves the bar to give the site name room (see ui.css)
+  const gameItem = el('a', 'menu-item menu-game');
+  gameItem.setAttribute('role', 'menuitem');
+  gameItem.dataset.testid = 'game-menu-link';
+  gameItem.href = GAME_URL;
+  const gameItemText = el('span', 'menu-text');
+  gameItem.append(gameItemText, icon('gamepad'));
+  menu.append(planner.item, analysisItem.item, compare.item, qualityItem.item, shareItem.item, gameItem, tutorialItem.item);
   menuWrap.append(menuButton, menu);
   attachMenu({ trigger: menuButton, menu });
 
@@ -219,6 +226,9 @@ export function createTopBar(store, { analysis, sites, siteList, audioCue, tutor
 
     gameLabel.textContent = t('app.game');
     gameLink.href = `${GAME_URL}?lang=${state.locale}`; // the game opens in the same language
+    gameItem.href = gameLink.href;
+    gameItemText.textContent = t('app.game');
+    gameItem.title = t('app.gameLabel');
     gameLink.setAttribute('aria-label', t('app.gameLabel'));
     gameLink.title = t('app.gameLabel');
 

@@ -69,26 +69,61 @@ async function loadStart(site) {
   }
 }
 
+/** The body of a response as one buffer, reporting how much of `totalBytes` has arrived (0..1) while it comes in. */
+async function readWithProgress(response, totalBytes, report) {
+  const reader = response.body?.getReader?.();
+  if (!reader || !(totalBytes > 0)) return response.arrayBuffer(); // no streaming here: no progress, same result
+  const chunks = [];
+  let received = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    received += value.length;
+    report(Math.min(received / totalBytes, 0.95)); // the last bit is parsing and the optional extras
+  }
+  const all = new Uint8Array(received);
+  let at = 0;
+  for (const chunk of chunks) {
+    all.set(chunk, at);
+    at += chunk.length;
+  }
+  return all.buffer;
+}
+
 /**
  * Load the terrain height map of a site the first time it is needed (about 2 MB).
  * Resolves to the terrain, or null for a site without one; repeated calls share one request.
+ * `onProgress` (optional) hears how much has arrived, 0..1, ending with 1; callers that join a request already
+ * under way hear it too.
+ * @param {object} site
+ * @param {((fraction: number) => void) | null} [onProgress]
  * @returns {Promise<object|null>}
  */
-export function ensureTerrain(site) {
-  if (site.terrain) return Promise.resolve(site.terrain);
+export function ensureTerrain(site, onProgress = null) {
+  if (site.terrain) {
+    onProgress?.(1);
+    return Promise.resolve(site.terrain);
+  }
   if (!site.info.terrain) return Promise.resolve(null);
+  if (onProgress) (site.terrainListeners ??= new Set()).add(onProgress);
+  const report = (fraction) => site.terrainListeners?.forEach((listen) => listen(fraction));
   if (!site.terrainPromise) {
-    site.terrainPromise = fetchOk(`${site.dir}/${site.info.terrain.file}`)
-      .then((response) => response.arrayBuffer())
+    const meta = site.info.terrain;
+    site.terrainPromise = fetchOk(`${site.dir}/${meta.file}`)
+      .then((response) => readWithProgress(response, meta.rows * meta.cols * 2, report))
       .then(async (buffer) => {
         const terrain = parseTerrain(buffer, site.info.terrain);
         site.terrainFingerprint = terrainFingerprint(buffer);
         [site.albedo, site.start] = await Promise.all([loadAlbedo(site), loadStart(site)]);
         site.terrain = terrain;
+        report(1);
+        site.terrainListeners = null;
         return site.terrain;
       })
       .catch((error) => {
         site.terrainPromise = null; // a later attempt may succeed
+        site.terrainListeners = null;
         throw error;
       });
   }

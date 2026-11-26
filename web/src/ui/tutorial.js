@@ -1,13 +1,14 @@
 import { t } from '../i18n.js';
 
 /**
- * The steps of the tutorial, in order. `target` is a CSS selector of the control the step explains; a step
+ * Every step of the tutorial, in order. `target` is a CSS selector of the control the step explains; a step
  * without one (the welcome and the last, about the 3D scene) is shown in the middle of the screen.
+ * `essential` marks the short tour a first-time visitor gets; the last step of that tour offers the rest.
  */
 export const TUTORIAL_STEPS = [
-  { id: 'welcome', target: null },
+  { id: 'welcome', target: null, essential: true },
   { id: 'locale', target: '[data-testid="locale"]' },
-  { id: 'site', target: '[data-testid="site-top"]' },
+  { id: 'site', target: '[data-testid="site-top"]', essential: true },
   { id: 'view', target: '[data-testid="view-toggle"]' },
   { id: 'lroc', target: '[data-testid="lroc-toggle"]' },
   { id: 'shadows', target: '[data-testid="shadow-lift-toggle"]' },
@@ -15,12 +16,15 @@ export const TUTORIAL_STEPS = [
   { id: 'sound', target: '[data-testid="sound-toggle"]' },
   { id: 'game', target: '[data-testid="game-link"]' },
   { id: 'menu', target: '[data-testid="menu-toggle"]' },
-  { id: 'play', target: '[data-testid="play-toggle"]' },
+  { id: 'play', target: '[data-testid="play-toggle"]', essential: true },
   { id: 'skips', target: '.pb-transport' },
-  { id: 'timeline', target: '.pb-seek' },
+  { id: 'timeline', target: '.pb-seek', essential: true },
   { id: 'speed', target: '[data-testid="speed"]' },
-  { id: 'scene', target: null },
+  { id: 'scene', target: null, essential: true },
 ];
+
+/** The short tour: welcome, choosing a site, playing time, the timeline and driving the rover. */
+export const ESSENTIAL_STEPS = TUTORIAL_STEPS.filter((step) => step.essential);
 
 const STORAGE_KEY = 'inside-moon-153.tutorial-seen';
 const GAP = 14;
@@ -62,13 +66,14 @@ export function createTutorial() {
   let card = null;
   let parts = null;
   let index = 0;
+  let steps = ESSENTIAL_STEPS;
   let returnFocus = null;
 
   const isOpen = () => root !== null;
 
   function place() {
     if (!root) return;
-    const step = TUTORIAL_STEPS[index];
+    const step = steps[index];
     const node = step.target ? document.querySelector(step.target) : null;
     const rect = node?.getBoundingClientRect();
     const visible = rect && rect.width > 0 && rect.height > 0;
@@ -96,9 +101,11 @@ export function createTutorial() {
   }
 
   function render() {
-    const step = TUTORIAL_STEPS[index];
-    const last = index === TUTORIAL_STEPS.length - 1;
-    parts.count.textContent = t('tutorial.step', { n: index + 1, total: TUTORIAL_STEPS.length });
+    const step = steps[index];
+    const last = index === steps.length - 1;
+    parts.count.textContent = t('tutorial.step', { n: index + 1, total: steps.length });
+    parts.more.hidden = !(last && steps !== TUTORIAL_STEPS); // the short tour ends by offering the rest
+    parts.more.textContent = t('tutorial.more');
     parts.title.textContent = t(`tutorial.${step.id}.title`);
     parts.text.textContent = t(`tutorial.${step.id}.text`);
     parts.prev.textContent = `‹ ${t('tutorial.prev')}`;
@@ -112,7 +119,7 @@ export function createTutorial() {
   function go(delta) {
     const next = index + delta;
     if (next < 0) return;
-    if (next >= TUTORIAL_STEPS.length) {
+    if (next >= steps.length) {
       close();
       return;
     }
@@ -135,7 +142,7 @@ export function createTutorial() {
       event.stopPropagation();
       go(-1);
     } else if (event.key === 'Tab') {
-      const buttons = [parts.prev, parts.next, parts.skip].filter((b) => !b.disabled);
+      const buttons = [parts.prev, parts.next, parts.more, parts.skip].filter((b) => !b.disabled && !b.hidden);
       const at = buttons.indexOf(document.activeElement);
       const to = (at + (event.shiftKey ? -1 : 1) + buttons.length) % buttons.length;
       event.preventDefault();
@@ -145,8 +152,10 @@ export function createTutorial() {
     }
   }
 
-  function open() {
+  /** @param {{full?: boolean}} [options] `full` walks through every control; otherwise the short tour */
+  function open({ full = false } = {}) {
     if (isOpen()) return;
+    steps = full ? TUTORIAL_STEPS : ESSENTIAL_STEPS;
     returnFocus = document.activeElement;
     root = el('div', 'tut-root');
     ring = el('div', 'tut-ring');
@@ -163,7 +172,16 @@ export function createTutorial() {
       prev: el('button', 'tut-button'),
       next: el('button', 'tut-button tut-primary'),
       skip: el('button', 'tut-button tut-skip'),
+      more: el('button', 'tut-button tut-more'),
     };
+    parts.more.hidden = true;
+    parts.more.dataset.testid = 'tutorial-more';
+    parts.more.type = 'button';
+    parts.more.addEventListener('click', () => {
+      steps = TUTORIAL_STEPS; // every control, from the one after the welcome
+      index = 1;
+      render();
+    });
     parts.title.id = 'tut-title';
     parts.prev.dataset.testid = 'tutorial-prev';
     parts.next.dataset.testid = 'tutorial-next';
@@ -177,7 +195,7 @@ export function createTutorial() {
     left.append(parts.prev, parts.next);
     const footer = el('div', 'tut-footer');
     footer.append(left, parts.skip);
-    card.append(parts.count, parts.title, parts.text, footer);
+    card.append(parts.count, parts.title, parts.text, parts.more, footer);
     root.append(ring, card);
     document.body.append(root);
 

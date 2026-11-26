@@ -4,6 +4,8 @@ export default defineConfig({
   base: './',
   build: {
     rolldownOptions: {
+      // two pages: the app, and the start screen with the Moon (inicio/), which shares the three.js file with it
+      input: { main: 'index.html', inicio: 'inicio/index.html' },
       // three.js is the bulk of the code and rarely changes: its own file stays in the browser cache between releases
       output: { codeSplitting: { groups: [{ name: 'three', test: /node_modules[\\/]three[\\/]build[\\/]/ }] } },
     },

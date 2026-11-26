@@ -29,6 +29,29 @@ export function nextTransition(site, body, timeMs) {
 }
 
 /**
+ * The next time after `timeMs` that the body rises ('rise') or sets ('set'), whichever kind is asked for.
+ * The first transition may be the other kind (a visible body sets before it can rise again), so this looks
+ * past it. Null if there is none within the data.
+ * @param {'sun'|'earth'} body
+ * @param {'rise'|'set'} kind
+ * @returns {{kind: 'set'|'rise', atMs: number} | null}
+ */
+export function nextEvent(site, body, kind, timeMs) {
+  let from = timeMs;
+  try {
+    for (let n = 0; n < 3; n++) {
+      const transition = nextTransition(site, body, from);
+      if (!transition) return null;
+      if (transition.kind === kind) return transition;
+      from = transition.atMs + site.eph.stepMs / 100; // just past it
+    }
+  } catch (error) {
+    if (!(error instanceof RangeError)) throw error; // ran off the end of the data
+  }
+  return null;
+}
+
+/**
  * Intervals in [fromMs, toMs] during which the body is visible. `toMs` is
  * clipped to the end of the data.
  * @returns {Array<{startMs: number, endMs: number}>}
