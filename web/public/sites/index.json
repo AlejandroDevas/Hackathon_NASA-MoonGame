@@ -18,5 +18,21 @@
   {
     "id": "site23-malapert-massif",
     "name": "Malapert Massif (Site 23)"
+  },
+  {
+    "id": "dm2-nobile-rim-2",
+    "name": "Nobile Rim 2 (DM2)"
+  },
+  {
+    "id": "site11-de-gerlache-rim",
+    "name": "de Gerlache Rim (Site 11)"
+  },
+  {
+    "id": "site07-peak-near-shackleton",
+    "name": "Peak Near Shackleton (Site 07)"
+  },
+  {
+    "id": "site20-leibnitz-beta-plateau",
+    "name": "Leibnitz Beta Plateau (Site 20)"
   }
 ]

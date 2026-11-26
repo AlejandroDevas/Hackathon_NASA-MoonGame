@@ -196,5 +196,158 @@
       "https://data.lroc.im-ldi.com/lroc/view_rdr/NAC_POLE_SOUTH",
       "https://doi.org/10.1016/j.pss.2020.105119"
     ]
+  },
+  {
+    "id": "dm2-nobile-rim-2",
+    "name": "Nobile Rim 2 (DM2)",
+    "lat_deg": -83.954017,
+    "lon_deg": 58.8220546,
+    "observer_height_m": 2.0,
+    "coordinates_source": "Centro geométrico de la extensión del DEM DM2_final_adj_5mpp_surf.tif de PGDA (x 147000..167000 m, y 85000..105000 m, estereográfica polar MOON_ME), convertido de XY a lat/lon con pyproj. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+    "sign": {
+      "es": {
+        "title": "Borde de Nobile 2 (DM2)",
+        "body": "Segunda región del borde del cráter Nobile, un cráter de unos 79 km de diámetro cerca del polo sur. Está al otro lado del cráter que Nobile Rim 1, así que su luz y su vista de la Tierra son distintas.",
+        "why": "Es una de las nueve regiones que NASA revisó en 2024 para Artemis III. Compararla con Nobile Rim 1 muestra cuánto cambia la viabilidad de un aterrizaje con solo moverse unos kilómetros por el mismo borde.",
+        "facts": [
+          "NASA incluyó Nobile Rim 2 entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
+          "En el archivo de datos lunares de NASA (PGDA) este mapa se llama «DM2: Nobile rim 2»; es un mapa de alturas con un punto cada 5 m, medido con LOLA.",
+          "En el mapa de 5 m de esta región, entre el punto más bajo y el más alto hay unos 3,2 km de desnivel (DEM de PGDA).",
+          "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
+        ]
+      },
+      "en": {
+        "title": "Nobile Rim 2 (DM2)",
+        "body": "The second region on the rim of Nobile crater, a crater about 79 km across near the south pole. It is on a different part of the rim than Nobile Rim 1, so its light and its view of the Earth differ.",
+        "why": "It is one of the nine regions NASA reviewed in 2024 for Artemis III. Comparing it with Nobile Rim 1 shows how much a landing's viability changes just by moving a few kilometres along the same rim.",
+        "facts": [
+          "NASA included Nobile Rim 2 among the nine candidate regions reviewed for Artemis III in 2024.",
+          "In NASA's lunar data archive (PGDA) this map is called \"DM2: Nobile rim 2\"; it is a height map with one point every 5 m, measured with LOLA.",
+          "On this region's 5 m map, the lowest and highest points differ by about 3.2 km (PGDA DEM).",
+          "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
+        ]
+      }
+    },
+    "sources": [
+      "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
+      "https://pgda.gsfc.nasa.gov/products/78",
+      "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "https://doi.org/10.1016/j.pss.2020.105119"
+    ]
+  },
+  {
+    "id": "site11-de-gerlache-rim",
+    "name": "de Gerlache Rim (Site 11)",
+    "lat_deg": -88.6834182,
+    "lon_deg": -67.9321004,
+    "observer_height_m": 2.0,
+    "coordinates_source": "Centro geométrico de la extensión del DEM Site11_final_adj_5mpp_surf.tif de PGDA (x -45000..-29000 m, y 7000..23000 m, estereográfica polar MOON_ME), convertido de XY a lat/lon con pyproj. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+    "sign": {
+      "es": {
+        "title": "Borde de de Gerlache (Sitio 11)",
+        "body": "De Gerlache es un cráter de unos 32 km de diámetro muy cerca del polo sur, vecino de Shackleton. Su borde lo une con Connecting Ridge, y su interior tiene zonas en sombra permanente.",
+        "why": "NASA lo nombra en sus listas de regiones para Artemis (de Gerlache Rim 2 está entre las nueve de 2024). Es un borde alto y cercano a zonas de posible hielo, con luz y visibilidad de la Tierra que hay que comprobar punto por punto.",
+        "facts": [
+          "El cráter lleva el nombre del explorador belga Adrien de Gerlache, líder de la expedición antártica del Belgica.",
+          "NASA incluyó «de Gerlache Rim 2» entre las nueve regiones candidatas de 2024. PGDA llama a este mapa «de Gerlache rim» (Sitio 11); no está confirmado que cubra exactamente la misma zona que la región «Rim 2» de NASA.",
+          "En el mapa de 5 m de esta región, entre el punto más bajo y el más alto hay unos 2,6 km de desnivel (DEM de PGDA).",
+          "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
+        ]
+      },
+      "en": {
+        "title": "de Gerlache Rim (Site 11)",
+        "body": "De Gerlache is a crater about 32 km across very close to the south pole, a neighbour of Shackleton. Its rim connects to Connecting Ridge, and its interior has permanently shadowed areas.",
+        "why": "NASA names it in its Artemis region lists (de Gerlache Rim 2 is among the nine from 2024). It is a high rim near areas of possible ice, with light and Earth visibility that must be checked point by point.",
+        "facts": [
+          "The crater is named after the Belgian explorer Adrien de Gerlache, leader of the Belgica Antarctic expedition.",
+          "NASA included \"de Gerlache Rim 2\" among the nine candidate regions in 2024. PGDA calls this map \"de Gerlache rim\" (Site 11); it is not confirmed that it covers exactly the same area as NASA's \"Rim 2\" region.",
+          "On this region's 5 m map, the lowest and highest points differ by about 2.6 km (PGDA DEM).",
+          "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
+        ]
+      }
+    },
+    "sources": [
+      "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
+      "https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-Moon/",
+      "https://pgda.gsfc.nasa.gov/products/78",
+      "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "https://doi.org/10.1016/j.pss.2020.105119"
+    ]
+  },
+  {
+    "id": "site07-peak-near-shackleton",
+    "name": "Peak Near Shackleton (Site 07)",
+    "lat_deg": -88.8110081,
+    "lon_deg": 123.6900675,
+    "observer_height_m": 2.0,
+    "coordinates_source": "Centro geométrico de la extensión del DEM Site07_final_adj_5mpp_surf.tif de PGDA (x 22000..38000 m, y -28000..-12000 m, estereográfica polar MOON_ME), convertido de XY a lat/lon con pyproj. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+    "sign": {
+      "es": {
+        "title": "Pico cerca de Shackleton (Sitio 07)",
+        "body": "Zona elevada a pocos kilómetros del cráter Shackleton, en el extremo del polo sur. Es de los terrenos más cercanos al polo que NASA ha estudiado como posible destino.",
+        "why": "Un pico tan cerca del polo puede conservar luz durante buena parte del año mientras tiene cráteres en sombra permanente a su alrededor: la combinación que se busca para energía solar y acceso a hielo.",
+        "facts": [
+          "«Peak Near Shackleton» estaba entre las 13 regiones candidatas que NASA anunció en 2022 para Artemis III; no está en la lista refinada de nueve de 2024.",
+          "En el archivo de datos lunares de NASA (PGDA) este mapa es el «Site 07: Peak near Shackleton», de la misma familia de mapas de 5 m que los otros sitios de esta herramienta.",
+          "En el mapa de 5 m de esta región, entre el punto más bajo y el más alto hay unos 2,1 km de desnivel (DEM de PGDA).",
+          "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
+        ]
+      },
+      "en": {
+        "title": "Peak Near Shackleton (Site 07)",
+        "body": "A raised area a few kilometres from Shackleton crater, at the very end of the south pole. It is among the closest-to-the-pole terrain NASA has studied as a possible destination.",
+        "why": "A peak this close to the pole can stay lit for much of the year while having permanently shadowed craters around it: the combination sought for solar power and access to ice.",
+        "facts": [
+          "\"Peak Near Shackleton\" was among the 13 candidate regions NASA announced in 2022 for Artemis III; it is not in the refined list of nine from 2024.",
+          "In NASA's lunar data archive (PGDA) this map is \"Site 07: Peak near Shackleton\", from the same family of 5 m maps as the other sites in this tool.",
+          "On this region's 5 m map, the lowest and highest points differ by about 2.1 km (PGDA DEM).",
+          "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
+        ]
+      }
+    },
+    "sources": [
+      "https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-Moon/",
+      "https://pgda.gsfc.nasa.gov/products/78",
+      "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "https://doi.org/10.1016/j.pss.2020.105119"
+    ]
+  },
+  {
+    "id": "site20-leibnitz-beta-plateau",
+    "name": "Leibnitz Beta Plateau (Site 20)",
+    "lat_deg": -85.4265773,
+    "lon_deg": 31.7427612,
+    "observer_height_m": 2.0,
+    "coordinates_source": "Centro geométrico de la extensión del DEM Site20_final_adj_5mpp_surf.tif de PGDA (x 65000..81000 m, y 110000..126000 m, estereográfica polar MOON_ME), convertido de XY a lat/lon con pyproj. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+    "sign": {
+      "es": {
+        "title": "Meseta Leibnitz Beta (Sitio 20)",
+        "body": "Meseta alta del terreno montañoso Leibnitz, a unos 85° S, lejos del polo geográfico pero con una gran superficie plana en altura.",
+        "why": "Una meseta suele ofrecer terreno más llano que la pared de un cráter, lo que facilita el aterrizaje. Su luz y su vista de la Tierra son las que deben decidir si compensa estar más lejos de los cráteres con hielo.",
+        "facts": [
+          "«Leibnitz Beta Plateau» estaba entre las 13 regiones candidatas que NASA anunció en 2022 para Artemis III; no está en la lista refinada de nueve de 2024.",
+          "En el archivo de datos lunares de NASA (PGDA) este mapa es el «Site 20: Leibnitz beta plateau».",
+          "En el mapa de 5 m de esta región, entre el punto más bajo y el más alto hay unos 3,7 km de desnivel (DEM de PGDA).",
+          "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
+        ]
+      },
+      "en": {
+        "title": "Leibnitz Beta Plateau (Site 20)",
+        "body": "A high plateau in the Leibnitz mountain terrain, at about 85° S: far from the geographic pole but with a large flat area at altitude.",
+        "why": "A plateau tends to offer more level ground than a crater wall, which eases landing. Its light and Earth view should decide whether it is worth being farther from the craters with ice.",
+        "facts": [
+          "\"Leibnitz Beta Plateau\" was among the 13 candidate regions NASA announced in 2022 for Artemis III; it is not in the refined list of nine from 2024.",
+          "In NASA's lunar data archive (PGDA) this map is \"Site 20: Leibnitz beta plateau\".",
+          "On this region's 5 m map, the lowest and highest points differ by about 3.7 km (PGDA DEM).",
+          "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
+        ]
+      }
+    },
+    "sources": [
+      "https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-Moon/",
+      "https://pgda.gsfc.nasa.gov/products/78",
+      "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+      "https://doi.org/10.1016/j.pss.2020.105119"
+    ]
   }
 ]

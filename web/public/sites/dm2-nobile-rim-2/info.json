@@ -1,0 +1,81 @@
+{
+  "id": "dm2-nobile-rim-2",
+  "name": "Nobile Rim 2 (DM2)",
+  "lat_deg": -83.954017,
+  "lon_deg": 58.8220546,
+  "observer_height_m": 2.0,
+  "coordinates_source": "Centro geométrico de la extensión del DEM DM2_final_adj_5mpp_surf.tif de PGDA (x 147000..167000 m, y 85000..105000 m, estereográfica polar MOON_ME), convertido de XY a lat/lon con pyproj. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+  "sign": {
+    "es": {
+      "title": "Borde de Nobile 2 (DM2)",
+      "body": "Segunda región del borde del cráter Nobile, un cráter de unos 79 km de diámetro cerca del polo sur. Está al otro lado del cráter que Nobile Rim 1, así que su luz y su vista de la Tierra son distintas.",
+      "why": "Es una de las nueve regiones que NASA revisó en 2024 para Artemis III. Compararla con Nobile Rim 1 muestra cuánto cambia la viabilidad de un aterrizaje con solo moverse unos kilómetros por el mismo borde.",
+      "facts": [
+        "NASA incluyó Nobile Rim 2 entre las nueve regiones candidatas revisadas para Artemis III en 2024.",
+        "En el archivo de datos lunares de NASA (PGDA) este mapa se llama «DM2: Nobile rim 2»; es un mapa de alturas con un punto cada 5 m, medido con LOLA.",
+        "En el mapa de 5 m de esta región, entre el punto más bajo y el más alto hay unos 3,2 km de desnivel (DEM de PGDA).",
+        "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
+      ]
+    },
+    "en": {
+      "title": "Nobile Rim 2 (DM2)",
+      "body": "The second region on the rim of Nobile crater, a crater about 79 km across near the south pole. It is on a different part of the rim than Nobile Rim 1, so its light and its view of the Earth differ.",
+      "why": "It is one of the nine regions NASA reviewed in 2024 for Artemis III. Comparing it with Nobile Rim 1 shows how much a landing's viability changes just by moving a few kilometres along the same rim.",
+      "facts": [
+        "NASA included Nobile Rim 2 among the nine candidate regions reviewed for Artemis III in 2024.",
+        "In NASA's lunar data archive (PGDA) this map is called \"DM2: Nobile rim 2\"; it is a height map with one point every 5 m, measured with LOLA.",
+        "On this region's 5 m map, the lowest and highest points differ by about 3.2 km (PGDA DEM).",
+        "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
+      ]
+    }
+  },
+  "sources": [
+    "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
+    "https://pgda.gsfc.nasa.gov/products/78",
+    "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+    "https://doi.org/10.1016/j.pss.2020.105119"
+  ],
+  "ephemeris": {
+    "start_utc": "2026-01-01T00:00:00Z",
+    "step_s": 3600,
+    "count": 43824,
+    "file": "ephemeris.bin"
+  },
+  "bodies": {
+    "sun_radius_deg": 0.2666,
+    "earth_radius_deg": 0
+  },
+  "terrain": {
+    "file": "terrain.bin",
+    "rows": 1001,
+    "cols": 1001,
+    "pixel_m": 5.0,
+    "min_m": 611.7189331054688,
+    "max_m": 1453.5150146484375,
+    "observer_rc": [
+      500.49988355773166,
+      499.50014822498997
+    ],
+    "north_bearing_deg": 58.822054600017196
+  },
+  "horizon": {
+    "sources": [
+      {
+        "file": "DM2_final_adj_5mpp_surf.tif",
+        "pixel_m": 5.0,
+        "requested_range_m": [
+          0,
+          10000.0
+        ]
+      },
+      {
+        "file": "LDEM_80S_80MPP_ADJ.TIF",
+        "pixel_m": 80.0,
+        "requested_range_m": [
+          7500.0,
+          300000.0
+        ]
+      }
+    ]
+  }
+}

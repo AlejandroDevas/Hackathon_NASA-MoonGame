@@ -1,0 +1,81 @@
+{
+  "id": "site07-peak-near-shackleton",
+  "name": "Peak Near Shackleton (Site 07)",
+  "lat_deg": -88.8110081,
+  "lon_deg": 123.6900675,
+  "observer_height_m": 2.0,
+  "coordinates_source": "Centro geométrico de la extensión del DEM Site07_final_adj_5mpp_surf.tif de PGDA (x 22000..38000 m, y -28000..-12000 m, estereográfica polar MOON_ME), convertido de XY a lat/lon con pyproj. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+  "sign": {
+    "es": {
+      "title": "Pico cerca de Shackleton (Sitio 07)",
+      "body": "Zona elevada a pocos kilómetros del cráter Shackleton, en el extremo del polo sur. Es de los terrenos más cercanos al polo que NASA ha estudiado como posible destino.",
+      "why": "Un pico tan cerca del polo puede conservar luz durante buena parte del año mientras tiene cráteres en sombra permanente a su alrededor: la combinación que se busca para energía solar y acceso a hielo.",
+      "facts": [
+        "«Peak Near Shackleton» estaba entre las 13 regiones candidatas que NASA anunció en 2022 para Artemis III; no está en la lista refinada de nueve de 2024.",
+        "En el archivo de datos lunares de NASA (PGDA) este mapa es el «Site 07: Peak near Shackleton», de la misma familia de mapas de 5 m que los otros sitios de esta herramienta.",
+        "En el mapa de 5 m de esta región, entre el punto más bajo y el más alto hay unos 2,1 km de desnivel (DEM de PGDA).",
+        "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
+      ]
+    },
+    "en": {
+      "title": "Peak Near Shackleton (Site 07)",
+      "body": "A raised area a few kilometres from Shackleton crater, at the very end of the south pole. It is among the closest-to-the-pole terrain NASA has studied as a possible destination.",
+      "why": "A peak this close to the pole can stay lit for much of the year while having permanently shadowed craters around it: the combination sought for solar power and access to ice.",
+      "facts": [
+        "\"Peak Near Shackleton\" was among the 13 candidate regions NASA announced in 2022 for Artemis III; it is not in the refined list of nine from 2024.",
+        "In NASA's lunar data archive (PGDA) this map is \"Site 07: Peak near Shackleton\", from the same family of 5 m maps as the other sites in this tool.",
+        "On this region's 5 m map, the lowest and highest points differ by about 2.1 km (PGDA DEM).",
+        "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
+      ]
+    }
+  },
+  "sources": [
+    "https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-Moon/",
+    "https://pgda.gsfc.nasa.gov/products/78",
+    "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+    "https://doi.org/10.1016/j.pss.2020.105119"
+  ],
+  "ephemeris": {
+    "start_utc": "2026-01-01T00:00:00Z",
+    "step_s": 3600,
+    "count": 43824,
+    "file": "ephemeris.bin"
+  },
+  "bodies": {
+    "sun_radius_deg": 0.2666,
+    "earth_radius_deg": 0
+  },
+  "terrain": {
+    "file": "terrain.bin",
+    "rows": 1001,
+    "cols": 1001,
+    "pixel_m": 5.0,
+    "min_m": 739.3251953125,
+    "max_m": 1648.6798095703125,
+    "observer_rc": [
+      500.499908136896,
+      500.49986809997426
+    ],
+    "north_bearing_deg": 123.69006750000861
+  },
+  "horizon": {
+    "sources": [
+      {
+        "file": "Site07_final_adj_5mpp_surf.tif",
+        "pixel_m": 5.0,
+        "requested_range_m": [
+          0,
+          8000.0
+        ]
+      },
+      {
+        "file": "LDEM_80S_80MPP_ADJ.TIF",
+        "pixel_m": 80.0,
+        "requested_range_m": [
+          6000.0,
+          300000.0
+        ]
+      }
+    ]
+  }
+}

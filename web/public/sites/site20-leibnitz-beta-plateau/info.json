@@ -1,0 +1,81 @@
+{
+  "id": "site20-leibnitz-beta-plateau",
+  "name": "Leibnitz Beta Plateau (Site 20)",
+  "lat_deg": -85.4265773,
+  "lon_deg": 31.7427612,
+  "observer_height_m": 2.0,
+  "coordinates_source": "Centro geométrico de la extensión del DEM Site20_final_adj_5mpp_surf.tif de PGDA (x 65000..81000 m, y 110000..126000 m, estereográfica polar MOON_ME), convertido de XY a lat/lon con pyproj. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+  "sign": {
+    "es": {
+      "title": "Meseta Leibnitz Beta (Sitio 20)",
+      "body": "Meseta alta del terreno montañoso Leibnitz, a unos 85° S, lejos del polo geográfico pero con una gran superficie plana en altura.",
+      "why": "Una meseta suele ofrecer terreno más llano que la pared de un cráter, lo que facilita el aterrizaje. Su luz y su vista de la Tierra son las que deben decidir si compensa estar más lejos de los cráteres con hielo.",
+      "facts": [
+        "«Leibnitz Beta Plateau» estaba entre las 13 regiones candidatas que NASA anunció en 2022 para Artemis III; no está en la lista refinada de nueve de 2024.",
+        "En el archivo de datos lunares de NASA (PGDA) este mapa es el «Site 20: Leibnitz beta plateau».",
+        "En el mapa de 5 m de esta región, entre el punto más bajo y el más alto hay unos 3,7 km de desnivel (DEM de PGDA).",
+        "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
+      ]
+    },
+    "en": {
+      "title": "Leibnitz Beta Plateau (Site 20)",
+      "body": "A high plateau in the Leibnitz mountain terrain, at about 85° S: far from the geographic pole but with a large flat area at altitude.",
+      "why": "A plateau tends to offer more level ground than a crater wall, which eases landing. Its light and Earth view should decide whether it is worth being farther from the craters with ice.",
+      "facts": [
+        "\"Leibnitz Beta Plateau\" was among the 13 candidate regions NASA announced in 2022 for Artemis III; it is not in the refined list of nine from 2024.",
+        "In NASA's lunar data archive (PGDA) this map is \"Site 20: Leibnitz beta plateau\".",
+        "On this region's 5 m map, the lowest and highest points differ by about 3.7 km (PGDA DEM).",
+        "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
+      ]
+    }
+  },
+  "sources": [
+    "https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-Moon/",
+    "https://pgda.gsfc.nasa.gov/products/78",
+    "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+    "https://doi.org/10.1016/j.pss.2020.105119"
+  ],
+  "ephemeris": {
+    "start_utc": "2026-01-01T00:00:00Z",
+    "step_s": 3600,
+    "count": 43824,
+    "file": "ephemeris.bin"
+  },
+  "bodies": {
+    "sun_radius_deg": 0.2666,
+    "earth_radius_deg": 0
+  },
+  "terrain": {
+    "file": "terrain.bin",
+    "rows": 1001,
+    "cols": 1001,
+    "pixel_m": 5.0,
+    "min_m": 5728.8369140625,
+    "max_m": 6463.86376953125,
+    "observer_rc": [
+      499.50011289494796,
+      500.4999566879833
+    ],
+    "north_bearing_deg": 31.74276119999489
+  },
+  "horizon": {
+    "sources": [
+      {
+        "file": "Site20_final_adj_5mpp_surf.tif",
+        "pixel_m": 5.0,
+        "requested_range_m": [
+          0,
+          8000.0
+        ]
+      },
+      {
+        "file": "LDEM_80S_80MPP_ADJ.TIF",
+        "pixel_m": 80.0,
+        "requested_range_m": [
+          6000.0,
+          300000.0
+        ]
+      }
+    ]
+  }
+}

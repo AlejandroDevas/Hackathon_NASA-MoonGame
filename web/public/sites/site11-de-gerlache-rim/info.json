@@ -1,0 +1,82 @@
+{
+  "id": "site11-de-gerlache-rim",
+  "name": "de Gerlache Rim (Site 11)",
+  "lat_deg": -88.6834182,
+  "lon_deg": -67.9321004,
+  "observer_height_m": 2.0,
+  "coordinates_source": "Centro geométrico de la extensión del DEM Site11_final_adj_5mpp_surf.tif de PGDA (x -45000..-29000 m, y 7000..23000 m, estereográfica polar MOON_ME), convertido de XY a lat/lon con pyproj. Es un punto representativo de la región, no una posición de aterrizaje concreta.",
+  "sign": {
+    "es": {
+      "title": "Borde de de Gerlache (Sitio 11)",
+      "body": "De Gerlache es un cráter de unos 32 km de diámetro muy cerca del polo sur, vecino de Shackleton. Su borde lo une con Connecting Ridge, y su interior tiene zonas en sombra permanente.",
+      "why": "NASA lo nombra en sus listas de regiones para Artemis (de Gerlache Rim 2 está entre las nueve de 2024). Es un borde alto y cercano a zonas de posible hielo, con luz y visibilidad de la Tierra que hay que comprobar punto por punto.",
+      "facts": [
+        "El cráter lleva el nombre del explorador belga Adrien de Gerlache, líder de la expedición antártica del Belgica.",
+        "NASA incluyó «de Gerlache Rim 2» entre las nueve regiones candidatas de 2024. PGDA llama a este mapa «de Gerlache rim» (Sitio 11); no está confirmado que cubra exactamente la misma zona que la región «Rim 2» de NASA.",
+        "En el mapa de 5 m de esta región, entre el punto más bajo y el más alto hay unos 2,6 km de desnivel (DEM de PGDA).",
+        "Cerca del 90 % de los puntos del mapa de 5 m se calcularon entre medidas reales, así que las alturas pueden fallar unos 30 a 50 cm (Barker et al. 2021)."
+      ]
+    },
+    "en": {
+      "title": "de Gerlache Rim (Site 11)",
+      "body": "De Gerlache is a crater about 32 km across very close to the south pole, a neighbour of Shackleton. Its rim connects to Connecting Ridge, and its interior has permanently shadowed areas.",
+      "why": "NASA names it in its Artemis region lists (de Gerlache Rim 2 is among the nine from 2024). It is a high rim near areas of possible ice, with light and Earth visibility that must be checked point by point.",
+      "facts": [
+        "The crater is named after the Belgian explorer Adrien de Gerlache, leader of the Belgica Antarctic expedition.",
+        "NASA included \"de Gerlache Rim 2\" among the nine candidate regions in 2024. PGDA calls this map \"de Gerlache rim\" (Site 11); it is not confirmed that it covers exactly the same area as NASA's \"Rim 2\" region.",
+        "On this region's 5 m map, the lowest and highest points differ by about 2.6 km (PGDA DEM).",
+        "About 90% of the points on the 5 m map were calculated between real measurements, so heights can be off by about 30 to 50 cm (Barker et al. 2021)."
+      ]
+    }
+  },
+  "sources": [
+    "https://www.nasa.gov/news-release/nasa-provides-update-on-artemis-iii-moon-landing-regions/",
+    "https://www.nasa.gov/news-release/nasa-identifies-candidate-regions-for-landing-next-americans-on-Moon/",
+    "https://pgda.gsfc.nasa.gov/products/78",
+    "https://pgda.gsfc.nasa.gov/data/LOLA_5mpp/",
+    "https://doi.org/10.1016/j.pss.2020.105119"
+  ],
+  "ephemeris": {
+    "start_utc": "2026-01-01T00:00:00Z",
+    "step_s": 3600,
+    "count": 43824,
+    "file": "ephemeris.bin"
+  },
+  "bodies": {
+    "sun_radius_deg": 0.2666,
+    "earth_radius_deg": 0
+  },
+  "terrain": {
+    "file": "terrain.bin",
+    "rows": 1001,
+    "cols": 1001,
+    "pixel_m": 5.0,
+    "min_m": 614.35107421875,
+    "max_m": 1815.9869384765625,
+    "observer_rc": [
+      499.5001073178946,
+      499.5002786610521
+    ],
+    "north_bearing_deg": 292.06789959999776
+  },
+  "horizon": {
+    "sources": [
+      {
+        "file": "Site11_final_adj_5mpp_surf.tif",
+        "pixel_m": 5.0,
+        "requested_range_m": [
+          0,
+          8000.0
+        ]
+      },
+      {
+        "file": "LDEM_80S_80MPP_ADJ.TIF",
+        "pixel_m": 80.0,
+        "requested_range_m": [
+          6000.0,
+          300000.0
+        ]
+      }
+    ]
+  }
+}
