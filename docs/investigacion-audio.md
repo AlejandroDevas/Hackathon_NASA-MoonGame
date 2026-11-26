@@ -1,6 +1,6 @@
 # Investigación de audio: música y efectos de sonido
 
-Fecha: 2026-11-15. Estado: fases 1 (clic y veredictos), 2 (llamada de radio Quindar con estática) y 3 (música generativa y volumen) y 4 (zumbido del rover por el chasis) implementadas; el resto es propuesta.
+Fecha: 2026-11-15. Estado: hechas las fases 1 (clic y veredictos), 2 (llamada de radio Quindar con estática), 3 (música generativa y volumen), 4 (zumbido del rover por el chasis) y 6 (documentación); queda solo la fase 5, opcional (archivos CC0 externos), que no se ha hecho porque no hace falta mientras todo suene bien sintetizado.
 
 ## 1. Restricciones del proyecto que condicionan la elección
 
@@ -126,12 +126,12 @@ Herramientas gráficas para **diseñar** un sonido y luego decidir si se exporta
 
 ## 5. Plan sugerido por fases (de menor a mayor esfuerzo)
 
-1. **Ampliar el interruptor actual (1-2 h).** Añadir a `audioCue` más eventos de interfaz sintetizados: clic, veredicto (3 sonidos), éxito al llegar al módulo. Sin archivos. Cada uno con prueba usando `AudioContextClass` inyectado.
-2. **Quindar y estática de radio generados (1 h).** Da identidad "misión lunar" con cero archivos.
-3. **Música ambiental generativa (3-6 h).** Drone + pad + notas esporádicas + reverb sintético, con el filtro ligado a la elevación solar. Detrás del mismo botón de sonido, con control de volumen.
-4. **Opcional: zumbido de rover "por el chasis".** Solo si el equipo acepta la opción 2 del §2 y lo explica en el README.
-5. **Opcional: pistas o efectos CC0 externos** (Kenney / OpenGameArt) si algo no queda bien sintetizado. Archivar licencia y origen.
-6. **Documentación (30 min).** Actualizar la sección "Sonido" del README: qué suena, por qué, y la tabla de créditos/licencias de audio.
+1. **Hecho. Ampliar el interruptor actual (1-2 h).** Añadir a `audioCue` más eventos de interfaz sintetizados: clic, veredicto (3 sonidos), éxito al llegar al módulo. Sin archivos. Cada uno con prueba usando `AudioContextClass` inyectado.
+2. **Hecho. Quindar y estática de radio generados (1 h).** Da identidad "misión lunar" con cero archivos.
+3. **Hecho. Música ambiental generativa (3-6 h).** Drone + pad + notas esporádicas + reverb sintético, con el filtro ligado a la elevación solar. Detrás del mismo botón de sonido, con control de volumen.
+4. **Hecho. Zumbido de rover "por el chasis".** Solo si el equipo acepta la opción 2 del §2 y lo explica en el README.
+5. **Pendiente, opcional: pistas o efectos CC0 externos** (Kenney / OpenGameArt) si algo no queda bien sintetizado. Archivar licencia y origen.
+6. **Hecho. Documentación (30 min).** Actualizar la sección "Sonido" del README: qué suena, por qué, y la tabla de créditos/licencias de audio.
 
 ## 6. Checklist legal antes de incluir cualquier archivo de audio
 

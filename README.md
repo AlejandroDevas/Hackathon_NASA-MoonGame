@@ -235,6 +235,7 @@ Los kernels SPICE (`de421.bsp`, `moon_pa_de421_1900-2050.bpc`, `moon_080317.tf`,
 | Módulo de aterrizaje | NASA 3D Resources, *Apollo Lunar Module* | `web/public/models/README.md` |
 | Tierra | NASA Earth Observatory, *Blue Marble: Next Generation* | Recoloreado el océano; `web/public/textures/README.md` |
 | Fuentes tipográficas | Barlow, Barlow Condensed, IBM Plex Mono; en el juego, Fredoka y JetBrains Mono | Licencia OFL (paquetes `@fontsource`) |
+| Sonido (efectos, llamada de radio, música y zumbido del rover) | Sintetizado en el navegador con Web Audio | No hay archivos de audio, así que no hay licencias que atribuir. Los tonos Quindar (2525 y 2475 Hz) reproducen frecuencias documentadas del Apolo, no grabaciones de NASA; `docs/investigacion-audio.md` recoge las fuentes y las opciones descartadas |
 | CSS del juego | Tailwind CSS 3.4 | Licencia MIT; solo se usa para compilar `web/public/juego/tailwind.css` |
 
 NASA no respalda este proyecto. Los modelos y las imágenes de NASA se usan según las [guías de uso de medios de NASA](https://www.nasa.gov/nasa-brand-center/images-and-media/).
@@ -286,11 +287,13 @@ No se usó ChatGPT ni otras herramientas de IA. Estas herramientas se usaron par
 - **Límite de pendiente:** se precalcula (`start.json`, ver más abajo) con una búsqueda de ruta que exige 2° menos que el límite del robot y comprueba la pendiente cada 2,5 m a lo largo de cada tramo; si ni 45° sirve, la escena lo avisa y muestra el cartel desde el punto central. Que exista ruta no garantiza que sea fácil, y el DEM está interpolado en un ~90 %.
 - **Textos de los sitios:** las cifras de cada cartel (tamaños de cráteres, iluminación, edades) vienen de páginas de NASA/USGS/LROC y de artículos citados en el propio cartel; algunas (el 90 % de luz de la cresta, el 56 % anual de un punto estudiado) son de puntos y métodos distintos y no son comparables entre sí. El estado de Artemis cambia: los textos hablan de «las nueve regiones revisadas en 2024» y de «las 13 de 2022», y en febrero de 2026 NASA reestructuró el programa (ver [Sitios de aterrizaje de Artemis](#sitios-de-aterrizaje-de-artemis)); conviene volver a comprobarlo en NASA antes de presentarlo.
 - **Rendimiento:** con renderizado por software (sin GPU) puede ir a pocos fotogramas por segundo; la resolución adaptable baja la calidad antes de que se note, y el movimiento del rover se ralentiza en vez de saltar. Las cifras de arriba son de un solo equipo.
+- **Sonido:** es sintético y opcional, y sus niveles, tonos y tiempos son una primera propuesta que aún no se ha afinado escuchándola en distintos altavoces o auriculares. La música sigue la elevación del Sol del escenario A (en el polo sur, un rango de pocos grados) y es una banda sonora, no un sonido de la Luna; el zumbido del rover es lo que se oiría por el chasis. Necesita Web Audio; sin él, el botón queda apagado y la aplicación funciona igual.
 - **Pérdida del contexto WebGL:** si el navegador pierde el contexto gráfico (poca memoria de GPU, muchas pestañas), la escena se vuelve a dibujar sola cuando se restaura.
 - **Pruebas del pipeline:** necesitan los paquetes de `requirements.txt` (entre ellos Skyfield); sin ellos, algunos archivos de `data-pipeline/tests/` no se pueden ejecutar.
 
 ## Ideas y pendiente
 
+- Sonido: si algún efecto o la música no convencen sintetizados, se pueden añadir pistas CC0 (Kenney, OpenGameArt, Freesound); cada archivo exigiría guardar su licencia y origen en `web/public/audio/LICENSES.md` y, si es CC BY, un crédito visible (checklist en `docs/investigacion-audio.md`).
 - Documentar el origen y la licencia de `web/public/inicio/moon.jpg` (ver Créditos).
 - Un módulo `web/src/ui/uxEnhance.js` que el `main.js` subido a GitHub importaba no llegó al repositorio; se quitó ese import para que la aplicación compile. Si existe en el equipo de quien lo escribió, hay que subirlo y volver a llamarlo desde `main.js`.
 - Aplicar el mosaico LROC NAC a 1 m/px (teselas de 2–3 GB; haría falta además quitar las sombras de 2010) o usar un producto con iluminación uniforme; hoy solo se usan sus vistas previas de ~32 m.
